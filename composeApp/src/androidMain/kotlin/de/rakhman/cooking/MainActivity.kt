@@ -13,7 +13,7 @@ class MainActivity : ComponentActivity() {
         val database = Database(driver)
 
         setContent {
-            App(database)
+            App()
         }
     }
 }

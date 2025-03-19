@@ -2,35 +2,33 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
-    id("org.jetbrains.compose.hot-reload") version "1.0.0-alpha01"
+    id("org.jetbrains.compose.hot-reload") version "1.0.0-alpha02"
     alias(libs.plugins.sqldelight)
 }
 
 kotlin {
     compilerOptions {
-        freeCompilerArgs.add("-Xexpect-actual-classes")
+        freeCompilerArgs.add("-Xrender-internal-diagnostic-names")
     }
     androidTarget {
-//        @OptIn(ExperimentalKotlinGradlePluginApi::class)
-//        compilerOptions {
-//            jvmTarget.set(JvmTarget.JVM_11)
-//        }
+        @OptIn(ExperimentalKotlinGradlePluginApi::class)
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
+        }
     }
     
-    jvm("desktop") {
-//        compilerOptions.freeCompilerArgs.add("-XXlenient-mode")
+    jvm {
+        compilerOptions.freeCompilerArgs.add("-XXlenient-mode")
+        compilerOptions.freeCompilerArgs.add("-Xindy-allow-annotated-lambdas=true")
     }
     
     sourceSets {
-        val desktopMain by getting
-        
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
@@ -40,14 +38,17 @@ kotlin {
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material)
+            implementation(compose.material3)
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
-            implementation("com.google.apis:google-api-services-sheets:v4-rev20250211-2.0.0")
+            implementation(libs.google.api.services.sheets)
+            implementation(libs.evas)
+            implementation(libs.evas.compose)
         }
-        desktopMain.dependencies {
+        jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
             implementation(libs.sqldelight.sqlite.driver)
@@ -108,9 +109,4 @@ sqldelight {
             packageName.set("de.rakhman.cooking")
         }
     }
-}
-
-tasks.withType<KotlinCompile> {
-    compilerOptions.freeCompilerArgs.add("-Xrender-internal-diagnostic-names")
-    compilerOptions.freeCompilerArgs.add("-XXlenient-mode")
 }

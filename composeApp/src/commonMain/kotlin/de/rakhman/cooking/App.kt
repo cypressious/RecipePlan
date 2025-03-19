@@ -1,47 +1,40 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package de.rakhman.cooking
 
-
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import MyBottomBar
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import de.rakhman.cooking.states.ScreenState
+import io.sellmair.evas.compose.composeValue
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 @Preview
-fun App(database: Database) {
-    var recipes by remember { mutableStateOf(database.recipesQueries.selectAll().executeAsList()) }
-
+fun App() {
     MaterialTheme {
-        Column {
-            Text("Rezepte")
-            LazyColumn {
-                items(
-                    count = recipes.size,
-                    key = { i -> recipes[i].id },
-                    itemContent = { i ->
-                        RecipeItem(recipe = recipes[i])
-                    }
-                )
+        Scaffold(
+            topBar = { MyTopBar() },
+            bottomBar = { MyBottomBar() },
+            floatingActionButton = {
+                FloatingActionButton(onClick = { }) {
+                    Icon(Icons.Default.Add, contentDescription = "Add")
+                }
+            }
+        ) { innerPadding ->
+            val modifier = Modifier.padding(innerPadding)
+            val screenState = ScreenState.composeValue()
+
+            when (screenState) {
+                ScreenState.Recipes -> RecipesScreen(modifier)
+                ScreenState.Plan -> PlanScreen(modifier)
             }
         }
 
     }
 }
 
-@Composable
-fun RecipeItem(recipe: Recipe) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = recipe.title)
-        Text(text = recipe.url)
-    }
-}
