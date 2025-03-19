@@ -1,0 +1,25 @@
+CREATE TABLE recipe
+(
+    id    TEXT PRIMARY KEY NOT NULL,
+    title TEXT             NOT NULL,
+    url   TEXT             NOT NULL
+);
+
+INSERT INTO recipe(id, title, url)
+VALUES ("1", "Foo", "https://www.google.com"),
+       ("2", "Bar", "https://www.google.com");
+
+selectAll
+:
+SELECT *
+FROM recipe;
+
+deleteAll
+:
+DELETE
+FROM recipe;
+
+insert
+:
+INSERT INTO recipe(id, title, url)
+VALUES (?, ?, ?);
