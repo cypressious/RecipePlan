@@ -3,6 +3,7 @@ package de.rakhman.cooking
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Divider
 import androidx.compose.material.IconButton
 import androidx.compose.material.LocalTextStyle
@@ -64,8 +65,22 @@ private fun Recipes(recipes: List<Recipe>) {
     )
     HorizontalDivider()
 
-    LazyColumn {
-        val filteredList = recipes.filter { it.matchesFilter(filter) }
+    val listState = rememberLazyListState()
+    LaunchedEffect(filter) { listState.scrollToItem(0) }
+
+    LazyColumn(state = listState) {
+        val filteredList = if (filter.isEmpty()) {
+            recipes
+        } else {
+            recipes
+                .filter { it.matchesFilter(filter) }
+                .sortedWith(compareByDescending<Recipe> {
+                    it.title.startsWith(filter, ignoreCase = true)
+                }.thenByDescending {
+                    it.title.contains(filter, ignoreCase = true)
+                })
+        }
+
         items(
             count = filteredList.size,
             key = { i -> filteredList[i].id },
