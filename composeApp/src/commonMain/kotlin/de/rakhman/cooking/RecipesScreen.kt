@@ -14,6 +14,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import de.rakhman.cooking.states.RecipesState
@@ -27,12 +28,6 @@ fun RecipesScreen(modifier: Modifier) {
             is RecipesState.Success -> {
                 val recipes = recipeState.list
                 Recipes(recipes)
-            }
-
-            RecipesState.Error -> {
-                Box(modifier = Modifier.Companion.fillMaxSize(), contentAlignment = Alignment.Companion.Center) {
-                    Text("Fehler")
-                }
             }
 
             RecipesState.Loading -> {
@@ -70,7 +65,7 @@ private fun Recipes(recipes: List<Recipe>) {
     HorizontalDivider()
 
     LazyColumn {
-        val filteredList = recipes.filter { it.title.contains(filter) || it.url.contains(filter) }
+        val filteredList = recipes.filter { it.matchesFilter(filter) }
         items(
             count = filteredList.size,
             key = { i -> filteredList[i].id },
@@ -82,16 +77,20 @@ private fun Recipes(recipes: List<Recipe>) {
     }
 }
 
+private fun Recipe.matchesFilter(filter: String): Boolean =
+    title.contains(filter, ignoreCase = true) ||
+            url?.contains(filter, ignoreCase = true) == true
+
 @Composable
 fun RecipeItem(recipe: Recipe) {
     Row(modifier = Modifier.clickable(onClick = {
-        openUrl(recipe.url)
+        recipe.url?.let { openUrl(it) }
     })) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(16.dp, 8.dp).weight(1f),
         ) {
             Text(text = recipe.title, fontSize = 24.sp, modifier = Modifier.padding(bottom = 8.dp))
-            Text(text = recipe.url)
+            Text(text = recipe.url ?: "", maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
 
         var expanded by remember { mutableStateOf(false) }

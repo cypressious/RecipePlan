@@ -44,14 +44,16 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
-            implementation(libs.google.api.services.sheets)
             implementation(libs.evas)
             implementation(libs.evas.compose)
+            implementation(libs.google.api.services.sheets)
         }
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
             implementation(libs.sqldelight.sqlite.driver)
+            implementation("com.google.api-client:google-api-client:2.0.0")
+            implementation("com.google.oauth-client:google-oauth-client-jetty:1.34.1")
         }
     }
 }
