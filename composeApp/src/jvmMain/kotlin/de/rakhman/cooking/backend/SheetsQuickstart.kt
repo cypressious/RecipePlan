@@ -25,7 +25,7 @@ object SheetsQuickstart {
     val JSON_FACTORY: JsonFactory = GsonFactory.getDefaultInstance()
     const val TOKENS_DIRECTORY_PATH = "tokens"
 
-    val SCOPES = mutableListOf<String?>(SheetsScopes.SPREADSHEETS_READONLY)
+    val SCOPES = mutableListOf<String?>(SheetsScopes.SPREADSHEETS)
     const val CREDENTIALS_FILE_PATH = "/credentials.json"
 
     @Throws(IOException::class)

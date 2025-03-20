@@ -18,8 +18,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import de.rakhman.cooking.events.DeleteEvent
 import de.rakhman.cooking.states.RecipesState
+import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.compose.composeValue
+import io.sellmair.evas.emit
+import io.sellmair.evas.emitAsync
+import kotlin.math.exp
 
 @Composable
 fun RecipesScreen(modifier: Modifier) {
@@ -127,7 +132,7 @@ fun RecipeItem(recipe: Recipe) {
                 )
                 DropdownMenuItem(
                     text = { Text("Löschen") },
-                    onClick = { /* Do something... */ }
+                    onClick = EvasLaunching { DeleteEvent(recipe.id).emitAsync(); expanded = false }
                 )
             }
         }
