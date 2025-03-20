@@ -32,6 +32,5 @@ fun MyTopBar() {
                 )
             }
         },
-        modifier = Modifier.shadow(4.dp)
     )
 }

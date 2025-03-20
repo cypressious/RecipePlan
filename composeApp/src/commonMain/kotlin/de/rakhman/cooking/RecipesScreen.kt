@@ -5,7 +5,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Divider
 import androidx.compose.material.IconButton
+import androidx.compose.material.LocalTextStyle
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -43,13 +46,37 @@ fun RecipesScreen(modifier: Modifier) {
 
 @Composable
 private fun Recipes(recipes: List<Recipe>) {
-    LazyColumn() {
+    var filter by remember { mutableStateOf("") }
+    OutlinedTextField(
+        modifier = Modifier.fillMaxWidth().padding(12.dp, 4.dp, 12.dp, 12.dp),
+        value = filter,
+        onValueChange = { filter = it.trim() },
+        label = { Text("Suche") },
+        trailingIcon = {
+            if (filter.isNotEmpty()) {
+                IconButton(
+                    modifier = Modifier.padding(4.dp, 0.dp),
+                    onClick = { filter = "" },
+                ) {
+                    Icon(
+                        Icons.Default.Clear,
+                        contentDescription = "Suche leeren",
+                    )
+                }
+            }
+        },
+        textStyle = LocalTextStyle.current.copy(fontSize = 18.sp)
+    )
+    HorizontalDivider()
+
+    LazyColumn {
+        val filteredList = recipes.filter { it.title.contains(filter) || it.url.contains(filter) }
         items(
-            count = recipes.size,
-            key = { i -> recipes[i].id },
+            count = filteredList.size,
+            key = { i -> filteredList[i].id },
             itemContent = { i ->
-                RecipeItem(recipe = recipes[i])
-                if (i != recipes.lastIndex) Divider()
+                RecipeItem(recipe = filteredList[i])
+                if (i != filteredList.lastIndex) Divider()
             },
         )
     }
@@ -70,7 +97,7 @@ fun RecipeItem(recipe: Recipe) {
         var expanded by remember { mutableStateOf(false) }
         Box(modifier = Modifier.align(Alignment.CenterVertically).padding(end = 12.dp)) {
             IconButton(onClick = { expanded = true }) {
-                Icon(imageVector =  Icons.Filled.MoreVert, contentDescription = "Optionen")
+                Icon(imageVector = Icons.Filled.MoreVert, contentDescription = "Optionen")
             }
             DropdownMenu(
                 expanded = expanded,
