@@ -21,7 +21,6 @@ sealed class RecipesState : State {
 
 fun CoroutineScope.launchDummyRecipesState() = launchState(RecipesState) {
     collectEvents<ReloadEvent> { doReload() }
-    doReload()
 }
 
 private suspend fun StateProducerScope<RecipesState>.doReload() {
