@@ -9,7 +9,7 @@ import androidx.compose.ui.tooling.preview.Preview
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val driver = DriverFactory(this).createDriver()
+        val driver = de.rakhman.cooking.database.DriverFactory(this).createDriver()
         val database = Database(driver)
 
         setContent {

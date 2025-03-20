@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.reload.DevelopmentEntryPoint
 
 fun main() {
-    val driver = DriverFactory().createDriver()
+    val driver = de.rakhman.cooking.database.DriverFactory().createDriver()
     val database = Database(driver)
 
     val events = Events()

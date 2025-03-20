@@ -1,4 +1,4 @@
-package de.rakhman.cooking
+package de.rakhman.cooking.database
 
 import app.cash.sqldelight.db.SqlDriver
 
