@@ -3,7 +3,11 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
     repositories {
-        mavenLocal()
+        maven("https://repo.sellmair.io") {
+            mavenContent {
+                includeGroupAndSubgroups("org.jetbrains.kotlin")
+            }
+        }
         mavenCentral()
         google {
             mavenContent {
@@ -13,6 +17,7 @@ pluginManagement {
             }
         }
         gradlePluginPortal()
+        mavenLocal()
     }
 }
 
@@ -22,7 +27,11 @@ plugins {
 
 dependencyResolutionManagement {
     repositories {
-        mavenLocal()
+        maven("https://repo.sellmair.io") {
+            mavenContent {
+                includeGroupAndSubgroups("org.jetbrains.kotlin")
+            }
+        }
         google {
             mavenContent {
                 includeGroupAndSubgroups("androidx")
@@ -31,6 +40,7 @@ dependencyResolutionManagement {
             }
         }
         mavenCentral()
+        mavenLocal()
     }
 }
 
