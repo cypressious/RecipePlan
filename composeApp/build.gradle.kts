@@ -34,6 +34,7 @@ kotlin {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.sqldelight.android.driver)
+            implementation(libs.play.services.auth)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -48,13 +49,13 @@ kotlin {
             implementation(libs.evas)
             implementation(libs.evas.compose)
             implementation(libs.google.api.services.sheets)
+            implementation(libs.google.api.client)
         }
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
             implementation(libs.sqldelight.sqlite.driver)
-            implementation("com.google.api-client:google-api-client:2.0.0")
-            implementation("com.google.oauth-client:google-oauth-client-jetty:1.34.1")
+            implementation(libs.google.oauth.client.jetty)
         }
     }
 }
@@ -72,7 +73,7 @@ android {
     }
     packaging {
         resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "/META-INF/{AL2.0,LGPL2.1,INDEX.LIST,DEPENDENCIES}"
         }
     }
     buildTypes {

@@ -12,16 +12,13 @@ import com.google.api.client.json.gson.GsonFactory
 import com.google.api.client.util.store.FileDataStoreFactory
 import com.google.api.services.sheets.v4.Sheets
 import com.google.api.services.sheets.v4.SheetsScopes
-import de.rakhman.cooking.backend.SheetsQuickstart.APPLICATION_NAME
-import de.rakhman.cooking.backend.SheetsQuickstart.JSON_FACTORY
-import de.rakhman.cooking.backend.SheetsQuickstart.getCredentials
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStreamReader
 
 object SheetsQuickstart {
-    const val APPLICATION_NAME = "Google Sheets API Java Quickstart"
+    const val APPLICATION_NAME = "Recipe Plan Desktop"
     val JSON_FACTORY: JsonFactory = GsonFactory.getDefaultInstance()
     const val TOKENS_DIRECTORY_PATH = "tokens"
 
@@ -29,7 +26,7 @@ object SheetsQuickstart {
     const val CREDENTIALS_FILE_PATH = "/credentials.json"
 
     @Throws(IOException::class)
-    fun getCredentials(HTTP_TRANSPORT: NetHttpTransport?): Credential? {
+    fun getCredentials(transport: NetHttpTransport): Credential? {
         // Load client secrets.
         val inputStream = SheetsQuickstart::class.java.getResourceAsStream(CREDENTIALS_FILE_PATH)
         if (inputStream == null) {
@@ -40,7 +37,7 @@ object SheetsQuickstart {
 
         // Build flow and trigger user authorization request.
         val flow = GoogleAuthorizationCodeFlow.Builder(
-            HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES
+            transport, JSON_FACTORY, clientSecrets, SCOPES
         )
             .setDataStoreFactory(FileDataStoreFactory(File(TOKENS_DIRECTORY_PATH)))
             .setAccessType("offline")
