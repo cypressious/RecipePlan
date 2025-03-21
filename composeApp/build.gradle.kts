@@ -15,6 +15,7 @@ plugins {
 kotlin {
     compilerOptions {
         freeCompilerArgs.add("-Xrender-internal-diagnostic-names")
+        freeCompilerArgs.add("-Xcontext-parameters")
     }
     androidTarget {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)

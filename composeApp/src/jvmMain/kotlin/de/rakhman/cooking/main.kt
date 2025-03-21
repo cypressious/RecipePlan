@@ -31,7 +31,7 @@ fun main() {
 
     singleWindowApplication(
         title = "RecipePlan",
-//        alwaysOnTop = true,
+        alwaysOnTop = true,
     ) {
         installEvas(events, states) {
             DevelopmentEntryPoint {
