@@ -1,4 +1,4 @@
-package de.rakhman.cooking
+package de.rakhman.cooking.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,13 +18,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import de.rakhman.cooking.Recipe
 import de.rakhman.cooking.events.DeleteEvent
+import de.rakhman.cooking.openUrl
 import de.rakhman.cooking.states.RecipesState
 import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.compose.composeValue
-import io.sellmair.evas.emit
 import io.sellmair.evas.emitAsync
-import kotlin.math.exp
 
 @Composable
 fun RecipesScreen(modifier: Modifier) {

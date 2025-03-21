@@ -1,4 +1,4 @@
-package de.rakhman.cooking
+package de.rakhman.cooking.ui
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh

@@ -4,6 +4,7 @@ import androidx.compose.ui.window.singleWindowApplication
 import de.rakhman.cooking.backend.SheetsQuickstart
 import de.rakhman.cooking.database.DriverFactory
 import de.rakhman.cooking.states.launchRecipesState
+import de.rakhman.cooking.ui.App
 import io.sellmair.evas.Events
 import io.sellmair.evas.States
 import io.sellmair.evas.compose.installEvas

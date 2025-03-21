@@ -1,3 +1,5 @@
+package de.rakhman.cooking.ui
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
@@ -10,6 +12,7 @@ import de.rakhman.cooking.states.ScreenState
 import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.compose.composeValue
 import io.sellmair.evas.set
+
 
 @Composable
 fun MyBottomBar() {
