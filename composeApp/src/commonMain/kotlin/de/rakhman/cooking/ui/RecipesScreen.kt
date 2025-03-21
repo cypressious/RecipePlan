@@ -19,6 +19,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import de.rakhman.cooking.Recipe
+import de.rakhman.cooking.events.AddToPlanEvent
 import de.rakhman.cooking.events.DeleteEvent
 import de.rakhman.cooking.openUrl
 import de.rakhman.cooking.states.RecipesState
@@ -32,8 +33,7 @@ fun RecipesScreen(modifier: Modifier) {
     Column(modifier = modifier) {
         when (recipeState) {
             is RecipesState.Success -> {
-                val recipes = recipeState.list
-                Recipes(recipes)
+                Recipes(recipeState.recipes)
             }
 
             RecipesState.Loading -> {
@@ -73,7 +73,7 @@ private fun Recipes(recipes: List<Recipe>) {
     val listState = rememberLazyListState()
     LaunchedEffect(filter) { listState.scrollToItem(0) }
 
-    LazyColumn(state = listState) {
+    LazyColumn(state = listState, contentPadding = PaddingValues(bottom = 70.dp)) {
         val filteredList = if (filter.isEmpty()) {
             recipes
         } else {
@@ -124,11 +124,11 @@ fun RecipeItem(recipe: Recipe) {
             ) {
                 DropdownMenuItem(
                     text = { Text("Auf den Plan") },
-                    onClick = { /* Do something... */ }
+                    onClick =  EvasLaunching { AddToPlanEvent(recipe.id).emitAsync(); expanded = false }
                 )
                 DropdownMenuItem(
                     text = { Text("Bearbeiten") },
-                    onClick = { /* Do something... */ }
+                    onClick =  EvasLaunching { expanded = false } // TODO
                 )
                 DropdownMenuItem(
                     text = { Text("Löschen") },

@@ -9,19 +9,20 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import de.rakhman.cooking.states.ScreenState
+import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.compose.composeValue
+import io.sellmair.evas.set
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 @Preview
 fun App() {
-
     MaterialTheme {
         Scaffold(
             topBar = { MyTopBar() },
             bottomBar = { MyBottomBar() },
             floatingActionButton = {
-                FloatingActionButton(onClick = { }) {
+                FloatingActionButton(onClick = EvasLaunching { ScreenState.set(ScreenState.Add) }) {
                     Icon(Icons.Default.Add, contentDescription = "Add")
                 }
             }
@@ -32,6 +33,7 @@ fun App() {
             when (screenState) {
                 ScreenState.Recipes -> RecipesScreen(modifier)
                 ScreenState.Plan -> PlanScreen(modifier)
+                ScreenState.Add -> AddScreen(modifier)
             }
         }
 

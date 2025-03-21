@@ -1,0 +1,20 @@
+CREATE TABLE plan
+(
+    recipeId INTEGER NOT NULL,
+    FOREIGN KEY(recipeId) REFERENCES recipe(id)
+);
+
+selectAll
+:
+SELECT *
+FROM plan;
+
+deleteAll
+:
+DELETE
+FROM plan;
+
+insert
+:
+INSERT INTO plan(recipeId)
+VALUES (?);
