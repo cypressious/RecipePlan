@@ -20,3 +20,9 @@ actual fun openUrl(url: String, c: PlatformContext) {
 
 @Composable
 actual fun getContext(): PlatformContext = PlatformContext
+
+actual fun shareRecipe(title: String, url: String?, c: PlatformContext) {
+}
+
+actual fun shareToBring(title: String, url: String, c: PlatformContext) {
+}
