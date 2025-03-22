@@ -184,6 +184,7 @@ private fun readSheetRange(range: String): List<List<Any?>> {
         .get(c.spreadSheetsId, range)
         .execute()
         .getValues()
+        ?: emptyList()
 }
 
 private fun Database.updateWith(recipes: List<Recipe>, plan: List<Long>) {
