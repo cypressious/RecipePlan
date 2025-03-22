@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.IntentSender.SendIntentException
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
@@ -19,10 +20,12 @@ import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.sheets.v4.Sheets
 import com.google.api.services.sheets.v4.SheetsScopes
 import de.rakhman.cooking.database.DriverFactory
+import de.rakhman.cooking.events.ErrorEvent
 import de.rakhman.cooking.states.launchRecipesState
 import de.rakhman.cooking.ui.App
 import io.sellmair.evas.Events
 import io.sellmair.evas.States
+import io.sellmair.evas.collectEventsAsync
 import io.sellmair.evas.compose.installEvas
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -39,8 +42,6 @@ class MainActivity : ComponentActivity() {
     lateinit var database: Database
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        System.setProperty("kotlinx.coroutines.debug", "on")
-
         super.onCreate(savedInstanceState)
         val driver = DriverFactory(this).createDriver()
         database = Database(driver)
@@ -63,8 +64,7 @@ class MainActivity : ComponentActivity() {
                             Log.e(javaClass.name, "Couldn't start Authorization UI: " + e.getLocalizedMessage())
                         }
                     } else {
-                        val credential =
-                            GoogleCredential().setAccessToken(authorizationResult.toGoogleSignInAccount()!!.idToken)
+                        val credential = GoogleCredential().setAccessToken(authorizationResult.accessToken)
                         launchStateHandler(credential)
                     }
                 })
@@ -86,7 +86,7 @@ class MainActivity : ComponentActivity() {
                 .getAuthorizationClient(this)
                 .getAuthorizationResultFromIntent(data)
             val credential =
-                GoogleCredential().setAccessToken(authorizationResult.toGoogleSignInAccount()!!.idToken)
+                GoogleCredential().setAccessToken(authorizationResult.accessToken)
             launchStateHandler(credential)
         }
     }
@@ -103,6 +103,10 @@ class MainActivity : ComponentActivity() {
                     .build()
 
                 launchRecipesState(database, sheetsService)
+
+                collectEventsAsync<ErrorEvent> {
+                    Toast.makeText(this@MainActivity, it.e.toString(), Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }

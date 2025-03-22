@@ -12,4 +12,4 @@ class RemoveFromPlanEvent(val index: Int) : Event
 
 class AddEvent(val title: String, val url: String?) : Event
 
-class ErrorEvent(e: Exception) : Event
+class ErrorEvent(val e: Exception) : Event
