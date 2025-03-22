@@ -22,6 +22,7 @@ import de.rakhman.cooking.Recipe
 import de.rakhman.cooking.events.AddToPlanEvent
 import de.rakhman.cooking.events.DeleteEvent
 import de.rakhman.cooking.openUrl
+import de.rakhman.cooking.getContext
 import de.rakhman.cooking.states.RecipesState
 import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.compose.composeValue
@@ -103,8 +104,9 @@ private fun Recipe.matchesFilter(filter: String): Boolean =
 
 @Composable
 fun RecipeItem(recipe: Recipe) {
+    val context = getContext()
     Row(modifier = Modifier.clickable(onClick = {
-        recipe.url?.let { openUrl(it) }
+        recipe.url?.let { openUrl(it, context) }
     })) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(16.dp, 8.dp).weight(1f),
