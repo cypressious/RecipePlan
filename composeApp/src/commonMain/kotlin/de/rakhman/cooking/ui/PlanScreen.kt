@@ -6,6 +6,10 @@ import androidx.compose.material.Divider
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.*
 import androidx.compose.ui.unit.*
 import de.rakhman.cooking.events.RemoveFromPlanEvent
@@ -13,6 +17,7 @@ import de.rakhman.cooking.states.RecipesState
 import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.compose.composeValue
 import io.sellmair.evas.emit
+import kotlinx.coroutines.delay
 
 @Composable
 fun PlanScreen(modifier: Modifier) {
@@ -25,12 +30,19 @@ fun PlanScreen(modifier: Modifier) {
                 LazyColumn(contentPadding = PaddingValues(bottom = 70.dp)) {
                     items(
                         count = planRecipes.size,
+                        key = { i -> "$i${System.currentTimeMillis()}"},
                         itemContent = { i ->
                             val recipe = planRecipes[i]
                             Row {
+                                var checked by remember { mutableStateOf(false) }
                                 Checkbox(
-                                    checked = false,
-                                    onCheckedChange = EvasLaunching<Boolean> { RemoveFromPlanEvent(i).emit() },
+                                    checked = checked,
+                                    enabled = !checked,
+                                    onCheckedChange = EvasLaunching<Boolean> {
+                                        checked = true
+                                        delay(250)
+                                        RemoveFromPlanEvent(i).emit()
+                                    },
                                     modifier = Modifier.align(Alignment.CenterVertically).padding(start = 12.dp),
                                 )
                                 RecipeItem(recipe = recipe)
