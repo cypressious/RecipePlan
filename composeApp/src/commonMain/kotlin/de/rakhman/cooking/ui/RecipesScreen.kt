@@ -110,7 +110,7 @@ fun RecipeItem(recipe: Recipe) {
             modifier = Modifier.fillMaxWidth().padding(16.dp, 8.dp).weight(1f),
         ) {
             Text(text = recipe.title, fontSize = 24.sp, modifier = Modifier.padding(bottom = 8.dp))
-            Text(text = recipe.url ?: "", maxLines = 1, overflow = TextOverflow.Ellipsis)
+            recipe.url?.let { Text(text = it, maxLines = 1, overflow = TextOverflow.Ellipsis) }
         }
 
         var expanded by remember { mutableStateOf(false) }
