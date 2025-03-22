@@ -13,13 +13,10 @@ import de.rakhman.cooking.events.ErrorEvent
 import de.rakhman.cooking.events.ReloadEvent
 import de.rakhman.cooking.events.RemoveFromPlanEvent
 import io.sellmair.evas.*
-import io.sellmair.evas.compose.eventsOrThrow
-import io.sellmair.evas.compose.statesOrThrow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
-import kotlin.coroutines.coroutineContext
 
 sealed class RecipesState : State {
     data object Loading : RecipesState()
@@ -46,17 +43,17 @@ fun CoroutineScope.launchRecipesState(
     loadFromDatabase(database).emit()
 
     with(RecipeContext(database, sheets, spreadSheetsId)) {
-        collectEventsAsyncOnIoCatchingErrors<ReloadEvent> { syncWithSheets() }
-        collectEventsAsyncOnIoCatchingErrors<DeleteEvent> { setDeleted(it.id) }
-        collectEventsAsyncOnIoCatchingErrors<AddEvent> { addRecipe(it.title, it.url) }
-        collectEventsAsyncOnIoCatchingErrors<AddToPlanEvent> { addtoPlan(it.id) }
-        collectEventsAsyncOnIoCatchingErrors<RemoveFromPlanEvent> { removeFromPlan(it.index) }
+        collectEventsAsyncCatchingErrors<ReloadEvent> { syncWithSheets() }
+        collectEventsAsyncCatchingErrors<DeleteEvent> { setDeleted(it.id) }
+        collectEventsAsyncCatchingErrors<AddEvent> { addRecipe(it.title, it.url) }
+        collectEventsAsyncCatchingErrors<AddToPlanEvent> { addToPlan(it.id) }
+        collectEventsAsyncCatchingErrors<RemoveFromPlanEvent> { removeFromPlan(it.index) }
     }
 
     ReloadEvent.emit()
 }
 
-private inline fun <reified T : Event> StateProducerScope<RecipesState>.collectEventsAsyncOnIoCatchingErrors(
+private inline fun <reified T : Event> StateProducerScope<RecipesState>.collectEventsAsyncCatchingErrors(
     crossinline f: suspend (T) -> Unit
 ) {
     collectEventsAsync<T> { event ->
@@ -71,6 +68,10 @@ private inline fun <reified T : Event> StateProducerScope<RecipesState>.collectE
 
 context(c: RecipeContext)
 private suspend fun setDeleted(id: Long) {
+    val state = RecipesState.value()
+    if (state is RecipesState.Success) {
+        RecipesState.set(RecipesState.Success(state.recipes.filter { it.id != id }, state.plan))
+    }
     withContext(Dispatchers.IO) {
         updateRawValue("$SHEET_NAME_RECIPES!C${id}", listOf(listOf(DELETED_VALUE)))
     }
@@ -90,9 +91,11 @@ private fun updateRawValue(range: String, rawValues: List<List<String>>) {
 }
 
 context(c: RecipeContext)
-private suspend fun addtoPlan(id: Long) {
+private suspend fun addToPlan(id: Long) {
     val state = RecipesState.value() as? RecipesState.Success ?: return
-    val rawPlanValue = (state.plan + id).joinToString(",")
+    val newPlan = state.plan + id
+    RecipesState.set(RecipesState.Success(state.recipes, newPlan))
+    val rawPlanValue = newPlan.joinToString(",")
     withContext(Dispatchers.IO) { updateRawValue("$SHEET_NAME_PLAN!A1", listOf(listOf(rawPlanValue))) }
     syncWithSheets()
 }
@@ -100,13 +103,24 @@ private suspend fun addtoPlan(id: Long) {
 context(c: RecipeContext)
 private suspend fun removeFromPlan(indexToRemove: Int) {
     val state = RecipesState.value() as? RecipesState.Success ?: return
-    val rawPlanValue = state.plan.filterIndexed { i, _ -> i != indexToRemove }.joinToString(",")
+    val filteredPlan = state.plan.filterIndexed { i, _ -> i != indexToRemove }
+    RecipesState.set(RecipesState.Success(state.recipes, filteredPlan))
+    val rawPlanValue = filteredPlan.joinToString(",")
     withContext(Dispatchers.IO) { updateRawValue("$SHEET_NAME_PLAN!A1", listOf(listOf(rawPlanValue))) }
     syncWithSheets()
 }
 
 context(c: RecipeContext)
 private suspend fun addRecipe(title: String, url: String?) {
+    val state = RecipesState.value()
+    if (state is RecipesState.Success) {
+        RecipesState.set(RecipesState.Success(
+            state.recipes + Recipe(Long.MAX_VALUE, title, url),
+            state.plan
+        ))
+    }
+    ScreenState.set(ScreenState.Recipes)
+
     withContext(Dispatchers.IO) {
         val recipes = readSheetRange(SHEET_NAME_RECIPES)
 
@@ -124,8 +138,6 @@ private suspend fun addRecipe(title: String, url: String?) {
 
         syncWithSheets()
     }
-
-    ScreenState.set(ScreenState.Recipes)
 }
 
 context(c: RecipeContext)
