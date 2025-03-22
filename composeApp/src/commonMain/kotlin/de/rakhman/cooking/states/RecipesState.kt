@@ -16,6 +16,7 @@ import io.sellmair.evas.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
 sealed class RecipesState : State {
@@ -40,9 +41,8 @@ private class RecipeContext(
 fun CoroutineScope.launchRecipesState(
     database: Database, sheets: Sheets, spreadSheetsId: String = "XXX"
 ) = launchState(RecipesState) {
-    loadFromDatabase(database).emit()
-
     with(RecipeContext(database, sheets, spreadSheetsId)) {
+        loadFromDatabase()
         collectEventsAsyncCatchingErrors<ReloadEvent> { syncWithSheets() }
         collectEventsAsyncCatchingErrors<DeleteEvent> { setDeleted(it.id) }
         collectEventsAsyncCatchingErrors<AddEvent> { addRecipe(it.title, it.url) }
@@ -53,6 +53,7 @@ fun CoroutineScope.launchRecipesState(
     ReloadEvent.emit()
 }
 
+context(c: RecipeContext)
 private inline fun <reified T : Event> StateProducerScope<RecipesState>.collectEventsAsyncCatchingErrors(
     crossinline f: suspend (T) -> Unit
 ) {
@@ -62,6 +63,7 @@ private inline fun <reified T : Event> StateProducerScope<RecipesState>.collectE
         } catch (e: Exception) {
             e.printStackTrace()
             ErrorEvent(e).emit()
+            loadFromDatabase()
         }
     }
 }
@@ -114,10 +116,12 @@ context(c: RecipeContext)
 private suspend fun addRecipe(title: String, url: String?) {
     val state = RecipesState.value()
     if (state is RecipesState.Success) {
-        RecipesState.set(RecipesState.Success(
-            state.recipes + Recipe(Long.MAX_VALUE, title, url),
-            state.plan
-        ))
+        RecipesState.set(
+            RecipesState.Success(
+                state.recipes + Recipe(Long.MAX_VALUE, title, url),
+                state.plan
+            )
+        )
     }
     ScreenState.set(ScreenState.Recipes)
 
@@ -146,7 +150,10 @@ private suspend fun syncWithSheets() = withContext(Dispatchers.IO) {
         readSheetRange(SHEET_NAME_RECIPES)
             .mapIndexedNotNull { i, row ->
                 if (row.isNotEmpty() && row.elementAtOrNull(2)?.toString() != DELETED_VALUE) {
-                    Recipe(i + 1L, row[0].toString(), row.elementAtOrNull(1)?.toString()?.ifBlank { null })
+                    Recipe(
+                        id = i + 1L,
+                        title = row[0].toString(),
+                        url = row.elementAtOrNull(1)?.toString()?.ifBlank { null })
                 } else {
                     null
                 }
@@ -193,12 +200,15 @@ private fun Database.updateWith(recipes: List<Recipe>, plan: List<Long>) {
     }
 }
 
-private fun loadFromDatabase(database: Database): RecipesState {
-    val recipes = database.recipesQueries.selectAll().executeAsList()
-    val plan = database.planQueries.selectAll().executeAsList()
-    return if (recipes.isNotEmpty()) {
-        RecipesState.Success(recipes, plan)
-    } else {
-        RecipesState.Loading
-    }
+context(c: RecipeContext)
+private suspend fun loadFromDatabase() {
+    val recipes = c.database.recipesQueries.selectAll().executeAsList()
+    val plan = c.database.planQueries.selectAll().executeAsList()
+    RecipesState.set(
+        if (recipes.isNotEmpty()) {
+            RecipesState.Success(recipes, plan)
+        } else {
+            RecipesState.Loading
+        }
+    )
 }
