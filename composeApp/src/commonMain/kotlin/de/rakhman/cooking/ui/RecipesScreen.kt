@@ -22,6 +22,8 @@ import de.rakhman.cooking.Recipe
 import de.rakhman.cooking.events.AddToPlanEvent
 import de.rakhman.cooking.events.DeleteEvent
 import de.rakhman.cooking.openUrl
+import de.rakhman.cooking.shareRecipe
+import de.rakhman.cooking.shareToBring
 import de.rakhman.cooking.getContext
 import de.rakhman.cooking.states.RecipesState
 import io.sellmair.evas.compose.EvasLaunching
@@ -126,16 +128,26 @@ fun RecipeItem(recipe: Recipe) {
             ) {
                 DropdownMenuItem(
                     text = { Text("Auf den Plan") },
-                    onClick =  EvasLaunching { AddToPlanEvent(recipe.id).emitAsync(); expanded = false }
+                    onClick = EvasLaunching { AddToPlanEvent(recipe.id).emitAsync(); expanded = false }
                 )
                 DropdownMenuItem(
                     text = { Text("Bearbeiten") },
-                    onClick =  EvasLaunching { expanded = false } // TODO
+                    onClick = EvasLaunching { expanded = false } // TODO
                 )
                 DropdownMenuItem(
                     text = { Text("Löschen") },
                     onClick = EvasLaunching { DeleteEvent(recipe.id).emitAsync(); expanded = false }
                 )
+                DropdownMenuItem(
+                    text = { Text("Teilen") },
+                    onClick = { shareRecipe(recipe.title, recipe.url, context); expanded = false }
+                )
+                recipe.url?.let { url ->
+                    DropdownMenuItem(
+                        text = { Text("Zu Bring hinzufügen") },
+                        onClick = { shareToBring(recipe.title, url, context); expanded = false }
+                    )
+                }
             }
         }
     }

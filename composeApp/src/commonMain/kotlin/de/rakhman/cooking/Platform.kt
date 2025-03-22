@@ -8,3 +8,5 @@ expect abstract class PlatformContext
 expect fun getContext(): PlatformContext
 
 expect fun openUrl(url: String, c: PlatformContext)
+expect fun shareRecipe(title: String, url: String?, c: PlatformContext)
+expect fun shareToBring(title: String, url: String, c: PlatformContext)
