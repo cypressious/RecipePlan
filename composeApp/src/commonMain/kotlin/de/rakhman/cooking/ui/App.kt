@@ -31,8 +31,9 @@ fun App() {
             val screenState = ScreenState.composeValue()
 
             when (screenState) {
+                ScreenState.Plan -> PlanScreen(modifier, false)
+                ScreenState.Shop -> PlanScreen(modifier, true)
                 ScreenState.Recipes -> RecipesScreen(modifier)
-                ScreenState.Plan -> PlanScreen(modifier)
                 ScreenState.Add -> AddScreen(modifier)
             }
         }

@@ -1,0 +1,20 @@
+CREATE TABLE shop
+(
+    recipeId INTEGER NOT NULL,
+    FOREIGN KEY(recipeId) REFERENCES recipe(id)
+);
+
+selectAll
+:
+SELECT *
+FROM shop;
+
+deleteAll
+:
+DELETE
+FROM shop;
+
+insert
+:
+INSERT INTO shop(recipeId)
+VALUES (?);

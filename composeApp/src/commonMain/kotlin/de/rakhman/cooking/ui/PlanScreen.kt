@@ -12,7 +12,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.*
 import androidx.compose.ui.unit.*
+import de.rakhman.cooking.events.AddToPlanEvent
 import de.rakhman.cooking.events.RemoveFromPlanEvent
+import de.rakhman.cooking.events.RemoveFromShopEvent
 import de.rakhman.cooking.states.RecipesState
 import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.compose.composeValue
@@ -20,13 +22,13 @@ import io.sellmair.evas.emit
 import kotlinx.coroutines.delay
 
 @Composable
-fun PlanScreen(modifier: Modifier) {
+fun PlanScreen(modifier: Modifier, isShop: Boolean) {
     val recipeState = RecipesState.Key.composeValue()
     Column(modifier = modifier) {
         when (recipeState) {
             is RecipesState.Success -> {
                 val byId = recipeState.recipes.associateBy { it.id }
-                val planRecipes = recipeState.plan.mapNotNull { byId[it] }
+                val planRecipes = (if (isShop) recipeState.shop else recipeState.plan).mapNotNull { byId[it] }
                 LazyColumn(contentPadding = PaddingValues(bottom = 70.dp)) {
                     items(
                         count = planRecipes.size,
@@ -41,7 +43,11 @@ fun PlanScreen(modifier: Modifier) {
                                     onCheckedChange = EvasLaunching<Boolean> {
                                         checked = true
                                         delay(250)
-                                        RemoveFromPlanEvent(i).emit()
+                                        if (isShop) {
+                                            AddToPlanEvent(recipe.id, i).emit()
+                                        } else {
+                                            RemoveFromPlanEvent(i).emit()
+                                        }
                                     },
                                     modifier = Modifier.align(Alignment.CenterVertically).padding(start = 12.dp),
                                 )

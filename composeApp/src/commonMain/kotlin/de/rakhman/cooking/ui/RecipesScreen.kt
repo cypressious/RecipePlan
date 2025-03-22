@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import de.rakhman.cooking.Recipe
 import de.rakhman.cooking.events.AddToPlanEvent
+import de.rakhman.cooking.events.AddToShopEvent
 import de.rakhman.cooking.events.DeleteEvent
 import de.rakhman.cooking.openUrl
 import de.rakhman.cooking.shareRecipe
@@ -127,8 +128,12 @@ fun RecipeItem(recipe: Recipe) {
                 onDismissRequest = { expanded = false }
             ) {
                 DropdownMenuItem(
+                    text = { Text("Auf die Einkaufsliste") },
+                    onClick = EvasLaunching { AddToShopEvent(recipe.id).emitAsync(); expanded = false }
+                )
+                DropdownMenuItem(
                     text = { Text("Auf den Plan") },
-                    onClick = EvasLaunching { AddToPlanEvent(recipe.id).emitAsync(); expanded = false }
+                    onClick = EvasLaunching { AddToPlanEvent(recipe.id, null).emitAsync(); expanded = false }
                 )
                 DropdownMenuItem(
                     text = { Text("Bearbeiten") },
