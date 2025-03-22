@@ -31,10 +31,12 @@ kotlin {
     
     sourceSets {
         androidMain.dependencies {
+            implementation(libs.kotlinx.coroutines.android)
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.sqldelight.android.driver)
             implementation(libs.play.services.auth)
+            implementation(libs.google.api.client.android)
         }
         commonMain.dependencies {
             implementation(compose.runtime)

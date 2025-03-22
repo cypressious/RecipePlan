@@ -14,6 +14,7 @@ androidx-test-junit = "1.2.1"
 compose-multiplatform = "1.7.0"
 evas = "1.2.0"
 googleApiClient = "2.7.2"
+googleApiClientAndroid = "2.7.2"
 googleApiServicesSheets = "v4-rev20250211-2.0.0"
 googleOauthClientJetty = "1.34.1"
 junit = "4.13.2"
@@ -26,6 +27,7 @@ sqldelight = "2.0.2"
 evas = { module = "io.sellmair:evas", version.ref = "evas" }
 evas-compose = { module = "io.sellmair:evas-compose", version.ref = "evas" }
 google-api-client = { module = "com.google.api-client:google-api-client", version.ref = "googleApiClient" }
+google-api-client-android = { module = "com.google.api-client:google-api-client-android", version.ref = "googleApiClientAndroid" }
 google-api-services-sheets = { module = "com.google.apis:google-api-services-sheets", version.ref = "googleApiServicesSheets" }
 google-oauth-client-jetty = { module = "com.google.oauth-client:google-oauth-client-jetty", version.ref = "googleOauthClientJetty" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -41,6 +43,7 @@ androidx-activity-compose = { module = "androidx.activity:activity-compose", ver
 androidx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 kotlinx-coroutines-swing = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinx-coroutines" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 sqldelight-android-driver = { group = "app.cash.sqldelight", name = "android-driver", version.ref = "sqldelight" }
 sqldelight-sqlite-driver = { group = "app.cash.sqldelight", name = "sqlite-driver", version.ref = "sqldelight" }
