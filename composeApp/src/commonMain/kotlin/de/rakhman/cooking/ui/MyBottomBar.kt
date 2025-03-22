@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -31,7 +33,7 @@ fun MyBottomBar() {
                 onClick = EvasLaunching { ScreenState.set(ScreenState.Plan) },
                 icon = {
                     Icon(
-                        imageVector = Icons.AutoMirrored.Default.Send,
+                        imageVector = Icons.Default.DateRange,
                         modifier = Modifier.size(32.dp),
                         contentDescription = null
                     )
