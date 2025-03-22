@@ -8,6 +8,6 @@ sealed class ScreenState(val title: String) : State {
     data object Add : ScreenState("Rezept Hinzufügen")
     companion object Key : State.Key<ScreenState> {
         override val default: ScreenState
-            get() = Recipes
+            get() = Plan
     }
 }

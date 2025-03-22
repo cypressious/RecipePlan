@@ -27,18 +27,6 @@ fun MyBottomBar() {
             val screenState = ScreenState.composeValue()
 
             NavigationBarItem(
-                selected = screenState == ScreenState.Recipes,
-                onClick = EvasLaunching { ScreenState.set(ScreenState.Recipes) },
-                icon = {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.List,
-                        modifier = Modifier.size(32.dp),
-                        contentDescription = null
-                    )
-                },
-                label = { Text("Rezepte") }
-            )
-            NavigationBarItem(
                 selected =  screenState == ScreenState.Plan,
                 onClick = EvasLaunching { ScreenState.set(ScreenState.Plan) },
                 icon = {
@@ -49,6 +37,18 @@ fun MyBottomBar() {
                     )
                 },
                 label = { Text("Plan") }
+            )
+            NavigationBarItem(
+                selected = screenState == ScreenState.Recipes,
+                onClick = EvasLaunching { ScreenState.set(ScreenState.Recipes) },
+                icon = {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.List,
+                        modifier = Modifier.size(32.dp),
+                        contentDescription = null
+                    )
+                },
+                label = { Text("Rezepte") }
             )
         }
         Button({}) { Text("Rezepte") }
