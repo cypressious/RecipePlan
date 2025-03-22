@@ -1,5 +1,9 @@
 package de.rakhman.cooking
 
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.WindowPosition
+import androidx.compose.ui.window.WindowState
+import androidx.compose.ui.window.rememberWindowState
 import androidx.compose.ui.window.singleWindowApplication
 import de.rakhman.cooking.backend.SheetsQuickstart
 import de.rakhman.cooking.database.DriverFactory
@@ -36,6 +40,7 @@ fun main() {
     }
 
     singleWindowApplication(
+        state = WindowState(width = 400.dp, height = 700.dp, position = WindowPosition(1100.dp, 50.dp)),
         title = "RecipePlan",
         alwaysOnTop = true,
     ) {
