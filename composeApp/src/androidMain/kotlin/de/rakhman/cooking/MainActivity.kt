@@ -21,6 +21,7 @@ import com.google.api.services.sheets.v4.Sheets
 import com.google.api.services.sheets.v4.SheetsScopes
 import de.rakhman.cooking.database.DriverFactory
 import de.rakhman.cooking.events.ErrorEvent
+import de.rakhman.cooking.states.ScreenState
 import de.rakhman.cooking.states.launchRecipesState
 import de.rakhman.cooking.ui.App
 import io.sellmair.evas.Events
@@ -109,6 +110,15 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onBackPressed() {
+        val state = states.getState(ScreenState).value
+        if (state is ScreenState.Add) {
+            states.setState(ScreenState, state.target)
+            return
+        }
+        super.onBackPressed()
     }
 }
 
