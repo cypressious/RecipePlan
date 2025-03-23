@@ -13,19 +13,14 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import de.rakhman.cooking.Recipe
+import androidx.compose.ui.*
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.*
+import androidx.compose.ui.unit.*
+import de.rakhman.cooking.*
 import de.rakhman.cooking.events.AddToPlanEvent
 import de.rakhman.cooking.events.AddToShopEvent
 import de.rakhman.cooking.events.DeleteEvent
-import de.rakhman.cooking.openUrl
-import de.rakhman.cooking.shareRecipe
-import de.rakhman.cooking.shareToBring
-import de.rakhman.cooking.getContext
 import de.rakhman.cooking.states.ID_TEMPORARY
 import de.rakhman.cooking.states.RecipesState
 import io.sellmair.evas.compose.EvasLaunching
@@ -115,8 +110,8 @@ fun RecipeItem(recipe: Recipe) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(16.dp, 8.dp).weight(1f),
         ) {
-            Text(text = recipe.title, fontSize = 24.sp, modifier = Modifier.padding(bottom = 8.dp))
-            recipe.url?.let { Text(text = it, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+            Text(text = recipe.title, fontSize = 18.sp, modifier = Modifier.padding(bottom = 8.dp))
+            recipe.url?.let { Text(text = it, maxLines = 1, overflow = TextOverflow.Ellipsis, color = Color.Gray) }
         }
 
         var expanded by remember { mutableStateOf(false) }
