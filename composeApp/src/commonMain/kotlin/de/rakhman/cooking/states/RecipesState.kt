@@ -150,21 +150,23 @@ private suspend fun removeFromShop(indexToRemove: Int) {
 context(c: RecipeContext)
 private suspend fun addRecipe(title: String, url: String?) {
     val state = RecipesState.value()
+    val target = (ScreenState.value() as? ScreenState.Add)?.target
+    ScreenState.set(target ?: ScreenState.Recipes)
+
     if (state is RecipesState.Success) {
         RecipesState.set(
             RecipesState.Success(
                 state.recipes + Recipe(Long.MAX_VALUE, title, url),
-                state.plan,
-                state.shop,
+                state.plan.let { if (target == ScreenState.Plan) it + Long.MAX_VALUE else it },
+                state.shop.let { if (target == ScreenState.Shop) it + Long.MAX_VALUE else it },
             )
         )
     }
-    ScreenState.set(ScreenState.Recipes)
 
     withContext(Dispatchers.IO) {
         val recipes = readSheetRange(SHEET_NAME_RECIPES)
 
-        val id = recipes.size + 1
+        val id = recipes.size + 1L
         c.sheets.spreadsheets().values().update(
             c.spreadSheetsId,
             "$SHEET_NAME_RECIPES!A$id:B$id",
@@ -174,6 +176,12 @@ private suspend fun addRecipe(title: String, url: String?) {
         ).run {
             valueInputOption = "RAW"
             execute()
+        }
+
+        if (target == ScreenState.Shop) {
+            addToShop(id)
+        } else if (target == ScreenState.Plan) {
+            addToPlan(id, null)
         }
 
         syncWithSheets()

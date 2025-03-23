@@ -12,6 +12,7 @@ import de.rakhman.cooking.states.ScreenState
 import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.compose.composeValue
 import io.sellmair.evas.set
+import io.sellmair.evas.value
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -22,7 +23,7 @@ fun App() {
             topBar = { MyTopBar() },
             bottomBar = { MyBottomBar() },
             floatingActionButton = {
-                FloatingActionButton(onClick = EvasLaunching { ScreenState.set(ScreenState.Add) }) {
+                FloatingActionButton(onClick = EvasLaunching { ScreenState.set(ScreenState.Add(ScreenState.value() as ScreenState.BaseScreen)) }) {
                     Icon(Icons.Default.Add, contentDescription = "Add")
                 }
             }
@@ -34,7 +35,7 @@ fun App() {
                 ScreenState.Plan -> PlanScreen(modifier, false)
                 ScreenState.Shop -> PlanScreen(modifier, true)
                 ScreenState.Recipes -> RecipesScreen(modifier)
-                ScreenState.Add -> AddScreen(modifier)
+                is ScreenState.Add -> AddScreen(modifier)
             }
         }
 
