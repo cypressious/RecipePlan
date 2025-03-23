@@ -39,6 +39,8 @@ private class RecipeContext(
     val spreadSheetsId: String
 )
 
+const val ID_TEMPORARY = -1L
+
 fun CoroutineScope.launchRecipesState(
     database: Database, sheets: Sheets, spreadSheetsId: String = "XXX"
 ) = launchState(RecipesState) {
@@ -96,15 +98,19 @@ private fun updateRawValue(range: String, rawValues: List<List<String>>) {
 }
 
 context(c: RecipeContext)
-private suspend fun addToPlan(id: Long, removeIndexFromShop: Int?) {
+private suspend fun addToPlan(id: Long, removeIndexFromShop: Int?, updateStateOptimististically: Boolean = true) {
     val state = RecipesState.value() as? RecipesState.Success ?: return
-    val newPlan = state.plan + id
+    val newPlan = (state.plan + id).filter { it != ID_TEMPORARY }
     val newShop = if (removeIndexFromShop != null) {
         state.shop.filterIndexed { i, _ -> i != removeIndexFromShop }
     } else {
         state.shop
+    }.filter { it != ID_TEMPORARY }
+
+    if (updateStateOptimististically) {
+        RecipesState.set(RecipesState.Success(state.recipes, newPlan, newShop))
     }
-    RecipesState.set(RecipesState.Success(state.recipes, newPlan, newShop))
+
     withContext(Dispatchers.IO) {
         updateRawValue(
             "$SHEET_NAME_PLAN!A1:A2",
@@ -118,10 +124,14 @@ private suspend fun addToPlan(id: Long, removeIndexFromShop: Int?) {
 }
 
 context(c: RecipeContext)
-private suspend fun addToShop(id: Long) {
+private suspend fun addToShop(id: Long, updateStateOptimistically: Boolean = true) {
     val state = RecipesState.value() as? RecipesState.Success ?: return
-    val newShop = state.shop + id
-    RecipesState.set(RecipesState.Success(state.recipes, state.plan, newShop))
+    val newShop = (state.shop + id).filter { it != ID_TEMPORARY }
+
+    if (updateStateOptimistically) {
+        RecipesState.set(RecipesState.Success(state.recipes, state.plan, newShop))
+    }
+
     val rawPlanValue = newShop.joinToString(",")
     withContext(Dispatchers.IO) { updateRawValue("$SHEET_NAME_PLAN!A2", listOf(listOf(rawPlanValue))) }
     syncWithSheets()
@@ -130,7 +140,7 @@ private suspend fun addToShop(id: Long) {
 context(c: RecipeContext)
 private suspend fun removeFromPlan(indexToRemove: Int) {
     val state = RecipesState.value() as? RecipesState.Success ?: return
-    val filteredPlan = state.plan.filterIndexed { i, _ -> i != indexToRemove }
+    val filteredPlan = state.plan.filterIndexed { i, id -> i != indexToRemove && id != ID_TEMPORARY }
     RecipesState.set(RecipesState.Success(state.recipes, filteredPlan, state.shop))
     val rawPlanValue = filteredPlan.joinToString(",")
     withContext(Dispatchers.IO) { updateRawValue("$SHEET_NAME_PLAN!A1", listOf(listOf(rawPlanValue))) }
@@ -140,7 +150,7 @@ private suspend fun removeFromPlan(indexToRemove: Int) {
 context(c: RecipeContext)
 private suspend fun removeFromShop(indexToRemove: Int) {
     val state = RecipesState.value() as? RecipesState.Success ?: return
-    val filteredShop = state.shop.filterIndexed { i, _ -> i != indexToRemove }
+    val filteredShop = state.shop.filterIndexed { i, id -> i != indexToRemove && id != ID_TEMPORARY }
     RecipesState.set(RecipesState.Success(state.recipes, state.plan, filteredShop))
     val rawPlanValue = filteredShop.joinToString(",")
     withContext(Dispatchers.IO) { updateRawValue("$SHEET_NAME_PLAN!A2", listOf(listOf(rawPlanValue))) }
@@ -156,9 +166,9 @@ private suspend fun addRecipe(title: String, url: String?) {
     if (state is RecipesState.Success) {
         RecipesState.set(
             RecipesState.Success(
-                state.recipes + Recipe(Long.MAX_VALUE, title, url),
-                state.plan.let { if (target == ScreenState.Plan) it + Long.MAX_VALUE else it },
-                state.shop.let { if (target == ScreenState.Shop) it + Long.MAX_VALUE else it },
+                state.recipes + Recipe(ID_TEMPORARY, title, url),
+                state.plan.let { if (target == ScreenState.Plan) it + ID_TEMPORARY else it },
+                state.shop.let { if (target == ScreenState.Shop) it + ID_TEMPORARY else it },
             )
         )
     }
@@ -179,9 +189,9 @@ private suspend fun addRecipe(title: String, url: String?) {
         }
 
         if (target == ScreenState.Shop) {
-            addToShop(id)
+            addToShop(id, updateStateOptimistically = false)
         } else if (target == ScreenState.Plan) {
-            addToPlan(id, null)
+            addToPlan(id, null, updateStateOptimististically = false)
         }
 
         syncWithSheets()

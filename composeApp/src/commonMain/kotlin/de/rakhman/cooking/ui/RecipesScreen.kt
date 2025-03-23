@@ -26,6 +26,7 @@ import de.rakhman.cooking.openUrl
 import de.rakhman.cooking.shareRecipe
 import de.rakhman.cooking.shareToBring
 import de.rakhman.cooking.getContext
+import de.rakhman.cooking.states.ID_TEMPORARY
 import de.rakhman.cooking.states.RecipesState
 import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.compose.composeValue
@@ -119,8 +120,9 @@ fun RecipeItem(recipe: Recipe) {
         }
 
         var expanded by remember { mutableStateOf(false) }
-        if (recipe.id != Long.MAX_VALUE) {
-            Box(modifier = Modifier.align(Alignment.CenterVertically).padding(end = 12.dp)) {
+
+        Box(modifier = Modifier.align(Alignment.CenterVertically).padding(end = 12.dp)) {
+            if (recipe.id != ID_TEMPORARY) {
                 IconButton(onClick = { expanded = true }) {
                     Icon(imageVector = Icons.Filled.MoreVert, contentDescription = "Optionen")
                 }
@@ -155,6 +157,8 @@ fun RecipeItem(recipe: Recipe) {
                         )
                     }
                 }
+            } else {
+                CircularProgressIndicator()
             }
         }
     }
