@@ -39,7 +39,7 @@ fun PlanScreen(modifier: Modifier, isShop: Boolean) {
                                 var checked by remember { mutableStateOf(false) }
                                 Checkbox(
                                     checked = checked,
-                                    enabled = !checked,
+                                    enabled = !checked && recipe.id != Long.MAX_VALUE,
                                     onCheckedChange = EvasLaunching<Boolean> {
                                         checked = true
                                         delay(250)

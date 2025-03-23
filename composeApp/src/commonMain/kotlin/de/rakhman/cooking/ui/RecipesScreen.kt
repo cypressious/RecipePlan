@@ -119,39 +119,41 @@ fun RecipeItem(recipe: Recipe) {
         }
 
         var expanded by remember { mutableStateOf(false) }
-        Box(modifier = Modifier.align(Alignment.CenterVertically).padding(end = 12.dp)) {
-            IconButton(onClick = { expanded = true }) {
-                Icon(imageVector = Icons.Filled.MoreVert, contentDescription = "Optionen")
-            }
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
-            ) {
-                DropdownMenuItem(
-                    text = { Text("Auf die Einkaufsliste") },
-                    onClick = EvasLaunching { AddToShopEvent(recipe.id).emitAsync(); expanded = false }
-                )
-                DropdownMenuItem(
-                    text = { Text("Auf den Plan") },
-                    onClick = EvasLaunching { AddToPlanEvent(recipe.id, null).emitAsync(); expanded = false }
-                )
-                DropdownMenuItem(
-                    text = { Text("Bearbeiten") },
-                    onClick = EvasLaunching { expanded = false } // TODO
-                )
-                DropdownMenuItem(
-                    text = { Text("Löschen") },
-                    onClick = EvasLaunching { DeleteEvent(recipe.id).emitAsync(); expanded = false }
-                )
-                DropdownMenuItem(
-                    text = { Text("Teilen") },
-                    onClick = { shareRecipe(recipe.title, recipe.url, context); expanded = false }
-                )
-                recipe.url?.let { url ->
+        if (recipe.id != Long.MAX_VALUE) {
+            Box(modifier = Modifier.align(Alignment.CenterVertically).padding(end = 12.dp)) {
+                IconButton(onClick = { expanded = true }) {
+                    Icon(imageVector = Icons.Filled.MoreVert, contentDescription = "Optionen")
+                }
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
                     DropdownMenuItem(
-                        text = { Text("Zu Bring hinzufügen") },
-                        onClick = { shareToBring(recipe.title, url, context); expanded = false }
+                        text = { Text("Auf die Einkaufsliste") },
+                        onClick = EvasLaunching { AddToShopEvent(recipe.id).emitAsync(); expanded = false }
                     )
+                    DropdownMenuItem(
+                        text = { Text("Auf den Plan") },
+                        onClick = EvasLaunching { AddToPlanEvent(recipe.id, null).emitAsync(); expanded = false }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Bearbeiten") },
+                        onClick = EvasLaunching { expanded = false } // TODO
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Löschen") },
+                        onClick = EvasLaunching { DeleteEvent(recipe.id).emitAsync(); expanded = false }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Teilen") },
+                        onClick = { shareRecipe(recipe.title, recipe.url, context); expanded = false }
+                    )
+                    recipe.url?.let { url ->
+                        DropdownMenuItem(
+                            text = { Text("Zu Bring hinzufügen") },
+                            onClick = { shareToBring(recipe.title, url, context); expanded = false }
+                        )
+                    }
                 }
             }
         }
