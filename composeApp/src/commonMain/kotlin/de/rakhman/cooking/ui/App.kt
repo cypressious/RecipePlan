@@ -19,18 +19,20 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Preview
 fun App() {
     MaterialTheme {
+        val screenState = ScreenState.composeValue()
+
         Scaffold(
             topBar = { MyTopBar() },
             bottomBar = { MyBottomBar() },
             floatingActionButton = {
-                FloatingActionButton(onClick = EvasLaunching { ScreenState.set(ScreenState.Add(ScreenState.value() as ScreenState.BaseScreen)) }) {
-                    Icon(Icons.Default.Add, contentDescription = "Add")
+                if (screenState is ScreenState.BaseScreen) {
+                    FloatingActionButton(onClick = EvasLaunching { ScreenState.set(ScreenState.Add(ScreenState.value() as ScreenState.BaseScreen)) }) {
+                        Icon(Icons.Default.Add, contentDescription = "Add")
+                    }
                 }
             }
         ) { innerPadding ->
             val modifier = Modifier.padding(innerPadding)
-            val screenState = ScreenState.composeValue()
-
             when (screenState) {
                 ScreenState.Plan -> PlanScreen(modifier, false)
                 ScreenState.Shop -> PlanScreen(modifier, true)
