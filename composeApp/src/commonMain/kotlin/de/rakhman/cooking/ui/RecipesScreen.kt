@@ -21,6 +21,7 @@ import de.rakhman.cooking.*
 import de.rakhman.cooking.events.AddToPlanEvent
 import de.rakhman.cooking.events.AddToShopEvent
 import de.rakhman.cooking.events.DeleteEvent
+import de.rakhman.cooking.events.NotificationEvent
 import de.rakhman.cooking.states.ID_TEMPORARY
 import de.rakhman.cooking.states.RecipesState
 import de.rakhman.cooking.states.ScreenState
@@ -130,11 +131,19 @@ fun RecipeItem(recipe: Recipe) {
                 ) {
                     DropdownMenuItem(
                         text = { Text("Auf die Einkaufsliste") },
-                        onClick = EvasLaunching { AddToShopEvent(recipe.id).emitAsync(); expanded = false }
+                        onClick = EvasLaunching {
+                            NotificationEvent("\"${recipe.title}\" zur Einkaufsliste hinzugefügt.").emitAsync()
+                            AddToShopEvent(recipe.id).emitAsync()
+                            expanded = false
+                        }
                     )
                     DropdownMenuItem(
                         text = { Text("Auf den Plan") },
-                        onClick = EvasLaunching { AddToPlanEvent(recipe.id, null).emitAsync(); expanded = false }
+                        onClick = EvasLaunching {
+                            NotificationEvent("\"${recipe.title}\" zum Plan hinzugefügt.").emitAsync()
+                            AddToPlanEvent(recipe.id, null).emitAsync()
+                            expanded = false
+                        }
                     )
                     DropdownMenuItem(
                         text = { Text("Bearbeiten") },
@@ -150,7 +159,11 @@ fun RecipeItem(recipe: Recipe) {
                     )
                     DropdownMenuItem(
                         text = { Text("Löschen") },
-                        onClick = EvasLaunching { DeleteEvent(recipe.id).emitAsync(); expanded = false }
+                        onClick = EvasLaunching {
+                            NotificationEvent("\"${recipe.title}\" gelöscht.").emitAsync()
+                            DeleteEvent(recipe.id).emitAsync()
+                            expanded = false
+                        }
                     )
                     DropdownMenuItem(
                         text = { Text("Teilen") },

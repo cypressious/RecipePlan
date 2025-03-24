@@ -260,7 +260,7 @@ private fun readRecipes(): List<Recipe> {
             if (row.isNotEmpty() && row.elementAtOrNull(2)?.toString() != DELETED_VALUE) {
                 Recipe(
                     id = i + 1L,
-                    title = row[0].toString(),
+                    title = row[0].toString().trim(),
                     url = row.elementAtOrNull(1)?.toString()?.ifBlank { null })
             } else {
                 null

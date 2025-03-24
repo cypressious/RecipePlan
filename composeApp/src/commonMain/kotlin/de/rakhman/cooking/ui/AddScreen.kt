@@ -16,9 +16,10 @@ import androidx.compose.ui.text.input.*
 import androidx.compose.ui.unit.*
 import de.rakhman.cooking.Recipe
 import de.rakhman.cooking.events.AddEvent
+import de.rakhman.cooking.events.NotificationEvent
 import de.rakhman.cooking.events.UpdateEvent
 import io.sellmair.evas.compose.EvasLaunching
-import io.sellmair.evas.emit
+import io.sellmair.evas.emitAsync
 
 private val urlRegex =
     Regex("""https?://(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)""")
@@ -37,10 +38,12 @@ fun AddScreen(modifier: Modifier, editingRecipe: Recipe?, initialData: String?) 
         val enabled = title.isNotBlank() && (url.isBlank() || url.matches(urlRegex))
         val submit = EvasLaunching {
             if (editingRecipe != null) {
-                UpdateEvent(editingRecipe.id, title, url)
+                NotificationEvent("\"${title.trim()}\" gespeichert.").emitAsync()
+                UpdateEvent(editingRecipe.id, title.trim(), url).emitAsync()
             } else {
-                AddEvent(title, url.ifBlank { null })
-            }.emit()
+                NotificationEvent("\"${title.trim()}\" hinzugefügt.").emitAsync()
+                AddEvent(title.trim(), url.ifBlank { null }).emitAsync()
+            }
         }
         val focusManager = LocalFocusManager.current
 
