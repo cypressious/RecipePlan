@@ -14,6 +14,7 @@ import de.rakhman.cooking.events.ErrorEvent
 import de.rakhman.cooking.events.ReloadEvent
 import de.rakhman.cooking.events.RemoveFromPlanEvent
 import de.rakhman.cooking.events.RemoveFromShopEvent
+import de.rakhman.cooking.events.UpdateEvent
 import io.sellmair.evas.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -50,6 +51,7 @@ fun CoroutineScope.launchRecipesState(
         collectEventsAsyncCatchingErrors<ReloadEvent> { syncWithSheets() }
         collectEventsAsyncCatchingErrors<DeleteEvent> { setDeleted(it.id) }
         collectEventsAsyncCatchingErrors<AddEvent> { addRecipe(it.title, it.url) }
+        collectEventsAsyncCatchingErrors<UpdateEvent> { updateRecipe(it.id, it.title, it.url) }
         collectEventsAsyncCatchingErrors<AddToPlanEvent> {
             updatePlanAndShop(addIdToPlan = it.id, removeIndexFromShop = it.removeIndexFromShop)
         }
@@ -157,6 +159,38 @@ private suspend fun updatePlanAndShop(
 }
 
 context(c: RecipeContext)
+private suspend fun updateRecipe(id: Long, title: String, url: String?) {
+    val state = RecipesState.value()
+    val target = (ScreenState.value() as? ScreenState.Add)?.target
+    ScreenState.set(target ?: ScreenState.Recipes)
+
+    if (state is RecipesState.Success) {
+        RecipesState.set(
+            RecipesState.Success(
+                state.recipes.map { if (it.id == id) Recipe(id, title, url) else it },
+                state.plan,
+                state.shop,
+            )
+        )
+    }
+
+    withContext(Dispatchers.IO) {
+        c.sheets.spreadsheets().values().update(
+            c.spreadSheetsId,
+            "$SHEET_NAME_RECIPES!A$id:B$id",
+            ValueRange().apply {
+                setValues(listOf(listOf(title, url ?: "")))
+            }
+        ).run {
+            valueInputOption = "RAW"
+            execute()
+        }
+    }
+
+    syncWithSheets()
+}
+
+context(c: RecipeContext)
 private suspend fun addRecipe(title: String, url: String?) {
     val state = RecipesState.value()
     val target = (ScreenState.value() as? ScreenState.Add)?.target
@@ -199,9 +233,9 @@ private suspend fun addRecipe(title: String, url: String?) {
                 updateStateOptimistically = false
             )
         }
-
-        syncWithSheets()
     }
+
+    syncWithSheets()
 }
 
 context(c: RecipeContext)

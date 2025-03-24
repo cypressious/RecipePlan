@@ -16,4 +16,6 @@ class RemoveFromShopEvent(val index: Int) : Event
 
 class AddEvent(val title: String, val url: String?) : Event
 
+class UpdateEvent(val id: Long, val title: String, val url: String?) : Event
+
 class ErrorEvent(val e: Exception) : Event

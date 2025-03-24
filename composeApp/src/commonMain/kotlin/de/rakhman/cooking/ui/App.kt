@@ -36,7 +36,7 @@ fun App() {
                 ScreenState.Plan -> PlanScreen(modifier, false)
                 ScreenState.Shop -> PlanScreen(modifier, true)
                 ScreenState.Recipes -> RecipesScreen(modifier)
-                is ScreenState.Add -> AddScreen(modifier, screenState.initialData)
+                is ScreenState.Add -> AddScreen(modifier, screenState.editingRecipe, screenState.initialData)
             }
         }
 

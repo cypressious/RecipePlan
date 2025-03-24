@@ -23,9 +23,12 @@ import de.rakhman.cooking.events.AddToShopEvent
 import de.rakhman.cooking.events.DeleteEvent
 import de.rakhman.cooking.states.ID_TEMPORARY
 import de.rakhman.cooking.states.RecipesState
+import de.rakhman.cooking.states.ScreenState
 import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.compose.composeValue
 import io.sellmair.evas.emitAsync
+import io.sellmair.evas.set
+import io.sellmair.evas.value
 
 @Composable
 fun RecipesScreen(modifier: Modifier) {
@@ -135,7 +138,15 @@ fun RecipeItem(recipe: Recipe) {
                     )
                     DropdownMenuItem(
                         text = { Text("Bearbeiten") },
-                        onClick = EvasLaunching { expanded = false } // TODO
+                        onClick = EvasLaunching {
+                            ScreenState.set(
+                                ScreenState.Add(
+                                    target = ScreenState.value() as ScreenState.BaseScreen,
+                                    editingRecipe = recipe
+                                )
+                            )
+                            expanded = false
+                        }
                     )
                     DropdownMenuItem(
                         text = { Text("Löschen") },

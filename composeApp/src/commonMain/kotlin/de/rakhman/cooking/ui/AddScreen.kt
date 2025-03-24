@@ -14,7 +14,9 @@ import androidx.compose.ui.focus.*
 import androidx.compose.ui.platform.*
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.unit.*
+import de.rakhman.cooking.Recipe
 import de.rakhman.cooking.events.AddEvent
+import de.rakhman.cooking.events.UpdateEvent
 import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.emit
 
@@ -22,12 +24,24 @@ private val urlRegex =
     Regex("""https?://(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)""")
 
 @Composable
-fun AddScreen(modifier: Modifier, initialData: String?) {
+fun AddScreen(modifier: Modifier, editingRecipe: Recipe?, initialData: String?) {
     Column(modifier = modifier.padding(16.dp)) {
-        var title by remember { mutableStateOf("") }
-        var url by remember { mutableStateOf(initialData?.let { urlRegex.find(it) }?.value ?: "") }
+        var title by remember { mutableStateOf(editingRecipe?.title ?: "") }
+        var url by remember {
+            mutableStateOf(
+                editingRecipe?.url
+                    ?: initialData?.let { urlRegex.find(it) }?.value
+                    ?: ""
+            )
+        }
         val enabled = title.isNotBlank() && (url.isBlank() || url.matches(urlRegex))
-        val submit = EvasLaunching { AddEvent(title, url.ifBlank { null }).emit() }
+        val submit = EvasLaunching {
+            if (editingRecipe != null) {
+                UpdateEvent(editingRecipe.id, title, url)
+            } else {
+                AddEvent(title, url.ifBlank { null })
+            }.emit()
+        }
         val focusManager = LocalFocusManager.current
 
         OutlinedTextField(
@@ -58,7 +72,7 @@ fun AddScreen(modifier: Modifier, initialData: String?) {
             modifier = Modifier.fillMaxWidth(),
             enabled = enabled
         ) {
-            Text("Hinzufügen")
+            Text(if (editingRecipe != null) "Aktualisieren" else "Hinzufügen")
         }
     }
 }
