@@ -26,7 +26,7 @@ fun App() {
             bottomBar = { MyBottomBar() },
             floatingActionButton = {
                 if (screenState is ScreenState.BaseScreen) {
-                    FloatingActionButton(onClick = EvasLaunching { ScreenState.set(ScreenState.Add(ScreenState.value() as ScreenState.BaseScreen)) }) {
+                    FloatingActionButton(onClick = EvasLaunching { ScreenState.set(ScreenState.Add(screenState)) }) {
                         Icon(Icons.Default.Add, contentDescription = "Add")
                     }
                 }
