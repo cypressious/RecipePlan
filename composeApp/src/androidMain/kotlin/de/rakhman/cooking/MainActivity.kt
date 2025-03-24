@@ -83,7 +83,7 @@ class MainActivity : ComponentActivity() {
         intent
             ?.takeIf { it.action == ACTION_SEND }
             ?.getStringExtra(EXTRA_TEXT)?.let {
-                states.setState(ScreenState, ScreenState.Add(ScreenState.Recipes, it))
+                states.setState(ScreenState, ScreenState.Add(ScreenState.Recipes, initialData = it))
                 intent = null
             }
     }
