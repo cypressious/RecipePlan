@@ -12,7 +12,6 @@ import de.rakhman.cooking.states.ScreenState
 import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.compose.composeValue
 import io.sellmair.evas.set
-import io.sellmair.evas.value
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -37,7 +36,7 @@ fun App() {
                 ScreenState.Plan -> PlanScreen(modifier, false)
                 ScreenState.Shop -> PlanScreen(modifier, true)
                 ScreenState.Recipes -> RecipesScreen(modifier)
-                is ScreenState.Add -> AddScreen(modifier)
+                is ScreenState.Add -> AddScreen(modifier, screenState.initialData)
             }
         }
 

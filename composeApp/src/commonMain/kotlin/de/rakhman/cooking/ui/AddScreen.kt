@@ -22,10 +22,10 @@ private val urlRegex =
     Regex("""https?://(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)""")
 
 @Composable
-fun AddScreen(modifier: Modifier) {
+fun AddScreen(modifier: Modifier, initialData: String?) {
     Column(modifier = modifier.padding(16.dp)) {
         var title by remember { mutableStateOf("") }
-        var url by remember { mutableStateOf("") }
+        var url by remember { mutableStateOf(initialData?.let { urlRegex.find(it) }?.value ?: "") }
         val enabled = title.isNotBlank() && (url.isBlank() || url.matches(urlRegex))
         val submit = EvasLaunching { AddEvent(title, url.ifBlank { null }).emit() }
         val focusManager = LocalFocusManager.current

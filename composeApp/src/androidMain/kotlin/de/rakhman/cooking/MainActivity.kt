@@ -1,6 +1,8 @@
 package de.rakhman.cooking
 
 import android.content.Intent
+import android.content.Intent.ACTION_SEND
+import android.content.Intent.EXTRA_TEXT
 import android.content.IntentSender.SendIntentException
 import android.os.Bundle
 import android.util.Log
@@ -77,6 +79,13 @@ class MainActivity : ComponentActivity() {
                 App()
             }
         }
+
+        intent
+            ?.takeIf { it.action == ACTION_SEND }
+            ?.getStringExtra(EXTRA_TEXT)?.let {
+                states.setState(ScreenState, ScreenState.Add(ScreenState.Recipes, it))
+                intent = null
+            }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
