@@ -9,3 +9,11 @@
 deploymentTargetSelector.xml
 modules.xml
 /compiler.xml
+/caches/deviceStreaming.xml
+/AndroidProjectSystem.xml
+/libraries/
+/artifacts/composeApp_jvm.xml
+/misc.xml
+/gradle.xml
+/migrations.xml
+/assetWizardSettings.xml
