@@ -17,3 +17,4 @@ captures
 **/xcshareddata/WorkspaceSettings.xcsettings
 /composeApp/tokens/StoredCredential
 /recipe-keystore
+composeApp/release
