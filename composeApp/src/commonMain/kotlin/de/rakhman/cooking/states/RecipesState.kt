@@ -31,7 +31,10 @@ sealed class RecipesState : State {
 
 private const val SHEET_NAME_RECIPES = "Rezepte"
 private const val SHEET_NAME_PLAN = "Plan"
+private const val RANGE_PLAN_AND_SHOP = "$SHEET_NAME_PLAN!A1:A2"
 private const val DELETED_VALUE = "deleted"
+
+const val ID_TEMPORARY = -1L
 
 private class RecipeContext(
     val database: Database,
@@ -39,20 +42,26 @@ private class RecipeContext(
     val spreadSheetsId: String
 )
 
-const val ID_TEMPORARY = -1L
-
 fun CoroutineScope.launchRecipesState(
     database: Database, sheets: Sheets, spreadSheetsId: String = "XXX"
 ) = launchState(RecipesState) {
     with(RecipeContext(database, sheets, spreadSheetsId)) {
-        loadFromDatabase()
+        setStateFromDatabase()
         collectEventsAsyncCatchingErrors<ReloadEvent> { syncWithSheets() }
         collectEventsAsyncCatchingErrors<DeleteEvent> { setDeleted(it.id) }
         collectEventsAsyncCatchingErrors<AddEvent> { addRecipe(it.title, it.url) }
-        collectEventsAsyncCatchingErrors<AddToPlanEvent> { addToPlan(it.id, it.removeIndexFromShop) }
-        collectEventsAsyncCatchingErrors<RemoveFromPlanEvent> { removeFromPlan(it.index) }
-        collectEventsAsyncCatchingErrors<AddToShopEvent> { addToShop(it.id) }
-        collectEventsAsyncCatchingErrors<RemoveFromShopEvent> { removeFromShop(it.index) }
+        collectEventsAsyncCatchingErrors<AddToPlanEvent> {
+            updatePlanAndShop(addIdToPlan = it.id, removeIndexFromShop = it.removeIndexFromShop)
+        }
+        collectEventsAsyncCatchingErrors<RemoveFromPlanEvent> {
+            updatePlanAndShop(removeIndexFromPlan = it.index)
+        }
+        collectEventsAsyncCatchingErrors<AddToShopEvent> {
+            updatePlanAndShop(addIdToShop = it.id)
+        }
+        collectEventsAsyncCatchingErrors<RemoveFromShopEvent> {
+            updatePlanAndShop(removeIndexFromShop = it.index)
+        }
     }
 
     ReloadEvent.emit()
@@ -68,7 +77,7 @@ private inline fun <reified T : Event> StateProducerScope<RecipesState>.collectE
         } catch (e: Exception) {
             e.printStackTrace()
             ErrorEvent(e).emit()
-            loadFromDatabase()
+            setStateFromDatabase()
         }
     }
 }
@@ -98,62 +107,49 @@ private fun updateRawValue(range: String, rawValues: List<List<String>>) {
 }
 
 context(c: RecipeContext)
-private suspend fun addToPlan(id: Long, removeIndexFromShop: Int?, updateStateOptimististically: Boolean = true) {
-    val state = RecipesState.value() as? RecipesState.Success ?: return
-    val newPlan = (state.plan + id).filter { it != ID_TEMPORARY }
-    val newShop = if (removeIndexFromShop != null) {
-        state.shop.filterIndexed { i, _ -> i != removeIndexFromShop }
-    } else {
-        state.shop
-    }.filter { it != ID_TEMPORARY }
+private suspend fun updatePlanAndShop(
+    addIdToPlan: Long? = null,
+    addIdToShop: Long? = null,
+    removeIndexFromPlan: Int? = null,
+    removeIndexFromShop: Int? = null,
+    updateStateOptimistically: Boolean = true,
+) {
+    fun newPlanAndShop(
+        plan: List<Long>,
+        shop: List<Long>,
+    ): Pair<List<Long>, List<Long>> {
+        fun List<Long>.updatePlan(addId: Long?, removeIndex: Int?): List<Long> {
+            return buildList {
+                this@updatePlan.filterIndexedTo(this) { i, id -> i != removeIndex && id != ID_TEMPORARY }
+                addId?.let { add(it) }
+            }
+        }
 
-    if (updateStateOptimististically) {
-        RecipesState.set(RecipesState.Success(state.recipes, newPlan, newShop))
+        val newPlan = plan.updatePlan(addIdToPlan, removeIndexFromPlan)
+        val newShop = shop.updatePlan(addIdToShop, removeIndexFromShop)
+        return Pair(newPlan, newShop)
+    }
+
+    if (updateStateOptimistically) {
+        val state = RecipesState.value()
+        if (state is RecipesState.Success) {
+            val (newPlan, newShop) = newPlanAndShop(state.plan, state.shop)
+            RecipesState.set(RecipesState.Success(state.recipes, newPlan, newShop))
+        }
     }
 
     withContext(Dispatchers.IO) {
+        val (oldPlan, oldShop) = readPlanAndShop()
+        val (newPlan, newShop) = newPlanAndShop(oldPlan, oldShop)
+
         updateRawValue(
-            "$SHEET_NAME_PLAN!A1:A2",
+            RANGE_PLAN_AND_SHOP,
             listOf(
                 listOf(newPlan.joinToString(",")),
                 listOf(newShop.joinToString(",")),
             )
         )
     }
-    syncWithSheets()
-}
-
-context(c: RecipeContext)
-private suspend fun addToShop(id: Long, updateStateOptimistically: Boolean = true) {
-    val state = RecipesState.value() as? RecipesState.Success ?: return
-    val newShop = (state.shop + id).filter { it != ID_TEMPORARY }
-
-    if (updateStateOptimistically) {
-        RecipesState.set(RecipesState.Success(state.recipes, state.plan, newShop))
-    }
-
-    val rawPlanValue = newShop.joinToString(",")
-    withContext(Dispatchers.IO) { updateRawValue("$SHEET_NAME_PLAN!A2", listOf(listOf(rawPlanValue))) }
-    syncWithSheets()
-}
-
-context(c: RecipeContext)
-private suspend fun removeFromPlan(indexToRemove: Int) {
-    val state = RecipesState.value() as? RecipesState.Success ?: return
-    val filteredPlan = state.plan.filterIndexed { i, id -> i != indexToRemove && id != ID_TEMPORARY }
-    RecipesState.set(RecipesState.Success(state.recipes, filteredPlan, state.shop))
-    val rawPlanValue = filteredPlan.joinToString(",")
-    withContext(Dispatchers.IO) { updateRawValue("$SHEET_NAME_PLAN!A1", listOf(listOf(rawPlanValue))) }
-    syncWithSheets()
-}
-
-context(c: RecipeContext)
-private suspend fun removeFromShop(indexToRemove: Int) {
-    val state = RecipesState.value() as? RecipesState.Success ?: return
-    val filteredShop = state.shop.filterIndexed { i, id -> i != indexToRemove && id != ID_TEMPORARY }
-    RecipesState.set(RecipesState.Success(state.recipes, state.plan, filteredShop))
-    val rawPlanValue = filteredShop.joinToString(",")
-    withContext(Dispatchers.IO) { updateRawValue("$SHEET_NAME_PLAN!A2", listOf(listOf(rawPlanValue))) }
     syncWithSheets()
 }
 
@@ -189,9 +185,16 @@ private suspend fun addRecipe(title: String, url: String?) {
         }
 
         if (target == ScreenState.Shop) {
-            addToShop(id, updateStateOptimistically = false)
+            updatePlanAndShop(
+                addIdToShop = id,
+                updateStateOptimistically = false
+            )
         } else if (target == ScreenState.Plan) {
-            addToPlan(id, null, updateStateOptimististically = false)
+            updatePlanAndShop(
+                addIdToPlan = id,
+                removeIndexFromShop = null,
+                updateStateOptimistically = false
+            )
         }
 
         syncWithSheets()
@@ -200,33 +203,8 @@ private suspend fun addRecipe(title: String, url: String?) {
 
 context(c: RecipeContext)
 private suspend fun syncWithSheets() = withContext(Dispatchers.IO) {
-    val recipesDeferred = async {
-        readSheetRange(SHEET_NAME_RECIPES)
-            .mapIndexedNotNull { i, row ->
-                if (row.isNotEmpty() && row.elementAtOrNull(2)?.toString() != DELETED_VALUE) {
-                    Recipe(
-                        id = i + 1L,
-                        title = row[0].toString(),
-                        url = row.elementAtOrNull(1)?.toString()?.ifBlank { null })
-                } else {
-                    null
-                }
-            }
-    }
-
-    val planDeferred = async {
-        val range = readSheetRange(SHEET_NAME_PLAN)
-        Pair(
-            parsePlanCell(
-                range
-                    .elementAtOrNull(0)?.elementAtOrNull(0)
-            ),
-            parsePlanCell(
-                range
-                    .elementAtOrNull(1)?.elementAtOrNull(0)
-            )
-        )
-    }
+    val recipesDeferred = async { readRecipes() }
+    val planDeferred = async { readPlanAndShop() }
 
     val recipes = recipesDeferred.await()
     val (plan, shop) = planDeferred.await()
@@ -234,6 +212,30 @@ private suspend fun syncWithSheets() = withContext(Dispatchers.IO) {
     c.database.updateWith(recipes, plan, shop)
 
     RecipesState.set(RecipesState.Success(recipes, plan, shop))
+}
+
+context(c: RecipeContext)
+private fun readRecipes(): List<Recipe> {
+    return readSheetRange(SHEET_NAME_RECIPES)
+        .mapIndexedNotNull { i, row ->
+            if (row.isNotEmpty() && row.elementAtOrNull(2)?.toString() != DELETED_VALUE) {
+                Recipe(
+                    id = i + 1L,
+                    title = row[0].toString(),
+                    url = row.elementAtOrNull(1)?.toString()?.ifBlank { null })
+            } else {
+                null
+            }
+        }
+}
+
+context(c: RecipeContext)
+private fun readPlanAndShop(): Pair<List<Long>, List<Long>> {
+    val range = readSheetRange(RANGE_PLAN_AND_SHOP)
+    return Pair(
+        parsePlanCell(range.elementAtOrNull(0)?.elementAtOrNull(0)),
+        parsePlanCell(range.elementAtOrNull(1)?.elementAtOrNull(0))
+    )
 }
 
 private fun parsePlanCell(elementAtOrNull: Any?): List<Long> {
@@ -273,7 +275,7 @@ private fun Database.updateWith(recipes: List<Recipe>, plan: List<Long>, shop: L
 }
 
 context(c: RecipeContext)
-private suspend fun loadFromDatabase() {
+private suspend fun setStateFromDatabase() {
     RecipesState.set(
         if (c.database.recipesQueries.selectAll().executeAsList().isNotEmpty()) {
             RecipesState.Success(
