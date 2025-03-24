@@ -23,12 +23,14 @@ fun PlanScreen(modifier: Modifier, isShop: Boolean) {
     Column(modifier = modifier) {
         when (recipeState) {
             is RecipesState.Success -> {
-                val byId = recipeState.recipes.associateBy { it.id }
-                val planRecipes = (if (isShop) recipeState.shop else recipeState.plan).mapNotNull { byId[it] }
+                val planRecipes =
+                    (if (isShop) recipeState.shop else recipeState.plan).mapNotNull { recipeState.byId[it] }
+                val timestamp = System.currentTimeMillis().toString()
+                val keys = planRecipes.mapIndexed { i, it -> "$i$timestamp" }
                 LazyColumn(contentPadding = PaddingValues(bottom = 70.dp)) {
                     items(
                         count = planRecipes.size,
-                        key = { i -> "$i${System.currentTimeMillis()}"},
+                        key = { i -> keys[i] },
                         itemContent = { i ->
                             val recipe = planRecipes[i]
                             Row {

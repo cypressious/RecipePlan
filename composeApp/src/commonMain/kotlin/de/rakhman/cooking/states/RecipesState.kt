@@ -23,7 +23,9 @@ import kotlinx.coroutines.withContext
 
 sealed class RecipesState : State {
     data object Loading : RecipesState()
-    data class Success(val recipes: List<Recipe>, val plan: List<Long>, val shop: List<Long>) : RecipesState()
+    data class Success(val recipes: List<Recipe>, val plan: List<Long>, val shop: List<Long>) : RecipesState() {
+        val byId = recipes.associateBy { it.id }
+    }
 
     companion object Key : State.Key<RecipesState> {
         override val default: RecipesState get() = Loading
