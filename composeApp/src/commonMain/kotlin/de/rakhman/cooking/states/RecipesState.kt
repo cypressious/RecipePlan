@@ -73,11 +73,14 @@ private inline fun <reified T : Event> StateProducerScope<RecipesState>.collectE
 ) {
     collectEventsAsync<T> { event ->
         try {
+            SyncState.setSyncing()
             f(event)
         } catch (e: Exception) {
             e.printStackTrace()
             ErrorEvent(e).emit()
             setStateFromDatabase()
+        } finally {
+            SyncState.setNotSyncing()
         }
     }
 }

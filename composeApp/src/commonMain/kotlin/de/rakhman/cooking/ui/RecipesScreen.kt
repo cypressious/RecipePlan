@@ -116,7 +116,7 @@ fun RecipeItem(recipe: Recipe) {
 
         var expanded by remember { mutableStateOf(false) }
 
-        Box(modifier = Modifier.align(Alignment.CenterVertically).padding(end = 12.dp)) {
+        Box(modifier = Modifier.align(Alignment.CenterVertically).padding(end = 12.dp), contentAlignment = Alignment.Center) {
             if (recipe.id != ID_TEMPORARY) {
                 IconButton(onClick = { expanded = true }) {
                     Icon(imageVector = Icons.Filled.MoreVert, contentDescription = "Optionen")
@@ -153,7 +153,7 @@ fun RecipeItem(recipe: Recipe) {
                     }
                 }
             } else {
-                CircularProgressIndicator()
+                CircularProgressIndicator(modifier = Modifier.padding(12.dp).width(24.dp).height(24.dp))
             }
         }
     }
