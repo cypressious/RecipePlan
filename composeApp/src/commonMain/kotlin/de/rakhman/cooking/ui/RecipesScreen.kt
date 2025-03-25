@@ -56,7 +56,7 @@ private fun Recipes(recipes: List<Recipe>) {
     OutlinedTextField(
         modifier = Modifier.fillMaxWidth().padding(12.dp, 4.dp, 12.dp, 12.dp),
         value = filter,
-        onValueChange = { filter = it.trim() },
+        onValueChange = { filter = it },
         label = { Text("Suche") },
         trailingIcon = {
             if (filter.isNotEmpty()) {
@@ -83,11 +83,11 @@ private fun Recipes(recipes: List<Recipe>) {
             recipes
         } else {
             recipes
-                .filter { it.matchesFilter(filter) }
+                .filter { it.matchesFilter(filter.trim()) }
                 .sortedWith(compareByDescending<Recipe> {
-                    it.title.startsWith(filter, ignoreCase = true)
+                    it.title.startsWith(filter.trim(), ignoreCase = true)
                 }.thenByDescending {
-                    it.title.contains(filter, ignoreCase = true)
+                    it.title.contains(filter.trim(), ignoreCase = true)
                 })
         }
 
