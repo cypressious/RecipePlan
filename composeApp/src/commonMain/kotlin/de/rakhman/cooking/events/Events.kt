@@ -6,13 +6,13 @@ object ReloadEvent : Event
 
 class DeleteEvent(val id: Long) : Event
 
-class AddToPlanEvent(val id: Long, val removeIndexFromShop: Int?) : Event
+class AddToPlanEvent(val id: Long) : Event
 
 class AddToShopEvent(val id: Long) : Event
 
-class RemoveFromPlanEvent(val index: Int) : Event
+class RemoveFromPlanEvent(val id: Long) : Event
 
-class RemoveFromShopEvent(val index: Int) : Event
+class RemoveFromShopEvent(val id: Long) : Event
 
 class AddEvent(val title: String, val url: String?) : Event
 

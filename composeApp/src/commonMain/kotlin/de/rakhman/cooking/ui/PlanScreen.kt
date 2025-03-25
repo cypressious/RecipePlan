@@ -12,6 +12,7 @@ import de.rakhman.cooking.events.AddToPlanEvent
 import de.rakhman.cooking.events.RemoveFromPlanEvent
 import de.rakhman.cooking.states.ID_TEMPORARY
 import de.rakhman.cooking.states.RecipesState
+import de.rakhman.cooking.states.ScreenState
 import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.compose.composeValue
 import io.sellmair.evas.emit
@@ -42,14 +43,14 @@ fun PlanScreen(modifier: Modifier, isShop: Boolean) {
                                         checked = true
                                         delay(250)
                                         if (isShop) {
-                                            AddToPlanEvent(recipe.id, i).emit()
+                                            AddToPlanEvent(recipe.id).emit()
                                         } else {
-                                            RemoveFromPlanEvent(i).emit()
+                                            RemoveFromPlanEvent(recipe.id).emit()
                                         }
                                     },
                                     modifier = Modifier.align(Alignment.CenterVertically).padding(start = 12.dp),
                                 )
-                                RecipeItem(recipe = recipe)
+                                RecipeItem(recipe = recipe, if (isShop) ScreenState.Shop else ScreenState.Plan)
                             }
                             if (i != planRecipes.lastIndex) Divider()
                         },

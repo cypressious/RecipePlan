@@ -55,16 +55,16 @@ fun CoroutineScope.launchRecipesState(
         collectEventsAsyncCatchingErrors<AddEvent> { addRecipe(it.title, it.url) }
         collectEventsAsyncCatchingErrors<UpdateEvent> { updateRecipe(it.id, it.title, it.url) }
         collectEventsAsyncCatchingErrors<AddToPlanEvent> {
-            updatePlanAndShop(addIdToPlan = it.id, removeIndexFromShop = it.removeIndexFromShop)
+            updatePlanAndShop(addIdToPlan = it.id, removeIdFromShop = it.id)
         }
         collectEventsAsyncCatchingErrors<RemoveFromPlanEvent> {
-            updatePlanAndShop(removeIndexFromPlan = it.index)
+            updatePlanAndShop(removeIdFromPlan = it.id)
         }
         collectEventsAsyncCatchingErrors<AddToShopEvent> {
             updatePlanAndShop(addIdToShop = it.id)
         }
         collectEventsAsyncCatchingErrors<RemoveFromShopEvent> {
-            updatePlanAndShop(removeIndexFromShop = it.index)
+            updatePlanAndShop(removeIdFromShop = it.id)
         }
     }
 
@@ -117,23 +117,23 @@ context(c: RecipeContext)
 private suspend fun updatePlanAndShop(
     addIdToPlan: Long? = null,
     addIdToShop: Long? = null,
-    removeIndexFromPlan: Int? = null,
-    removeIndexFromShop: Int? = null,
+    removeIdFromPlan: Long? = null,
+    removeIdFromShop: Long? = null,
     updateStateOptimistically: Boolean = true,
 ) {
     fun newPlanAndShop(
         plan: List<Long>,
         shop: List<Long>,
     ): Pair<List<Long>, List<Long>> {
-        fun List<Long>.updatePlan(addId: Long?, removeIndex: Int?): List<Long> {
+        fun List<Long>.updatePlan(addId: Long?, removeId: Long?): List<Long> {
             return buildList {
-                this@updatePlan.filterIndexedTo(this) { i, id -> i != removeIndex && id != ID_TEMPORARY }
+                this@updatePlan.filterTo(this) { id -> id != removeId && id != ID_TEMPORARY }
                 addId?.let { add(it) }
-            }
+            }.distinct()
         }
 
-        val newPlan = plan.updatePlan(addIdToPlan, removeIndexFromPlan)
-        val newShop = shop.updatePlan(addIdToShop, removeIndexFromShop)
+        val newPlan = plan.updatePlan(addIdToPlan, removeIdFromPlan)
+        val newShop = shop.updatePlan(addIdToShop, removeIdFromShop)
         return Pair(newPlan, newShop)
     }
 
@@ -231,7 +231,7 @@ private suspend fun addRecipe(title: String, url: String?) {
         } else if (target == ScreenState.Plan) {
             updatePlanAndShop(
                 addIdToPlan = id,
-                removeIndexFromShop = null,
+                removeIdFromShop = null,
                 updateStateOptimistically = false
             )
         }
