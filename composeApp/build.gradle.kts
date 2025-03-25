@@ -52,6 +52,8 @@ kotlin {
             implementation(libs.evas.compose)
             implementation(libs.google.api.services.sheets)
             implementation(libs.google.api.client)
+            implementation("com.fleeksoft.ksoup:ksoup:0.2.2")
+            implementation("com.fleeksoft.ksoup:ksoup-network:0.2.2")
         }
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)

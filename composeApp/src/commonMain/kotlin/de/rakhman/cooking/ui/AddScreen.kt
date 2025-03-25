@@ -14,12 +14,16 @@ import androidx.compose.ui.focus.*
 import androidx.compose.ui.platform.*
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.unit.*
+import com.fleeksoft.ksoup.Ksoup
+import com.fleeksoft.ksoup.network.parseGetRequest
 import de.rakhman.cooking.Recipe
 import de.rakhman.cooking.events.AddEvent
 import de.rakhman.cooking.events.NotificationEvent
 import de.rakhman.cooking.events.UpdateEvent
 import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.emitAsync
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 private val urlRegex =
     Regex("""https?://(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)""")
@@ -34,6 +38,17 @@ fun AddScreen(modifier: Modifier, editingRecipe: Recipe?, initialData: String?) 
                     ?: initialData?.let { urlRegex.find(it) }?.value
                     ?: ""
             )
+        }
+        LaunchedEffect(url) {
+            if (title.isNotEmpty() || url.isEmpty()) return@LaunchedEffect
+            withContext(Dispatchers.IO) {
+                try {
+                    val doc = Ksoup.parseGetRequest(url)
+                    title = doc.title()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
         }
         val enabled = title.isNotBlank() && (url.isBlank() || url.matches(urlRegex))
         val submit = EvasLaunching {
@@ -70,7 +85,7 @@ fun AddScreen(modifier: Modifier, editingRecipe: Recipe?, initialData: String?) 
                 onDone = { if (enabled) submit() }
             ),
         )
-          Button(
+        Button(
             onClick = submit,
             modifier = Modifier.fillMaxWidth(),
             enabled = enabled
