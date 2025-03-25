@@ -3,24 +3,18 @@ package de.rakhman.cooking
 import android.content.Intent
 import android.content.Intent.ACTION_SEND
 import android.content.Intent.EXTRA_TEXT
-import android.content.IntentSender.SendIntentException
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.*
 import androidx.lifecycle.coroutineScope
-import com.google.android.gms.auth.api.identity.AuthorizationRequest
+import com.google.android.gms.auth.api.identity.AuthorizationResult
 import com.google.android.gms.auth.api.identity.Identity
-import com.google.android.gms.common.api.Scope
-import com.google.api.client.auth.oauth2.Credential
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.sheets.v4.Sheets
-import com.google.api.services.sheets.v4.SheetsScopes
 import de.rakhman.cooking.database.DriverFactory
 import de.rakhman.cooking.events.ErrorEvent
 import de.rakhman.cooking.states.ScreenState
@@ -36,10 +30,6 @@ import kotlinx.coroutines.withContext
 
 
 class MainActivity : ComponentActivity() {
-    companion object {
-        private const val REQUEST_CODE_AUTHZ = 12
-    }
-
     val events = Events()
     val states = States()
     lateinit var database: Database
@@ -49,30 +39,7 @@ class MainActivity : ComponentActivity() {
         val driver = DriverFactory(this).createDriver()
         database = Database(driver)
 
-        val requestedScopes = listOf(Scope(SheetsScopes.SPREADSHEETS))
-        val authorizationRequest = AuthorizationRequest.builder().setRequestedScopes(requestedScopes).build()
-        Identity.getAuthorizationClient(this)
-            .authorize(authorizationRequest)
-            .addOnSuccessListener(
-                { authorizationResult ->
-                    if (authorizationResult.hasResolution()) {
-                        // Access needs to be granted by the user
-                        val pendingIntent = authorizationResult.pendingIntent!!
-                        try {
-                            startIntentSenderForResult(
-                                pendingIntent.intentSender,
-                                REQUEST_CODE_AUTHZ, null, 0, 0, 0, null
-                            )
-                        } catch (e: SendIntentException) {
-                            Log.e(javaClass.name, "Couldn't start Authorization UI: " + e.getLocalizedMessage())
-                        }
-                    } else {
-                        val credential = GoogleCredential().setAccessToken(authorizationResult.accessToken)
-                        launchStateHandler(credential)
-                    }
-                })
-            .addOnFailureListener({ e -> Log.e(javaClass.name, "Failed to authorize", e) })
-
+        handleAuthz { launchStateHandler(it) }
 
         setContent {
             installEvas(events, states) {
@@ -88,6 +55,7 @@ class MainActivity : ComponentActivity() {
             }
     }
 
+    @Suppress("OVERRIDE_DEPRECATION", "DEPRECATION")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -95,19 +63,19 @@ class MainActivity : ComponentActivity() {
             val authorizationResult = Identity
                 .getAuthorizationClient(this)
                 .getAuthorizationResultFromIntent(data)
-            val credential =
-                GoogleCredential().setAccessToken(authorizationResult.accessToken)
-            launchStateHandler(credential)
+            launchStateHandler(authorizationResult)
         }
     }
 
-    private fun launchStateHandler(credentials: Credential) {
+    private fun launchStateHandler(authorizationResult: AuthorizationResult) {
+        val httpCredentialsAdapter = authorizationResult.toCredentials()
+
         lifecycle.coroutineScope.launch {
             withContext(Dispatchers.Main + events + states) {
                 val sheetsService = Sheets.Builder(
                     GoogleNetHttpTransport.newTrustedTransport(),
                     GsonFactory.getDefaultInstance(),
-                    credentials
+                    httpCredentialsAdapter
                 )
                     .setApplicationName("Recipe Plan Android")
                     .build()
@@ -115,12 +83,14 @@ class MainActivity : ComponentActivity() {
                 launchRecipesState(database, sheetsService)
 
                 collectEventsAsync<ErrorEvent> {
-                    Toast.makeText(this@MainActivity, it.e.toString(), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity, it.e.toString(), Toast.LENGTH_LONG).show()
                 }
             }
         }
     }
 
+
+    @Suppress("OVERRIDE_DEPRECATION", "DEPRECATION")
     override fun onBackPressed() {
         val state = states.getState(ScreenState).value
         if (state is ScreenState.Add) {
