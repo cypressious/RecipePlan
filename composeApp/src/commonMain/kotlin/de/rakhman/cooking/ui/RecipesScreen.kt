@@ -8,6 +8,7 @@ import androidx.compose.material.Divider
 import androidx.compose.material.IconButton
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.MoreVert
@@ -74,6 +75,13 @@ private fun Recipes(recipes: List<Recipe>) {
         textStyle = LocalTextStyle.current.copy(fontSize = 18.sp)
     )
     HorizontalDivider()
+
+    if (recipes.isEmpty()) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("Keine Einträge", fontSize = 20.sp)
+        }
+        return
+    }
 
     val listState = rememberLazyListState()
     LaunchedEffect(filter) { listState.scrollToItem(0) }

@@ -3,10 +3,12 @@ package de.rakhman.cooking.ui
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Divider
+import androidx.compose.material.Text
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
 import de.rakhman.cooking.events.AddToPlanEvent
 import de.rakhman.cooking.events.RemoveFromPlanEvent
@@ -26,6 +28,14 @@ fun PlanScreen(modifier: Modifier, isShop: Boolean) {
             is RecipesState.Success -> {
                 val planRecipes =
                     (if (isShop) recipeState.shop else recipeState.plan).mapNotNull { recipeState.byId[it] }
+
+                if (planRecipes.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("Keine Einträge", fontSize = 20.sp)
+                    }
+                    return@Column
+                }
+
                 val timestamp = System.currentTimeMillis().toString()
                 val keys = planRecipes.mapIndexed { i, it -> "$i$timestamp" }
                 LazyColumn(contentPadding = PaddingValues(bottom = 70.dp)) {
