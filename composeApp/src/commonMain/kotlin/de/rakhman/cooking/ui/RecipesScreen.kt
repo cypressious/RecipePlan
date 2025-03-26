@@ -39,7 +39,7 @@ fun RecipesScreen(modifier: Modifier) {
     Column(modifier = modifier) {
         when (recipeState) {
             is RecipesState.Success -> {
-                Recipes(recipeState.recipes)
+                Recipes(recipeState.recipes.sortedBy { it.title.lowercase() })
             }
 
             RecipesState.Loading -> {
