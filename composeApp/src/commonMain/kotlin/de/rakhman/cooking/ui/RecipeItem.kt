@@ -12,10 +12,14 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,10 +31,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
 import de.rakhman.cooking.Recipe
 import de.rakhman.cooking.events.AddToPlanEvent
 import de.rakhman.cooking.events.AddToShopEvent
 import de.rakhman.cooking.events.DeleteEvent
+import de.rakhman.cooking.events.DeleteRequestEvent
 import de.rakhman.cooking.events.NotificationEvent
 import de.rakhman.cooking.events.RemoveFromShopEvent
 import de.rakhman.cooking.getContext
@@ -44,6 +50,7 @@ import io.sellmair.evas.emitAsync
 import io.sellmair.evas.set
 import io.sellmair.evas.value
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecipeItem(recipe: Recipe, screenState: ScreenState) {
     val context = getContext()
@@ -121,8 +128,7 @@ fun RecipeItem(recipe: Recipe, screenState: ScreenState) {
                     DropdownMenuItem(
                         text = { Text("Löschen") },
                         onClick = EvasLaunching {
-                            NotificationEvent("\"${recipe.title}\" gelöscht.").emitAsync()
-                            DeleteEvent(recipe.id).emitAsync()
+                            DeleteRequestEvent(recipe).emitAsync()
                             expanded = false
                         }
                     )

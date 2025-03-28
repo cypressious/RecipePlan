@@ -1,5 +1,6 @@
 package de.rakhman.cooking.events
 
+import de.rakhman.cooking.Recipe
 import io.sellmair.evas.Event
 
 object ReloadEvent : Event
@@ -21,3 +22,5 @@ class UpdateEvent(val id: Long, val title: String, val url: String?) : Event
 class ErrorEvent(val e: Exception) : Event
 
 class NotificationEvent(val message: String) : Event
+
+class DeleteRequestEvent(val recipe: Recipe) : Event
