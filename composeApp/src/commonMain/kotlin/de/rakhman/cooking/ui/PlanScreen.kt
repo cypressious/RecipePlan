@@ -8,7 +8,6 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
 import de.rakhman.cooking.events.AddToPlanEvent
 import de.rakhman.cooking.events.RemoveFromPlanEvent
