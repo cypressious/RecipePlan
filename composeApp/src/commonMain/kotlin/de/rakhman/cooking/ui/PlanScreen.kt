@@ -19,6 +19,7 @@ import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.compose.composeValue
 import io.sellmair.evas.emit
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun PlanScreen(modifier: Modifier, isShop: Boolean) {
@@ -51,7 +52,7 @@ fun PlanScreen(modifier: Modifier, isShop: Boolean) {
                                     enabled = !checked && recipe.id != ID_TEMPORARY,
                                     onCheckedChange = EvasLaunching<Boolean> {
                                         checked = true
-                                        delay(250)
+                                        delay(250.milliseconds)
                                         if (isShop) {
                                             AddToPlanEvent(recipe.id).emit()
                                         } else {
