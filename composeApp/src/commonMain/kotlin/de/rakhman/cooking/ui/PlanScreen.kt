@@ -10,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.unit.*
 import de.rakhman.cooking.events.AddToPlanEvent
+import de.rakhman.cooking.events.NotificationEvent
 import de.rakhman.cooking.events.RemoveFromPlanEvent
 import de.rakhman.cooking.states.ID_TEMPORARY
 import de.rakhman.cooking.states.RecipesState
@@ -17,6 +18,7 @@ import de.rakhman.cooking.states.ScreenState
 import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.compose.composeValue
 import io.sellmair.evas.emit
+import io.sellmair.evas.emitAsync
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -53,9 +55,11 @@ fun PlanScreen(modifier: Modifier, isShop: Boolean) {
                                         checked = true
                                         delay(250.milliseconds)
                                         if (isShop) {
-                                            AddToPlanEvent(recipe.id).emit()
+                                            AddToPlanEvent(recipe.id).emitAsync()
+                                            NotificationEvent("\"${recipe.title}\" zum Plan hinzugefügt.").emitAsync()
                                         } else {
-                                            RemoveFromPlanEvent(recipe.id).emit()
+                                            RemoveFromPlanEvent(recipe.id).emitAsync()
+                                            NotificationEvent("\"${recipe.title}\" vom Plan entfernt.").emitAsync()
                                         }
                                     },
                                     modifier = Modifier.align(Alignment.CenterVertically).padding(start = 12.dp),
