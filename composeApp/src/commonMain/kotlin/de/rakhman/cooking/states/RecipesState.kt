@@ -17,6 +17,7 @@ import de.rakhman.cooking.events.RemoveFromShopEvent
 import de.rakhman.cooking.events.UpdateEvent
 import io.sellmair.evas.*
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
@@ -46,10 +47,10 @@ private class RecipeContext(
 )
 
 fun CoroutineScope.launchRecipesState(
-    database: Database, sheets: Sheets, spreadSheetsId: String = "XXX"
+    database: Database, sheets: Deferred<Sheets>, spreadSheetsId: String = "XXX"
 ) = launchState(RecipesState) {
-    with(RecipeContext(database, sheets, spreadSheetsId)) {
-        setStateFromDatabase()
+    setStateFromDatabase(database)
+    with(RecipeContext(database, sheets.await(), spreadSheetsId)) {
         collectEventsAsyncCatchingErrors<ReloadEvent> { syncWithSheets() }
         collectEventsAsyncCatchingErrors<DeleteEvent> { setDeleted(it.id) }
         collectEventsAsyncCatchingErrors<AddEvent> { addRecipe(it.title, it.url) }
@@ -82,7 +83,7 @@ private inline fun <reified T : Event> StateProducerScope<RecipesState>.collectE
         } catch (e: Exception) {
             e.printStackTrace()
             ErrorEvent(e).emit()
-            setStateFromDatabase()
+            setStateFromDatabase(c.database)
         } finally {
             SyncState.setNotSyncing()
         }
@@ -313,14 +314,13 @@ private fun Database.updateWith(recipes: List<Recipe>, plan: List<Long>, shop: L
     }
 }
 
-context(c: RecipeContext)
-private suspend fun setStateFromDatabase() {
+private suspend fun setStateFromDatabase(database: Database) {
     RecipesState.set(
-        if (c.database.recipesQueries.selectAll().executeAsList().isNotEmpty()) {
+        if (database.recipesQueries.selectAll().executeAsList().isNotEmpty()) {
             RecipesState.Success(
-                recipes = c.database.recipesQueries.selectAll().executeAsList(),
-                plan = c.database.planQueries.selectAll().executeAsList(),
-                shop = c.database.shopQueries.selectAll().executeAsList(),
+                recipes = database.recipesQueries.selectAll().executeAsList(),
+                plan = database.planQueries.selectAll().executeAsList(),
+                shop = database.shopQueries.selectAll().executeAsList(),
             )
         } else {
             RecipesState.Loading
