@@ -9,6 +9,8 @@ sealed class ScreenState(val title: String) : State {
     data object Plan : BaseScreen("Plan")
     data object Shop : BaseScreen("Einkaufen")
     class Add(val target: BaseScreen, val editingRecipe: Recipe? = null, val initialData: String? = null) : ScreenState("Rezept Hinzufügen")
+    data object Settings : ScreenState("Einstellungen")
+
     companion object Key : State.Key<ScreenState> {
         override val default: ScreenState
             get() = Plan

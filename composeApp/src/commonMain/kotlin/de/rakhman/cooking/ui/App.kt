@@ -7,12 +7,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import de.rakhman.cooking.Recipe
 import de.rakhman.cooking.events.DeleteEvent
@@ -74,7 +69,7 @@ fun App() {
 
         Scaffold(
             topBar = { MyTopBar() },
-            bottomBar = { MyBottomBar() },
+            bottomBar = { if (screenState != ScreenState.Settings) MyBottomBar() },
             floatingActionButton = {
                 if (screenState is ScreenState.BaseScreen) {
                     FloatingActionButton(onClick = EvasLaunching {
@@ -92,6 +87,7 @@ fun App() {
                 ScreenState.Shop -> PlanScreen(modifier, true)
                 ScreenState.Recipes -> RecipesScreen(modifier)
                 is ScreenState.Add -> AddScreen(modifier, screenState.editingRecipe, screenState.initialData)
+                ScreenState.Settings -> SettingsScreen(modifier)
             }
         }
 

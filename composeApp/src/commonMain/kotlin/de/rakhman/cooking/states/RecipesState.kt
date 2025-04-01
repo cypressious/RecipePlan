@@ -6,21 +6,10 @@ import com.google.api.services.sheets.v4.Sheets
 import com.google.api.services.sheets.v4.model.ValueRange
 import de.rakhman.cooking.Database
 import de.rakhman.cooking.Recipe
-import de.rakhman.cooking.events.AddEvent
-import de.rakhman.cooking.events.AddToPlanEvent
-import de.rakhman.cooking.events.AddToShopEvent
-import de.rakhman.cooking.events.DeleteEvent
-import de.rakhman.cooking.events.ErrorEvent
-import de.rakhman.cooking.events.ReloadEvent
-import de.rakhman.cooking.events.RemoveFromPlanEvent
-import de.rakhman.cooking.events.RemoveFromShopEvent
-import de.rakhman.cooking.events.UpdateEvent
+import de.rakhman.cooking.events.*
 import io.sellmair.evas.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collectLatest
 
 sealed class RecipesState : State {
     data object Loading : RecipesState()
@@ -47,8 +36,42 @@ private class RecipeContext(
 )
 
 fun CoroutineScope.launchRecipesState(
-    database: Database, sheets: Deferred<Sheets>, spreadSheetsId: String = "XXX"
-) = launchState(RecipesState) {
+    database: Database, sheets: Deferred<Sheets>
+) {
+    launchState(SettingsState) {
+        val spreadSheetsId = database.settingsQueries.selectFirst().executeAsOneOrNull()
+        if (spreadSheetsId != null) {
+            emit(SettingsState(spreadSheetsId))
+        } else {
+            ScreenState.set(ScreenState.Settings)
+        }
+
+        collectEvents<SpreadsheetIdChangedEvent> {
+            database.transaction {
+                database.settingsQueries.deleteAll()
+                database.settingsQueries.insert(it.id)
+                database.recipesQueries.deleteAll()
+                database.planQueries.deleteAll()
+                database.shopQueries.deleteAll()
+            }
+
+            emit(SettingsState(it.id))
+        }
+    }
+
+    launch {
+        SettingsState.flow().collectLatest {
+            val spreadSheetsId = it?.spreadSheetsId
+            if (!spreadSheetsId.isNullOrBlank()) {
+                coroutineScope { launchRecipesStateInternal(database, sheets, spreadSheetsId) }
+            }
+        }
+    }
+}
+
+private fun CoroutineScope.launchRecipesStateInternal(
+    database: Database, sheets: Deferred<Sheets>, spreadSheetsId: String
+) = launch {
     setStateFromDatabase(database)
     with(RecipeContext(database, sheets.await(), spreadSheetsId)) {
         collectEventsAsyncCatchingErrors<ReloadEvent> { syncWithSheets() }
@@ -73,7 +96,7 @@ fun CoroutineScope.launchRecipesState(
 }
 
 context(c: RecipeContext)
-private inline fun <reified T : Event> StateProducerScope<RecipesState>.collectEventsAsyncCatchingErrors(
+private inline fun <reified T : Event> CoroutineScope.collectEventsAsyncCatchingErrors(
     crossinline f: suspend (T) -> Unit
 ) {
     collectEventsAsync<T> { event ->

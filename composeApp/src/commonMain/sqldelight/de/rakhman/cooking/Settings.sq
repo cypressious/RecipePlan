@@ -1,0 +1,20 @@
+CREATE TABLE settings
+(
+    spreadSheetId TEXT NOT NULL
+);
+
+selectFirst
+:
+SELECT *
+FROM settings
+LIMIT 1;
+
+deleteAll
+:
+DELETE
+FROM settings;
+
+insert
+:
+INSERT INTO settings(spreadSheetId)
+VALUES (?);

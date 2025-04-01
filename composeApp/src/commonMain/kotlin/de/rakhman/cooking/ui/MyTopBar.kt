@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.*
@@ -14,6 +15,7 @@ import de.rakhman.cooking.states.SyncState
 import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.compose.composeValue
 import io.sellmair.evas.emit
+import io.sellmair.evas.set
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,16 +29,25 @@ fun MyTopBar() {
         ),
         title = { Text(screenState.title) },
         actions = {
-            val syncState = SyncState.composeValue()
-            if (!syncState.isSyncing) {
-                IconButton(onClick = EvasLaunching { ReloadEvent.emit() }) {
+            if (screenState != ScreenState.Settings) {
+                val syncState = SyncState.composeValue()
+                if (!syncState.isSyncing) {
+                    IconButton(onClick = EvasLaunching { ReloadEvent.emit() }) {
+                        Icon(
+                            imageVector = Icons.Filled.Refresh,
+                            contentDescription = "Neu laden",
+                        )
+                    }
+                } else {
+                    CircularProgressIndicator(modifier = Modifier.padding(top = 16.dp, end = 16.dp).width(24.dp))
+                }
+
+                IconButton(onClick = EvasLaunching { ScreenState.set(ScreenState.Settings) }) {
                     Icon(
-                        imageVector = Icons.Filled.Refresh,
-                        contentDescription = "Neu laden",
+                        imageVector = Icons.Filled.Settings,
+                        contentDescription = "Einstellungen",
                     )
                 }
-            } else {
-                CircularProgressIndicator(modifier = Modifier.padding(top = 16.dp, end = 16.dp).width(24.dp))
             }
         },
     )

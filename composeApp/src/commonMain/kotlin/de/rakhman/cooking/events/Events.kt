@@ -24,3 +24,5 @@ class ErrorEvent(val e: Exception) : Event
 class NotificationEvent(val message: String) : Event
 
 class DeleteRequestEvent(val recipe: Recipe) : Event
+
+class SpreadsheetIdChangedEvent(val id: String) : Event
