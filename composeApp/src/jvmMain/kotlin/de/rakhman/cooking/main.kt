@@ -11,9 +11,11 @@ import io.sellmair.evas.States
 import io.sellmair.evas.compose.installEvas
 import kotlinx.coroutines.*
 import org.jetbrains.compose.reload.DevelopmentEntryPoint
+import java.util.Locale
 
 fun main() {
     System.setProperty(DEBUG_PROPERTY_NAME, DEBUG_PROPERTY_VALUE_ON)
+    Locale.setDefault(Locale.US)
     val events = Events()
     val states = States()
 
@@ -29,7 +31,7 @@ fun main() {
 
     singleWindowApplication(
         state = WindowState(width = 400.dp, height = 700.dp, position = WindowPosition(1100.dp, 50.dp)),
-        title = "RecipePlan",
+        title = "Recipe Plan",
         alwaysOnTop = true,
     ) {
         installEvas(events, states) {

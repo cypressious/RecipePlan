@@ -18,6 +18,9 @@ import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.emitAsync
 import io.sellmair.evas.set
 import io.sellmair.evas.value
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
+import recipeplan.composeapp.generated.resources.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,7 +51,7 @@ fun RecipeItem(recipe: Recipe, screenState: ScreenState) {
         ) {
             if (recipe.id != ID_TEMPORARY) {
                 IconButton(onClick = { expanded = true }) {
-                    Icon(imageVector = Icons.Filled.MoreVert, contentDescription = "Optionen")
+                    Icon(imageVector = Icons.Filled.MoreVert, contentDescription = stringResource(Res.string.actions))
                 }
                 DropdownMenu(
                     expanded = expanded,
@@ -56,17 +59,17 @@ fun RecipeItem(recipe: Recipe, screenState: ScreenState) {
                 ) {
                     if (screenState == ScreenState.Recipes) {
                         DropdownMenuItem(
-                            text = { Text("Auf die Einkaufsliste") },
+                            text = { Text(stringResource(Res.string.add_to_shop)) },
                             onClick = EvasLaunching {
-                                NotificationEvent("\"${recipe.title}\" zur Einkaufsliste hinzugefügt.").emitAsync()
+                                NotificationEvent(getString(Res.string.recipe_added_to_shop, recipe.title)).emitAsync()
                                 AddToShopEvent(recipe.id).emitAsync()
                                 expanded = false
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("Auf den Plan") },
+                            text = { Text(stringResource(Res.string.add_to_plan)) },
                             onClick = EvasLaunching {
-                                NotificationEvent("\"${recipe.title}\" zum Plan hinzugefügt.").emitAsync()
+                                NotificationEvent(getString(Res.string.recipe_added_to_plan, recipe.title)).emitAsync()
                                 AddToPlanEvent(recipe.id).emitAsync()
                                 expanded = false
                             }
@@ -74,16 +77,16 @@ fun RecipeItem(recipe: Recipe, screenState: ScreenState) {
                     }
                     if (screenState == ScreenState.Shop) {
                         DropdownMenuItem(
-                            text = { Text("Von Einkaufsliste entfernen") },
+                            text = { Text(stringResource(Res.string.remove_from_shop)) },
                             onClick = EvasLaunching {
-                                NotificationEvent("\"${recipe.title}\" von Einkaufsliste entfernt.").emitAsync()
+                                NotificationEvent(getString(Res.string.recipe_removed_from_shop, recipe.title)).emitAsync()
                                 RemoveFromShopEvent(recipe.id).emitAsync()
                                 expanded = false
                             }
                         )
                     }
                     DropdownMenuItem(
-                        text = { Text("Bearbeiten") },
+                        text = { Text(stringResource(Res.string.edit)) },
                         onClick = EvasLaunching {
                             ScreenState.Key.set(
                                 ScreenState.Add(
@@ -95,19 +98,19 @@ fun RecipeItem(recipe: Recipe, screenState: ScreenState) {
                         }
                     )
                     DropdownMenuItem(
-                        text = { Text("Löschen") },
+                        text = { Text(stringResource(Res.string.delete)) },
                         onClick = EvasLaunching {
                             DeleteRequestEvent(recipe).emitAsync()
                             expanded = false
                         }
                     )
                     DropdownMenuItem(
-                        text = { Text("Teilen") },
+                        text = { Text(stringResource(Res.string.share)) },
                         onClick = { shareRecipe(recipe.title, recipe.url, context); expanded = false }
                     )
                     recipe.url?.let { url ->
                         DropdownMenuItem(
-                            text = { Text("Zu Bring hinzufügen") },
+                            text = { Text(stringResource(Res.string.add_to_bring)) },
                             onClick = { shareToBring(recipe.title, url, context); expanded = false }
                         )
                     }

@@ -19,8 +19,10 @@ import io.sellmair.evas.compose.eventsOrThrow
 import io.sellmair.evas.emitAsync
 import io.sellmair.evas.set
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
-
+import recipeplan.composeapp.generated.resources.*
 @Composable
 @Preview
 fun App() {
@@ -46,21 +48,21 @@ fun App() {
         recipeToBeDeleted?.let {
             AlertDialog(
                 onDismissRequest = { recipeToBeDeleted = null },
-                text = { Text("Rezept \"${it.title}\" löschen?") },
+                text = { Text(stringResource(Res.string.confirm_delete_recipe, it.title)) },
                 confirmButton = {
                     TextButton(
                         onClick = EvasLaunching {
-                            NotificationEvent("\"${it.title}\" gelöscht.").emitAsync()
+                            NotificationEvent(getString(Res.string.recipe_deleted, it.title)).emitAsync()
                             DeleteEvent(it.id).emitAsync()
                             recipeToBeDeleted = null
                         }
                     ) {
-                        Text("Löschen")
+                        Text(stringResource(Res.string.delete))
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = { recipeToBeDeleted = null }) {
-                        Text("Abbrechen")
+                        Text(stringResource(Res.string.cancel))
                     }
                 }
             )
@@ -74,7 +76,7 @@ fun App() {
                     FloatingActionButton(onClick = EvasLaunching {
                         ScreenState.set(ScreenState.Add(screenState))
                     }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add")
+                        Icon(Icons.Default.Add, contentDescription = stringResource(Res.string.add_recipe))
                     }
                 }
             },

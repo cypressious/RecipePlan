@@ -13,6 +13,7 @@ import de.rakhman.cooking.states.ScreenState
 import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.compose.composeValue
 import io.sellmair.evas.set
+import org.jetbrains.compose.resources.stringResource
 
 val tabs = listOf(
     ScreenState.Plan to Icons.Default.DateRange,
@@ -42,7 +43,7 @@ fun MyBottomBar() {
                             contentDescription = null
                         )
                     },
-                    label = { Text(state.title) }
+                    label = { Text(stringResource(state.title)) }
                 )
             }
         }

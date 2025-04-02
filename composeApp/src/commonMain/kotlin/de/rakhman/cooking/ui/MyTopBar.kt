@@ -16,6 +16,8 @@ import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.compose.composeValue
 import io.sellmair.evas.emit
 import io.sellmair.evas.set
+import org.jetbrains.compose.resources.stringResource
+import recipeplan.composeapp.generated.resources.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,7 +29,7 @@ fun MyTopBar() {
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             titleContentColor = MaterialTheme.colorScheme.primary,
         ),
-        title = { Text(screenState.title) },
+        title = { Text(stringResource(screenState.title)) },
         actions = {
             if (screenState != ScreenState.Settings) {
                 val syncState = SyncState.composeValue()
@@ -35,7 +37,7 @@ fun MyTopBar() {
                     IconButton(onClick = EvasLaunching { ReloadEvent.emit() }) {
                         Icon(
                             imageVector = Icons.Filled.Refresh,
-                            contentDescription = "Neu laden",
+                            contentDescription = stringResource(Res.string.reload),
                         )
                     }
                 } else {
@@ -45,7 +47,7 @@ fun MyTopBar() {
                 IconButton(onClick = EvasLaunching { ScreenState.set(ScreenState.Settings) }) {
                     Icon(
                         imageVector = Icons.Filled.Settings,
-                        contentDescription = "Einstellungen",
+                        contentDescription = stringResource(Res.string.settings),
                     )
                 }
             }

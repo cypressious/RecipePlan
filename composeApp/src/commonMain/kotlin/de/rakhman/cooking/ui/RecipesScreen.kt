@@ -13,6 +13,8 @@ import de.rakhman.cooking.Recipe
 import de.rakhman.cooking.states.RecipesState
 import de.rakhman.cooking.states.ScreenState
 import io.sellmair.evas.compose.composeValue
+import org.jetbrains.compose.resources.stringResource
+import recipeplan.composeapp.generated.resources.*
 
 @Composable
 fun RecipesScreen(modifier: Modifier) {
@@ -39,7 +41,7 @@ private fun Recipes(recipes: List<Recipe>) {
         modifier = Modifier.fillMaxWidth().padding(12.dp, 4.dp, 12.dp, 12.dp),
         value = filter,
         onValueChange = { filter = it },
-        label = { Text("Suche") },
+        label = { Text(stringResource(Res.string.search)) },
         trailingIcon = {
             if (filter.isNotEmpty()) {
                 IconButton(
@@ -48,7 +50,7 @@ private fun Recipes(recipes: List<Recipe>) {
                 ) {
                     Icon(
                         Icons.Default.Clear,
-                        contentDescription = "Suche leeren",
+                        contentDescription = stringResource(Res.string.clear_search),
                     )
                 }
             }
@@ -59,7 +61,7 @@ private fun Recipes(recipes: List<Recipe>) {
 
     if (recipes.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("Keine Einträge", fontSize = 20.sp)
+            Text(stringResource(Res.string.no_entries), fontSize = 20.sp)
         }
         return
     }
@@ -85,7 +87,7 @@ private fun Recipes(recipes: List<Recipe>) {
             key = { i -> filteredList[i].id },
             itemContent = { i ->
                 RecipeItem(recipe = filteredList[i], ScreenState.Recipes)
-                if (i != filteredList.lastIndex) Divider()
+                if (i != filteredList.lastIndex) HorizontalDivider()
             },
         )
     }

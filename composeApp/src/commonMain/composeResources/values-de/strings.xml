@@ -1,0 +1,37 @@
+<resources>
+    <string name="cancel">Abbrechen</string>
+    <string name="confirm_delete_recipe">Rezept "%1$s" löschen?</string>
+    <string name="recipe_deleted">"%1$s" gelöscht.</string>
+    <string name="recipe_saved">"%1$s" gespeichert.</string>
+    <string name="recipe_added">"%1$s" hinzugefügt.</string>
+    <string name="recipe_added_to_plan">"%1$s" zum Plan hinzugefügt.</string>
+    <string name="recipe_added_to_shop">"%1$s" zur Einkaufsliste hinzugefügt.</string>
+    <string name="recipe_removed_from_plan">"%1$s" vom Plan entfernt.</string>
+    <string name="recipe_removed_from_shop">"%1$s" von Einkaufsliste entfernt.</string>
+    <string name="create_new_sheet">Neues Google Sheet erstellen</string>
+    <string name="or_enter_existing_id">Oder existierende ID eingeben</string>
+    <string name="save">Speichern</string>
+    <string name="open_google_sheet">Google Sheet öffnen</string>
+    <string name="share_recipes_hint">Um deine Rezepte gemeinsam mit anderen Personen zu planen, gebe ihnen das Google Sheet mit Schreibrechten frei.</string>
+    <string name="close">Schließen</string>
+    <string name="delete">Löschen</string>
+    <string name="recipes">Rezepte</string>
+    <string name="plan">Plan</string>
+    <string name="shop">Einkaufen</string>
+    <string name="add_recipe">Rezept Hinzufügen</string>
+    <string name="settings">Einstellungen</string>
+    <string name="title">Titel</string>
+    <string name="update">Aktualisieren</string>
+    <string name="add">Hinzufügen</string>
+    <string name="reload">Neu laden</string>
+    <string name="no_entries">Keine Einträge</string>
+    <string name="actions">Optionen</string>
+    <string name="add_to_shop">Auf die Einkaufsliste</string>
+    <string name="add_to_plan">Auf den Plan</string>
+    <string name="remove_from_shop">Von Einkaufsliste entfernen</string>
+    <string name="edit">Bearbeiten</string>
+    <string name="share">Teilen</string>
+    <string name="add_to_bring">Zu Bring hinzufügen</string>
+    <string name="search">Suchen</string>
+    <string name="clear_search">Suche leeren</string>
+</resources>

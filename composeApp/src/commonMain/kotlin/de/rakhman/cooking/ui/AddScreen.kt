@@ -24,6 +24,9 @@ import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.emitAsync
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
+import recipeplan.composeapp.generated.resources.*
 
 private val urlRegex =
     Regex("""https?://(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)""")
@@ -53,10 +56,10 @@ fun AddScreen(modifier: Modifier, editingRecipe: Recipe?, initialData: String?) 
         val enabled = title.isNotBlank() && (url.isBlank() || url.matches(urlRegex))
         val submit = EvasLaunching {
             if (editingRecipe != null) {
-                NotificationEvent("\"${title.trim()}\" gespeichert.").emitAsync()
+                NotificationEvent(getString(Res.string.recipe_saved, title.trim())).emitAsync()
                 UpdateEvent(editingRecipe.id, title.trim(), url).emitAsync()
             } else {
-                NotificationEvent("\"${title.trim()}\" hinzugefügt.").emitAsync()
+                NotificationEvent(getString(Res.string.recipe_added, title.trim())).emitAsync()
                 AddEvent(title.trim(), url.ifBlank { null }).emitAsync()
             }
         }
@@ -65,7 +68,7 @@ fun AddScreen(modifier: Modifier, editingRecipe: Recipe?, initialData: String?) 
         OutlinedTextField(
             value = title,
             onValueChange = { title = it },
-            label = { Text("Titel") },
+            label = { Text(stringResource(Res.string.title)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
@@ -77,7 +80,7 @@ fun AddScreen(modifier: Modifier, editingRecipe: Recipe?, initialData: String?) 
         OutlinedTextField(
             value = url,
             onValueChange = { url = it },
-            label = { Text("URL") },
+            label = { Text(stringResource(Res.string.url)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
@@ -90,7 +93,7 @@ fun AddScreen(modifier: Modifier, editingRecipe: Recipe?, initialData: String?) 
             modifier = Modifier.fillMaxWidth(),
             enabled = enabled
         ) {
-            Text(if (editingRecipe != null) "Aktualisieren" else "Hinzufügen")
+            Text(stringResource(if (editingRecipe != null) Res.string.update else Res.string.add))
         }
     }
 }

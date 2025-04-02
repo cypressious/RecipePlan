@@ -2,7 +2,10 @@ package de.rakhman.cooking.ui
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.*
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.unit.*
@@ -16,6 +19,9 @@ import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.compose.composeValue
 import io.sellmair.evas.emitAsync
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
+import recipeplan.composeapp.generated.resources.*
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
@@ -29,7 +35,7 @@ fun PlanScreen(modifier: Modifier, isShop: Boolean) {
 
                 if (planRecipes.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("Keine Einträge", fontSize = 20.sp)
+                        Text(stringResource(Res.string.no_entries), fontSize = 20.sp)
                     }
                     return@Column
                 }
@@ -52,17 +58,17 @@ fun PlanScreen(modifier: Modifier, isShop: Boolean) {
                                         delay(250.milliseconds)
                                         if (isShop) {
                                             AddToPlanEvent(recipe.id).emitAsync()
-                                            NotificationEvent("\"${recipe.title}\" zum Plan hinzugefügt.").emitAsync()
+                                            NotificationEvent(getString(Res.string.recipe_added_to_plan, recipe.title)).emitAsync()
                                         } else {
                                             RemoveFromPlanEvent(recipe.id).emitAsync()
-                                            NotificationEvent("\"${recipe.title}\" vom Plan entfernt.").emitAsync()
+                                            NotificationEvent(getString(Res.string.recipe_removed_from_plan, recipe.title)).emitAsync()
                                         }
                                     },
                                     modifier = Modifier.align(Alignment.CenterVertically).padding(start = 12.dp),
                                 )
                                 RecipeItem(recipe = recipe, if (isShop) ScreenState.Shop else ScreenState.Plan)
                             }
-                            if (i != planRecipes.lastIndex) Divider()
+                            if (i != planRecipes.lastIndex) HorizontalDivider()
                         },
                     )
                 }
