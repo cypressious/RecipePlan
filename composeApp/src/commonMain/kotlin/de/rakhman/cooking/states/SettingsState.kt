@@ -8,3 +8,11 @@ class SettingsState(val spreadSheetsId: String) : State {
             get() = null
     }
 }
+
+enum class SavingSettingsState : State {
+    NotSaving, Saving;
+    companion object : State.Key<SavingSettingsState> {
+        override val default: SavingSettingsState
+            get() = NotSaving
+    }
+}

@@ -3,6 +3,10 @@
 package de.rakhman.cooking.states
 
 import com.google.api.services.sheets.v4.Sheets
+import com.google.api.services.sheets.v4.model.Sheet
+import com.google.api.services.sheets.v4.model.SheetProperties
+import com.google.api.services.sheets.v4.model.Spreadsheet
+import com.google.api.services.sheets.v4.model.SpreadsheetProperties
 import com.google.api.services.sheets.v4.model.ValueRange
 import de.rakhman.cooking.Database
 import de.rakhman.cooking.Recipe
@@ -46,7 +50,7 @@ fun CoroutineScope.launchRecipesState(
             ScreenState.set(ScreenState.Settings)
         }
 
-        collectEvents<SpreadsheetIdChangedEvent> {
+        collectEventsAsync<SpreadsheetIdChangedEvent> {
             database.transaction {
                 database.settingsQueries.deleteAll()
                 database.settingsQueries.insert(it.id)
@@ -56,6 +60,25 @@ fun CoroutineScope.launchRecipesState(
             }
 
             emit(SettingsState(it.id))
+        }
+
+        collectEventsAsync<CreateSpreadsheetEvent>(Dispatchers.IO) {
+            try {
+                SavingSettingsState.set(SavingSettingsState.Saving)
+                val sheets = sheets.await()
+                val result = sheets.spreadsheets().create(Spreadsheet().apply {
+                    properties = SpreadsheetProperties().apply { title = "Recipes" }
+                    this.sheets = listOf(
+                        Sheet().apply { properties = SheetProperties().apply { title = SHEET_NAME_RECIPES} },
+                        Sheet().apply { properties = SheetProperties().apply { title = SHEET_NAME_PLAN} },
+                    )
+                }).execute()
+                SpreadsheetIdChangedEvent(result.spreadsheetId).emit()
+            } catch (e: Exception) {
+                ErrorEvent(e).emit()
+            } finally {
+                SavingSettingsState.set(SavingSettingsState.NotSaving)
+            }
         }
     }
 
