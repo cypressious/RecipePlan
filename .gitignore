@@ -18,3 +18,4 @@ captures
 /composeApp/tokens/StoredCredential
 /recipe-keystore
 composeApp/release
+/composeApp/src/jvmMain/resources/credentials.json
