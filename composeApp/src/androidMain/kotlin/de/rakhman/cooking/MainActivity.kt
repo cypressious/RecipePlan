@@ -115,12 +115,11 @@ class MainActivity : ComponentActivity() {
 
     @Suppress("OVERRIDE_DEPRECATION", "DEPRECATION")
     override fun onBackPressed() {
-        val state = states.getState(ScreenState).value
-        if (state is ScreenState.Add) {
-            states.setState(ScreenState, state.target)
-            return
+        when (val state = states.getState(ScreenState).value) {
+            is ScreenState.Add -> states.setState(ScreenState, state.target)
+            is ScreenState.Settings -> states.setState(ScreenState, ScreenState.Plan)
+            else -> super.onBackPressed()
         }
-        super.onBackPressed()
     }
 }
 
