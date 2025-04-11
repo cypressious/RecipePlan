@@ -82,14 +82,5 @@ fun SettingsScreen(modifier: Modifier) {
         ) {
             Text(stringResource(Res.string.sign_out))
         }
-
-        Spacer(Modifier.weight(1f))
-
-        OutlinedButton(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = EvasLaunching { ScreenState.set(ScreenState.Plan) },
-        ) {
-            Text(stringResource(Res.string.close))
-        }
     }
 }

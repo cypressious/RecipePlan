@@ -3,6 +3,7 @@ package de.rakhman.cooking.ui
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -30,8 +31,25 @@ fun MyTopBar() {
             titleContentColor = MaterialTheme.colorScheme.primary,
         ),
         title = { Text(stringResource(screenState.title)) },
+        navigationIcon = {
+            if (screenState !is ScreenState.BaseScreen) {
+                IconButton(onClick = EvasLaunching {
+                    ScreenState.set(when(screenState) {
+                        is ScreenState.Add -> screenState.target
+                        ScreenState.Settings -> ScreenState.Plan
+                        else -> screenState
+                    })
+                }
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = stringResource(Res.string.back),
+                    )
+                }
+            }
+        },
         actions = {
-            if (screenState != ScreenState.Settings) {
+            if (screenState is ScreenState.BaseScreen) {
                 val syncState = SyncState.composeValue()
                 if (!syncState.isSyncing) {
                     IconButton(onClick = EvasLaunching { ReloadEvent.emit() }) {
