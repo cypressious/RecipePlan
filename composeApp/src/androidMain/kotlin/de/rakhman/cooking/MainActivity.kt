@@ -37,14 +37,13 @@ import kotlin.time.Duration.Companion.seconds
 class MainActivity : ComponentActivity() {
     val events = Events()
     val states = States()
-    lateinit var database: Database
     val sheetsDeferred = CompletableDeferred<Sheets>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val driver = DriverFactory(this).createDriver()
-        database = Database(driver)
-        launchStateHandler()
+        val database = Database(driver)
+        launchStateHandler(database)
 
         setContent {
             installEvas(events, states) {
@@ -73,7 +72,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun launchStateHandler() {
+    private fun launchStateHandler(database: Database) {
         lifecycle.coroutineScope.launch {
             launch {
                 val authorizationResult = handleAuthz().await() ?: return@launch
