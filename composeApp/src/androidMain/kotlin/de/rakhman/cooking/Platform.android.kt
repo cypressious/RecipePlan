@@ -1,5 +1,6 @@
 package de.rakhman.cooking
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -11,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.*
 import androidx.core.net.toUri
 import androidx.glance.appwidget.updateAll
+import com.google.android.gms.auth.api.identity.Identity
 import de.rakhman.cooking.ui.DarkColorScheme
 import de.rakhman.cooking.ui.LightColorScheme
 
@@ -71,4 +73,13 @@ actual fun getColorScheme(): ColorScheme {
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
+}
+
+actual fun signOut(c: PlatformContext) {
+    @Suppress("DEPRECATION")
+    Identity.getSignInClient(c).signOut()
+    require(c is Activity)
+    val intent = c.intent
+    c.finish()
+    c.startActivity(intent)
 }

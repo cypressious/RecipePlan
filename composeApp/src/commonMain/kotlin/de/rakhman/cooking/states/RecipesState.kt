@@ -55,15 +55,17 @@ fun CoroutineScope.launchRecipesState(
         }
 
         collectEventsAsync<SpreadsheetIdChangedEvent> {
+            val id = it.id
+
             database.transaction {
                 database.settingsQueries.deleteAll()
-                database.settingsQueries.insert(it.id)
+                id?.let { database.settingsQueries.insert(it) }
                 database.recipesQueries.deleteAll()
                 database.planQueries.deleteAll()
                 database.shopQueries.deleteAll()
             }
 
-            emit(SettingsState(it.id))
+            emit(id?.let(::SettingsState))
         }
 
         collectEventsAsync<CreateSpreadsheetEvent>(Dispatchers.IO) {

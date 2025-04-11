@@ -34,4 +34,5 @@
     <string name="add_to_bring">Zu Bring hinzufügen</string>
     <string name="search">Suchen</string>
     <string name="clear_search">Suche leeren</string>
+    <string name="sign_out">Abmelden</string>
 </resources>

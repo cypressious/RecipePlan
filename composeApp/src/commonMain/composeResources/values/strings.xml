@@ -35,4 +35,5 @@
     <string name="add_to_bring">Add to Bring</string>
     <string name="search">Search</string>
     <string name="clear_search">Clear search</string>
+    <string name="sign_out">Sign out</string>
 </resources>

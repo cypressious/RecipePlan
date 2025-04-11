@@ -1,26 +1,31 @@
 package de.rakhman.cooking.ui
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.unit.*
-import de.rakhman.cooking.*
 import de.rakhman.cooking.events.CreateSpreadsheetEvent
 import de.rakhman.cooking.events.SpreadsheetIdChangedEvent
+import de.rakhman.cooking.getContext
+import de.rakhman.cooking.openUrl
+import de.rakhman.cooking.signOut
 import de.rakhman.cooking.states.SavingSettingsState
 import de.rakhman.cooking.states.ScreenState
 import de.rakhman.cooking.states.SettingsState
 import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.compose.composeValue
 import io.sellmair.evas.emit
+import io.sellmair.evas.emitAsync
 import io.sellmair.evas.set
 import org.jetbrains.compose.resources.stringResource
 import recipeplan.composeapp.generated.resources.*
 
 @Composable
 fun SettingsScreen(modifier: Modifier) {
-    Column(modifier = modifier.padding(12.dp, 4.dp, 12.dp, 12.dp).fillMaxSize()) {
+    Column(modifier = modifier.padding(12.dp, 4.dp, 12.dp, 12.dp).fillMaxSize().verticalScroll(rememberScrollState())) {
         val settings = SettingsState.composeValue()
         val savingState = SavingSettingsState.composeValue()
         var spreadSheetId by remember { mutableStateOf(settings?.spreadSheetsId ?: "") }
@@ -53,10 +58,9 @@ fun SettingsScreen(modifier: Modifier) {
 
         val context = getContext()
 
-        Button(
+        FilledTonalButton(
             modifier = Modifier.fillMaxWidth(),
             onClick =  { openUrl("https://docs.google.com/spreadsheets/d/$spreadSheetId", context) },
-            colors = ButtonDefaults.filledTonalButtonColors(),
             enabled = spreadSheetId.isNotBlank()
         ) {
             Text(stringResource(Res.string.open_google_sheet))
@@ -65,15 +69,25 @@ fun SettingsScreen(modifier: Modifier) {
         Text(
             stringResource(Res.string.share_recipes_hint),
             fontSize = 14.sp,
-            modifier = Modifier.padding(top = 16.dp)
+            modifier = Modifier.padding(top = 16.dp, bottom = 24.dp)
         )
+
+        FilledTonalButton(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = EvasLaunching { SpreadsheetIdChangedEvent(null).emitAsync(); signOut(context) },
+            colors = ButtonDefaults.filledTonalButtonColors(
+                MaterialTheme.colorScheme.errorContainer,
+                MaterialTheme.colorScheme.error
+            ),
+        ) {
+            Text(stringResource(Res.string.sign_out))
+        }
 
         Spacer(Modifier.weight(1f))
 
-        Button(
+        OutlinedButton(
             modifier = Modifier.fillMaxWidth(),
             onClick = EvasLaunching { ScreenState.set(ScreenState.Plan) },
-            colors = ButtonDefaults.elevatedButtonColors()
         ) {
             Text(stringResource(Res.string.close))
         }
