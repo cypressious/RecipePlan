@@ -38,7 +38,7 @@ actual fun shareRecipe(title: String, url: String?, c: PlatformContext) {
     i.setType("text/plain")
     i.putExtra(Intent.EXTRA_SUBJECT, title)
     url?.let { i.putExtra(Intent.EXTRA_TEXT, it) }
-    c.startActivity(Intent.createChooser(i, "Rezept teilen"))
+    c.startActivity(Intent.createChooser(i, c.getString(R.string.share_recipe)))
 }
 
 actual fun shareToBring(title: String, url: String, c: PlatformContext) {

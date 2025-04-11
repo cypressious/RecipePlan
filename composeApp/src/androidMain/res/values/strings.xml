@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name" translatable="false">Recipe Plan</string>
     <string name="reload">Reload</string>
+    <string name="share_recipe">Share recipe</string>
 </resources>
