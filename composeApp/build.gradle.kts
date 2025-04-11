@@ -16,6 +16,7 @@ kotlin {
     compilerOptions {
         freeCompilerArgs.add("-Xrender-internal-diagnostic-names")
         freeCompilerArgs.add("-Xcontext-parameters")
+        freeCompilerArgs.add("-Xexpect-actual-classes")
     }
     androidTarget {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
