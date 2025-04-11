@@ -361,10 +361,11 @@ private fun Database.updateWith(recipes: List<Recipe>, plan: List<Long>, shop: L
 }
 
 private suspend fun setStateFromDatabase(database: Database) {
+    val recipes = database.recipesQueries.selectAll().executeAsList()
     RecipesState.set(
-        if (database.recipesQueries.selectAll().executeAsList().isNotEmpty()) {
+        if (recipes.isNotEmpty()) {
             RecipesState.Success(
-                recipes = database.recipesQueries.selectAll().executeAsList(),
+                recipes = recipes,
                 plan = database.planQueries.selectAll().executeAsList(),
                 shop = database.shopQueries.selectAll().executeAsList(),
             )
