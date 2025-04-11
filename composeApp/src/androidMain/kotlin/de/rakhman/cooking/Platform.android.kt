@@ -2,14 +2,17 @@ package de.rakhman.cooking
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.*
 import androidx.core.net.toUri
 import androidx.glance.appwidget.updateAll
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
-import com.google.api.client.json.gson.GsonFactory
-import com.google.api.services.sheets.v4.Sheets
-import com.google.auth.http.HttpCredentialsAdapter
+import de.rakhman.cooking.ui.DarkColorScheme
+import de.rakhman.cooking.ui.LightColorScheme
 
 actual typealias PlatformContext = Context
 
@@ -56,4 +59,16 @@ actual fun shareToBring(title: String, url: String, c: PlatformContext) {
 
 actual suspend fun updateWidget(c: PlatformContext) {
     MyAppWidget().updateAll(c)
+}
+
+@Composable
+actual fun getColorScheme(): ColorScheme {
+    val darkTheme = isSystemInDarkTheme()
+    val dynamicColor = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+    return when {
+        dynamicColor && darkTheme -> dynamicDarkColorScheme(LocalContext.current)
+        dynamicColor && !darkTheme -> dynamicLightColorScheme(LocalContext.current)
+        darkTheme -> DarkColorScheme
+        else -> LightColorScheme
+    }
 }

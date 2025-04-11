@@ -109,7 +109,7 @@ class MyAppWidget : GlanceAppWidget() {
                             Text(
                                 text = recipe.title,
                                 modifier = GlanceModifier.padding(bottom = 6.dp),
-                                style = TextStyle(fontSize = 16.sp)
+                                style = TextStyle(fontSize = 16.sp, color = GlanceTheme.colors.onBackground)
                             )
                             recipe.url?.let { url ->
                                 Text(

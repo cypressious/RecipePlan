@@ -38,7 +38,7 @@ fun RecipeItem(recipe: Recipe, screenState: ScreenState) {
                     text = it,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.secondary
                 )
             }
         }

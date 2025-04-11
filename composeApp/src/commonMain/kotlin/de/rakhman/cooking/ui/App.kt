@@ -12,6 +12,7 @@ import de.rakhman.cooking.Recipe
 import de.rakhman.cooking.events.DeleteEvent
 import de.rakhman.cooking.events.DeleteRequestEvent
 import de.rakhman.cooking.events.NotificationEvent
+import de.rakhman.cooking.getColorScheme
 import de.rakhman.cooking.states.ScreenState
 import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.compose.composeValue
@@ -23,10 +24,11 @@ import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import recipeplan.composeapp.generated.resources.*
+
 @Composable
 @Preview
 fun App() {
-    MaterialTheme {
+    MaterialTheme(getColorScheme()) {
         val screenState = ScreenState.composeValue()
         val snackbarHostState = remember { SnackbarHostState() }
         val events = eventsOrThrow()
