@@ -7,7 +7,7 @@ import de.rakhman.cooking.Database
 actual class DriverFactory {
     actual fun createDriver(): SqlDriver {
         val driver: SqlDriver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
-        Database.Companion.Schema.create(driver)
+        Database.Schema.create(driver)
         return driver
     }
 }

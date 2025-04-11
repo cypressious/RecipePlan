@@ -11,7 +11,7 @@ actual abstract class PlatformContext {
 actual fun openUrl(url: String, c: PlatformContext) {
     try {
         if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-            Desktop.getDesktop().browse(URI(url));
+            Desktop.getDesktop().browse(URI(url))
         }
     } catch (e: Exception) {
         e.printStackTrace()

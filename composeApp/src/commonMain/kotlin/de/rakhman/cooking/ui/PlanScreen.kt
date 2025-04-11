@@ -26,7 +26,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun PlanScreen(modifier: Modifier, isShop: Boolean) {
-    val recipeState = RecipesState.Key.composeValue()
+    val recipeState = RecipesState.composeValue()
     Column(modifier = modifier) {
         when (recipeState) {
             is RecipesState.Success -> {
@@ -75,7 +75,7 @@ fun PlanScreen(modifier: Modifier, isShop: Boolean) {
             }
 
             RecipesState.Loading -> {
-                Box(modifier = Modifier.Companion.fillMaxSize(), contentAlignment = Alignment.Companion.Center) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
             }

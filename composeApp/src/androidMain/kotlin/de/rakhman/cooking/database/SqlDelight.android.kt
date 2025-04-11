@@ -7,6 +7,6 @@ import de.rakhman.cooking.Database
 
 actual class DriverFactory(private val context: Context) {
     actual fun createDriver(): SqlDriver {
-        return AndroidSqliteDriver(Database.Companion.Schema, context, "recipes.db")
+        return AndroidSqliteDriver(Database.Schema, context, "recipes.db")
     }
 }

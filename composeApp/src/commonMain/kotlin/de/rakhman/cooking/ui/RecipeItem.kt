@@ -26,19 +26,19 @@ import recipeplan.composeapp.generated.resources.*
 @Composable
 fun RecipeItem(recipe: Recipe, screenState: ScreenState) {
     val context = getContext()
-    Row(modifier = Modifier.Companion.clickable(onClick = {
+    Row(modifier = Modifier.clickable(onClick = {
         recipe.url?.let { openUrl(it, context) }
     })) {
         Column(
-            modifier = Modifier.Companion.fillMaxWidth().padding(16.dp, 8.dp).weight(1f),
+            modifier = Modifier.fillMaxWidth().padding(16.dp, 8.dp).weight(1f),
         ) {
-            Text(text = recipe.title, fontSize = 18.sp, modifier = Modifier.Companion.padding(bottom = 8.dp))
+            Text(text = recipe.title, fontSize = 18.sp, modifier = Modifier.padding(bottom = 8.dp))
             recipe.url?.let {
                 Text(
                     text = it,
                     maxLines = 1,
-                    overflow = TextOverflow.Companion.Ellipsis,
-                    color = Color.Companion.Gray
+                    overflow = TextOverflow.Ellipsis,
+                    color = Color.Gray
                 )
             }
         }
@@ -46,8 +46,8 @@ fun RecipeItem(recipe: Recipe, screenState: ScreenState) {
         var expanded by remember { mutableStateOf(false) }
 
         Box(
-            modifier = Modifier.Companion.align(Alignment.Companion.CenterVertically).padding(end = 12.dp),
-            contentAlignment = Alignment.Companion.Center
+            modifier = Modifier.align(Alignment.CenterVertically).padding(end = 12.dp),
+            contentAlignment = Alignment.Center
         ) {
             if (recipe.id != ID_TEMPORARY) {
                 IconButton(onClick = { expanded = true }) {
@@ -88,9 +88,9 @@ fun RecipeItem(recipe: Recipe, screenState: ScreenState) {
                     DropdownMenuItem(
                         text = { Text(stringResource(Res.string.edit)) },
                         onClick = EvasLaunching {
-                            ScreenState.Key.set(
+                            ScreenState.set(
                                 ScreenState.Add(
-                                    target = ScreenState.Key.value() as ScreenState.BaseScreen,
+                                    target = ScreenState.value() as ScreenState.BaseScreen,
                                     editingRecipe = recipe
                                 )
                             )
@@ -116,7 +116,7 @@ fun RecipeItem(recipe: Recipe, screenState: ScreenState) {
                     }
                 }
             } else {
-                CircularProgressIndicator(modifier = Modifier.Companion.padding(12.dp).width(24.dp).height(24.dp))
+                CircularProgressIndicator(modifier = Modifier.padding(12.dp).width(24.dp).height(24.dp))
             }
         }
     }

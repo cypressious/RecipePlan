@@ -18,7 +18,7 @@ import recipeplan.composeapp.generated.resources.*
 
 @Composable
 fun RecipesScreen(modifier: Modifier) {
-    val recipeState = RecipesState.Key.composeValue()
+    val recipeState = RecipesState.composeValue()
     Column(modifier = modifier) {
         when (recipeState) {
             is RecipesState.Success -> {
@@ -26,7 +26,7 @@ fun RecipesScreen(modifier: Modifier) {
             }
 
             RecipesState.Loading -> {
-                Box(modifier = Modifier.Companion.fillMaxSize(), contentAlignment = Alignment.Companion.Center) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
             }
