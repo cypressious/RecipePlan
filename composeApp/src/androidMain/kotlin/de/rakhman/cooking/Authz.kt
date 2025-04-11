@@ -13,13 +13,15 @@ import com.google.api.services.sheets.v4.SheetsScopes
 import com.google.auth.http.HttpCredentialsAdapter
 import com.google.auth.oauth2.AccessToken
 import com.google.auth.oauth2.OAuth2CredentialsWithRefresh
+import kotlinx.coroutines.CompletableDeferred
 import java.util.Date
 
 const val REQUEST_CODE_AUTHZ = 12
 const val TAG = "AUTHZ"
 
-context(context: Activity)
-fun handleAuthz(cb: (AuthorizationResult) -> Unit) {
+context(context: Context)
+fun handleAuthz(): CompletableDeferred<AuthorizationResult?> {
+    val deferred = CompletableDeferred<AuthorizationResult?>()
     Identity.getAuthorizationClient(context)
         .authorize(getAuthzRequest())
         .addOnSuccessListener { authorizationResult ->
@@ -27,18 +29,26 @@ fun handleAuthz(cb: (AuthorizationResult) -> Unit) {
                 // Access needs to be granted by the user
                 val pendingIntent = authorizationResult.pendingIntent!!
                 try {
-                    context.startIntentSenderForResult(
-                        pendingIntent.intentSender,
-                        REQUEST_CODE_AUTHZ, null, 0, 0, 0, null
-                    )
+                    if (context is Activity) {
+                        context.startIntentSenderForResult(
+                            pendingIntent.intentSender,
+                            REQUEST_CODE_AUTHZ, null, 0, 0, 0, null
+                        )
+                    }
+                    deferred.complete(null)
                 } catch (e: SendIntentException) {
                     Log.e(TAG, "Couldn't start Authorization UI: " + e.localizedMessage)
                 }
             } else {
-                cb(authorizationResult)
+                deferred.complete(authorizationResult)
             }
         }
-        .addOnFailureListener { e -> Log.e(TAG, "Failed to authorize", e) }
+        .addOnFailureListener { e ->
+            Log.e(TAG, "Failed to authorize", e)
+            deferred.completeExceptionally(e)
+        }
+
+    return deferred
 }
 
 context(context: Context)

@@ -5,17 +5,27 @@ import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.*
 import androidx.core.net.toUri
+import androidx.glance.appwidget.updateAll
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
+import com.google.api.client.json.gson.GsonFactory
+import com.google.api.services.sheets.v4.Sheets
+import com.google.auth.http.HttpCredentialsAdapter
 
 actual typealias PlatformContext = Context
 
 actual fun openUrl(url: String, c: PlatformContext) {
     try {
-        val uri = url.toUri()
-        val browserIntent = Intent(Intent.ACTION_VIEW, uri)
+        val browserIntent = url.toUrlIntent()
         c.startActivity(browserIntent)
     } catch (e: Exception) {
         e.printStackTrace()
     }
+}
+
+fun String.toUrlIntent(): Intent {
+    val uri = toUri()
+    val browserIntent = Intent(Intent.ACTION_VIEW, uri)
+    return browserIntent
 }
 
 @Composable
@@ -42,4 +52,8 @@ actual fun shareToBring(title: String, url: String, c: PlatformContext) {
     } catch (e: Exception) {
         e.printStackTrace()
     }
+}
+
+actual suspend fun updateWidget(c: PlatformContext) {
+    MyAppWidget().updateAll(c)
 }

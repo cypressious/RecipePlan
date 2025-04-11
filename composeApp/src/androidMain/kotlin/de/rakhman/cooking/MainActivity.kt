@@ -14,10 +14,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.gms.auth.api.identity.Identity
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
-import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.sheets.v4.Sheets
-import com.google.auth.http.HttpCredentialsAdapter
 import de.rakhman.cooking.database.DriverFactory
 import de.rakhman.cooking.events.ErrorEvent
 import de.rakhman.cooking.events.ReloadEvent
@@ -49,11 +46,6 @@ class MainActivity : ComponentActivity() {
         database = Database(driver)
         launchStateHandler()
 
-        handleAuthz {
-            Log.d("MainActivity", "authZ successful, completing sheetsDeferred.")
-            sheetsDeferred.complete(buildSheetsService(it.toCredentials()))
-        }
-
         setContent {
             installEvas(events, states) {
                 App()
@@ -83,8 +75,14 @@ class MainActivity : ComponentActivity() {
 
     private fun launchStateHandler() {
         lifecycle.coroutineScope.launch {
+            launch {
+                val authorizationResult = handleAuthz().await() ?: return@launch
+                Log.d("MainActivity", "authZ successful, completing sheetsDeferred.")
+                sheetsDeferred.complete(buildSheetsService(authorizationResult.toCredentials()))
+            }
+
             withContext(Dispatchers.Main + events + states) {
-                launchRecipesState(database, sheetsDeferred)
+                launchRecipesState(database, sheetsDeferred, this@MainActivity)
 
                 collectEventsAsync<ErrorEvent> {
                     Toast.makeText(this@MainActivity, it.e.toString(), Toast.LENGTH_LONG).show()
@@ -101,17 +99,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
-    private fun buildSheetsService(httpCredentialsAdapter: HttpCredentialsAdapter): Sheets {
-        return Sheets.Builder(
-            GoogleNetHttpTransport.newTrustedTransport(),
-            GsonFactory.getDefaultInstance(),
-            httpCredentialsAdapter
-        )
-            .setApplicationName("Recipe Plan Android")
-            .build()
-    }
-
 
     @Suppress("OVERRIDE_DEPRECATION", "DEPRECATION")
     override fun onBackPressed() {

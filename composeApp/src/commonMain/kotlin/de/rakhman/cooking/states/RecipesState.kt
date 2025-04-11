@@ -11,6 +11,7 @@ import com.google.api.services.sheets.v4.model.ValueRange
 import de.rakhman.cooking.Database
 import de.rakhman.cooking.Recipe
 import de.rakhman.cooking.events.*
+import de.rakhman.cooking.*
 import io.sellmair.evas.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collectLatest
@@ -33,14 +34,17 @@ private const val DELETED_VALUE = "deleted"
 
 const val ID_TEMPORARY = -1L
 
-private class RecipeContext(
+class RecipeContext(
     val database: Database,
     val sheets: Sheets,
-    val spreadSheetsId: String
+    val spreadSheetsId: String,
+    val platformContext: PlatformContext
 )
 
 fun CoroutineScope.launchRecipesState(
-    database: Database, sheets: Deferred<Sheets>
+    database: Database,
+    sheets: Deferred<Sheets>,
+    platformContext: PlatformContext
 ) {
     launchState(SettingsState) {
         val spreadSheetsId = database.settingsQueries.selectFirst().executeAsOneOrNull()
@@ -69,8 +73,8 @@ fun CoroutineScope.launchRecipesState(
                 val result = sheets.spreadsheets().create(Spreadsheet().apply {
                     properties = SpreadsheetProperties().apply { title = "Recipes" }
                     this.sheets = listOf(
-                        Sheet().apply { properties = SheetProperties().apply { title = SHEET_NAME_RECIPES} },
-                        Sheet().apply { properties = SheetProperties().apply { title = SHEET_NAME_PLAN} },
+                        Sheet().apply { properties = SheetProperties().apply { title = SHEET_NAME_RECIPES } },
+                        Sheet().apply { properties = SheetProperties().apply { title = SHEET_NAME_PLAN } },
                     )
                 }).execute()
                 SpreadsheetIdChangedEvent(result.spreadsheetId).emit()
@@ -86,33 +90,34 @@ fun CoroutineScope.launchRecipesState(
         SettingsState.flow().collectLatest {
             val spreadSheetsId = it?.spreadSheetsId
             if (!spreadSheetsId.isNullOrBlank()) {
-                coroutineScope { launchRecipesStateInternal(database, sheets, spreadSheetsId) }
+                coroutineScope {
+                    with(RecipeContext(database, sheets.await(), spreadSheetsId, platformContext)) {
+                        launchRecipesStateInternal()
+                    }
+                }
             }
         }
     }
 }
 
-private fun CoroutineScope.launchRecipesStateInternal(
-    database: Database, sheets: Deferred<Sheets>, spreadSheetsId: String
-) = launch {
-    setStateFromDatabase(database)
-    with(RecipeContext(database, sheets.await(), spreadSheetsId)) {
-        collectEventsAsyncCatchingErrors<ReloadEvent> { syncWithSheets() }
-        collectEventsAsyncCatchingErrors<DeleteEvent> { setDeleted(it.id) }
-        collectEventsAsyncCatchingErrors<AddEvent> { addRecipe(it.title, it.url) }
-        collectEventsAsyncCatchingErrors<UpdateEvent> { updateRecipe(it.id, it.title, it.url) }
-        collectEventsAsyncCatchingErrors<AddToPlanEvent> {
-            updatePlanAndShop(addIdToPlan = it.id, removeIdFromShop = it.id)
-        }
-        collectEventsAsyncCatchingErrors<RemoveFromPlanEvent> {
-            updatePlanAndShop(removeIdFromPlan = it.id)
-        }
-        collectEventsAsyncCatchingErrors<AddToShopEvent> {
-            updatePlanAndShop(addIdToShop = it.id)
-        }
-        collectEventsAsyncCatchingErrors<RemoveFromShopEvent> {
-            updatePlanAndShop(removeIdFromShop = it.id)
-        }
+context(c: RecipeContext)
+private fun CoroutineScope.launchRecipesStateInternal() = launch {
+    setStateFromDatabase(c.database)
+    collectEventsAsyncCatchingErrors<ReloadEvent> { syncWithSheets() }
+    collectEventsAsyncCatchingErrors<DeleteEvent> { setDeleted(it.id) }
+    collectEventsAsyncCatchingErrors<AddEvent> { addRecipe(it.title, it.url) }
+    collectEventsAsyncCatchingErrors<UpdateEvent> { updateRecipe(it.id, it.title, it.url) }
+    collectEventsAsyncCatchingErrors<AddToPlanEvent> {
+        updatePlanAndShop(addIdToPlan = it.id, removeIdFromShop = it.id)
+    }
+    collectEventsAsyncCatchingErrors<RemoveFromPlanEvent> {
+        updatePlanAndShop(removeIdFromPlan = it.id)
+    }
+    collectEventsAsyncCatchingErrors<AddToShopEvent> {
+        updatePlanAndShop(addIdToShop = it.id)
+    }
+    collectEventsAsyncCatchingErrors<RemoveFromShopEvent> {
+        updatePlanAndShop(removeIdFromShop = it.id)
     }
 
     ReloadEvent.emit()
@@ -288,7 +293,7 @@ private suspend fun addRecipe(title: String, url: String?) {
 }
 
 context(c: RecipeContext)
-private suspend fun syncWithSheets() = withContext(Dispatchers.IO) {
+suspend fun syncWithSheets() = withContext(Dispatchers.IO) {
     val recipesDeferred = async { readRecipes() }
     val planDeferred = async { readPlanAndShop() }
 
@@ -296,8 +301,9 @@ private suspend fun syncWithSheets() = withContext(Dispatchers.IO) {
     val (plan, shop) = planDeferred.await()
 
     c.database.updateWith(recipes, plan, shop)
+    withContext(Dispatchers.Default) { updateWidget(c.platformContext) }
 
-    RecipesState.set(RecipesState.Success(recipes, plan, shop))
+    coroutineContext.statesOrNull?.setState(RecipesState, RecipesState.Success(recipes, plan, shop))
 }
 
 context(c: RecipeContext)

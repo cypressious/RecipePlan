@@ -37,6 +37,8 @@ kotlin {
             implementation(libs.sqldelight.android.driver)
             implementation(libs.play.services.auth)
             implementation(libs.google.api.client.android)
+            implementation(libs.androidx.glance.appwidget)
+            implementation(libs.androidx.glance.material3)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -53,6 +55,7 @@ kotlin {
             implementation(libs.google.api.client)
             implementation(libs.ksoup)
             implementation(libs.ksoup.network)
+            implementation(libs.sqldelight.coroutines.extensions)
         }
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)

@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">Recipe Plan</string>
+    <string name="app_name" translatable="false">Recipe Plan</string>
+    <string name="reload">Reload</string>
 </resources>

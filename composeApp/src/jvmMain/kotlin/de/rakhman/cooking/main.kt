@@ -24,9 +24,13 @@ fun main() {
         val driver = DriverFactory().createDriver()
         val database = Database(driver)
 
-        launchRecipesState(database, async(Dispatchers.IO) {
-            SheetsQuickstart.getSheetsService()
-        })
+        launchRecipesState(
+            database = database,
+            sheets = async(Dispatchers.IO) {
+                SheetsQuickstart.getSheetsService()
+            },
+            platformContext = PlatformContext
+        )
     }
 
     singleWindowApplication(
