@@ -7,7 +7,6 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
-import androidx.compose.ui.graphics.*
 import androidx.compose.ui.text.style.*
 import androidx.compose.ui.unit.*
 import de.rakhman.cooking.*
@@ -24,13 +23,19 @@ import recipeplan.composeapp.generated.resources.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RecipeItem(recipe: Recipe, screenState: ScreenState) {
+fun RecipeItem(recipe: Recipe, screenState: ScreenState, slotLeft: (@Composable RowScope.() -> Unit)? = null) {
     val context = getContext()
-    Row(modifier = Modifier.clickable(onClick = {
-        recipe.url?.let { openUrl(it, context) }
-    })) {
+    Row(
+        modifier = Modifier
+        .height(IntrinsicSize.Min)
+        .clickable(onClick = {
+            recipe.url?.let { openUrl(it, context) }
+        })
+    ) {
+        slotLeft?.invoke(this)
+
         Column(
-            modifier = Modifier.fillMaxWidth().padding(16.dp, 8.dp).weight(1f),
+            modifier = Modifier.fillMaxWidth().padding(start = if (slotLeft == null) 16.dp else 0.dp, end = 16.dp, top = 8.dp, bottom = 8.dp).weight(1f),
         ) {
             Text(text = recipe.title, fontSize = 18.sp, modifier = Modifier.padding(bottom = 8.dp))
             recipe.url?.let {
@@ -79,7 +84,8 @@ fun RecipeItem(recipe: Recipe, screenState: ScreenState) {
                         DropdownMenuItem(
                             text = { Text(stringResource(Res.string.remove_from_shop)) },
                             onClick = EvasLaunching {
-                                NotificationEvent(getString(Res.string.recipe_removed_from_shop, recipe.title)).emitAsync()
+                                NotificationEvent(getString(Res.string.recipe_removed_from_shop, recipe.title))
+                                    .emitAsync()
                                 RemoveFromShopEvent(recipe.id).emitAsync()
                                 expanded = false
                             }
