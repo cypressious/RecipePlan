@@ -22,8 +22,10 @@ junit = "4.13.2"
 kotlin = "2.2.0-lenient-3"
 kotlinx-coroutines = "1.10.1"
 ksoup = "0.2.2"
+materialIconsCore = "1.7.3"
 playServicesAuth = "21.3.0"
 sqldelight = "2.0.2"
+hotReload = "1.0.0-alpha04"
 
 [libraries]
 evas = { module = "io.sellmair:evas", version.ref = "evas" }
@@ -50,6 +52,7 @@ kotlinx-coroutines-swing = { group = "org.jetbrains.kotlinx", name = "kotlinx-co
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinx-coroutines" }
 ksoup-network = { module = "com.fleeksoft.ksoup:ksoup-network", version.ref = "ksoup" }
 ksoup = { module = "com.fleeksoft.ksoup:ksoup", version.ref = "ksoup" }
+material-icons-core = { module = "org.jetbrains.compose.material:material-icons-core", version.ref = "materialIconsCore" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 sqldelight-android-driver = { group = "app.cash.sqldelight", name = "android-driver", version.ref = "sqldelight" }
 sqldelight-coroutines-extensions = { group = "app.cash.sqldelight", name = "coroutines-extensions", version.ref = "sqldelight" }
@@ -62,3 +65,4 @@ composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-mu
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight"}
+hotReload = { id = "org.jetbrains.compose.hot-reload", version.ref = "hotReload" }

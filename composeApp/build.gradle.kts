@@ -8,7 +8,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
-    id("org.jetbrains.compose.hot-reload") version "1.0.0-alpha04"
+    alias(libs.plugins.hotReload)
     alias(libs.plugins.sqldelight)
 }
 
@@ -48,7 +48,7 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
-            implementation("org.jetbrains.compose.material:material-icons-core:1.7.3")
+            implementation(libs.material.icons.core)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(libs.evas)
