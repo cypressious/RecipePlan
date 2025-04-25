@@ -20,3 +20,4 @@ captures
 composeApp/release
 /composeApp/src/jvmMain/resources/credentials.json
 /.idea/uiDesigner.xml
+/.idea/deviceManager.xml
