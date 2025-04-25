@@ -24,6 +24,10 @@ fun main() {
         val driver = DriverFactory().createDriver()
         val database = Database(driver)
 
+        System.getenv("SHEET")?.let {
+            database.settingsQueries.insert(it)
+        }
+
         launchRecipesState(
             database = database,
             sheets = async(Dispatchers.IO) {
