@@ -8,7 +8,6 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.*
 import de.rakhman.cooking.Recipe
 import de.rakhman.cooking.states.RecipesState

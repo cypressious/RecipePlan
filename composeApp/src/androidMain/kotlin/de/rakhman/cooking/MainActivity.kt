@@ -26,11 +26,7 @@ import io.sellmair.evas.States
 import io.sellmair.evas.collectEventsAsync
 import io.sellmair.evas.compose.installEvas
 import io.sellmair.evas.emit
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import kotlin.time.Duration.Companion.seconds
 
 

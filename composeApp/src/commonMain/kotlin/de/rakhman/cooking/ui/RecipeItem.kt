@@ -7,14 +7,10 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.*
 import androidx.compose.ui.unit.*
 import de.rakhman.cooking.*
 import de.rakhman.cooking.events.*
-import de.rakhman.cooking.events.AddToPlanEvent
-import de.rakhman.cooking.events.AddToShopEvent
-import de.rakhman.cooking.events.NotificationEvent
 import de.rakhman.cooking.states.ID_TEMPORARY
 import de.rakhman.cooking.states.ScreenState
 import io.sellmair.evas.compose.EvasLaunching
@@ -23,9 +19,6 @@ import io.sellmair.evas.set
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import recipeplan.composeapp.generated.resources.*
-import recipeplan.composeapp.generated.resources.Res
-import recipeplan.composeapp.generated.resources.recipe_added_to_plan
-import recipeplan.composeapp.generated.resources.recipe_added_to_shop
 
 @Composable
 fun RecipeItem(

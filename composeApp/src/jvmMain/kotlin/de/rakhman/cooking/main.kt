@@ -11,7 +11,7 @@ import io.sellmair.evas.States
 import io.sellmair.evas.compose.installEvas
 import kotlinx.coroutines.*
 import org.jetbrains.compose.reload.DevelopmentEntryPoint
-import java.util.Locale
+import java.util.*
 
 fun main() {
     System.setProperty(DEBUG_PROPERTY_NAME, DEBUG_PROPERTY_VALUE_ON)
