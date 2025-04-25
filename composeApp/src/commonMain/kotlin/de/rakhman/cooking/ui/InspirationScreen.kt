@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.ShoppingCart
@@ -30,29 +31,31 @@ fun InspirationScreen(modifier: Modifier) {
     var windowed by remember { mutableStateOf(state.recipes.shuffled().windowed(INSPIRATION_COUNT, INSPIRATION_COUNT)) }
     var checked by remember { mutableStateOf(List(INSPIRATION_COUNT) { false }) }
 
-    fun check(index: Int) {
-        checked = checked.mapIndexed { i, it -> if (i == index) true else it }
-    }
-
-    Column(modifier.fillMaxSize().padding(12.dp)) {
+    Box(modifier.fillMaxSize()) {
         if (windowed.isEmpty()) {
             Text(stringResource(Res.string.no_entries))
         } else {
-            Column(modifier = Modifier.verticalScroll(rememberScrollState()).weight(1f)) {
-                windowed.first().forEachIndexed { i, recipe ->
-                    InspirationCard(recipe, checked[i], onChecked = { check(i) })
+            Column(modifier = Modifier.verticalScroll(rememberScrollState()).padding(12.dp).padding(bottom = 64.dp)) {
+                windowed.first().forEachIndexed { index, recipe ->
+                    InspirationCard(
+                        recipe = recipe,
+                        isChecked = checked[index],
+                        onChecked = {
+                            checked = checked.mapIndexed { i, it -> if (i == index) true else it }
+                        },
+                    )
                 }
             }
 
-            FilledTonalButton(
+            ExtendedFloatingActionButton(
                 onClick = {
                     windowed = windowed.drop(1)
                     checked = List(INSPIRATION_COUNT) { false }
                 },
-                modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 12.dp)
-            ) {
-                Text(stringResource(Res.string.next))
-            }
+                icon = { Icon(Icons.AutoMirrored.Filled.ArrowForward, stringResource(Res.string.next)) },
+                text = { Text(stringResource(Res.string.next)) },
+                modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp)
+            )
         }
     }
 }
