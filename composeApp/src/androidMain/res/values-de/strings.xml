@@ -2,4 +2,5 @@
 <resources>
     <string name="reload">Neu laden</string>
     <string name="share_recipe">Rezept teilen</string>
+    <string name="no_items">Keine Einträge</string>
 </resources>

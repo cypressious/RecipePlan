@@ -2,7 +2,8 @@ package de.rakhman.cooking
 
 import android.content.Context
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.unit.*
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.datastore.core.DataStore
 import androidx.glance.*
 import androidx.glance.action.ActionParameters
@@ -92,6 +93,14 @@ class MyAppWidget : GlanceAppWidget() {
                     onClick = actionRunCallback<RefreshAction>()
                 )
             }
+
+            if (recipes.isEmpty()) {
+                Box(modifier = GlanceModifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(text = LocalContext.current.getString(R.string.no_items), style = TextStyle(fontSize = 20.sp, color = GlanceTheme.colors.onBackground))
+                }
+                return@Column
+            }
+
             LazyColumn {
                 items(
                     count = recipes.size,
