@@ -5,9 +5,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.focus.*
@@ -20,7 +18,9 @@ import de.rakhman.cooking.Recipe
 import de.rakhman.cooking.events.AddEvent
 import de.rakhman.cooking.events.NotificationEvent
 import de.rakhman.cooking.events.UpdateEvent
+import de.rakhman.cooking.states.ScreenState
 import io.sellmair.evas.compose.EvasLaunching
+import io.sellmair.evas.compose.composeValue
 import io.sellmair.evas.emitAsync
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -31,8 +31,13 @@ import recipeplan.composeapp.generated.resources.*
 private val urlRegex =
     Regex("""https?://(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)""")
 
+val allTargets = listOf(ScreenState.Plan, ScreenState.Shop, ScreenState.Recipes)
+
 @Composable
 fun AddScreen(modifier: Modifier, editingRecipe: Recipe?, initialData: String?) {
+    val composeValue = ScreenState.composeValue()
+    var target by remember { mutableStateOf((composeValue as? ScreenState.Add)?.target ?: ScreenState.Recipes) }
+
     Column(modifier = modifier.padding(16.dp)) {
         var title by remember { mutableStateOf(editingRecipe?.title ?: "") }
         var url by remember {
@@ -60,7 +65,7 @@ fun AddScreen(modifier: Modifier, editingRecipe: Recipe?, initialData: String?) 
                 UpdateEvent(editingRecipe.id, title.trim(), url).emitAsync()
             } else {
                 NotificationEvent(getString(Res.string.recipe_added, title.trim())).emitAsync()
-                AddEvent(title.trim(), url.ifBlank { null }).emitAsync()
+                AddEvent(title.trim(), url.ifBlank { null }, target).emitAsync()
             }
         }
         val focusManager = LocalFocusManager.current
@@ -88,6 +93,21 @@ fun AddScreen(modifier: Modifier, editingRecipe: Recipe?, initialData: String?) 
                 onDone = { if (enabled) submit() }
             ),
         )
+
+        if (editingRecipe == null) {
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
+                allTargets.forEachIndexed { index, label ->
+                    val option = allTargets[index]
+                    SegmentedButton(
+                        shape = SegmentedButtonDefaults.itemShape(index = index, count = allTargets.size),
+                        onClick = { target = option },
+                        selected = target == option,
+                        label = { Text(stringResource(option.title)) }
+                    )
+                }
+            }
+        }
+
         Button(
             onClick = submit,
             modifier = Modifier.fillMaxWidth(),

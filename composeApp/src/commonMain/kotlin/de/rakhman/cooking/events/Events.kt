@@ -1,6 +1,7 @@
 package de.rakhman.cooking.events
 
 import de.rakhman.cooking.Recipe
+import de.rakhman.cooking.states.ScreenState
 import io.sellmair.evas.Event
 
 object ReloadEvent : Event
@@ -15,7 +16,7 @@ class RemoveFromPlanEvent(val id: Long) : Event
 
 class RemoveFromShopEvent(val id: Long) : Event
 
-class AddEvent(val title: String, val url: String?) : Event
+class AddEvent(val title: String, val url: String?, val target: ScreenState.BaseScreen) : Event
 
 class UpdateEvent(val id: Long, val title: String, val url: String?) : Event
 

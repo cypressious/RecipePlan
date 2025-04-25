@@ -112,7 +112,7 @@ private fun CoroutineScope.launchRecipesStateInternal() = launch {
     setStateFromDatabase(c.database)
     collectEventsAsyncCatchingErrors<ReloadEvent> { syncWithSheets() }
     collectEventsAsyncCatchingErrors<DeleteEvent> { setDeleted(it.id) }
-    collectEventsAsyncCatchingErrors<AddEvent> { addRecipe(it.title, it.url) }
+    collectEventsAsyncCatchingErrors<AddEvent> { addRecipe(it.title, it.url, it.target) }
     collectEventsAsyncCatchingErrors<UpdateEvent> { updateRecipe(it.id, it.title, it.url) }
     collectEventsAsyncCatchingErrors<AddToPlanEvent> {
         updatePlanAndShop(addIdToPlan = it.id, removeIdFromShop = it.id)
@@ -268,11 +268,10 @@ private suspend fun updateRecipe(id: Long, title: String, url: String?) {
 }
 
 context(c: RecipeContext)
-private suspend fun addRecipe(title: String, url: String?) {
-    val state = RecipesState.value()
-    val target = (ScreenState.value() as? ScreenState.Add)?.target
-    ScreenState.set(target ?: ScreenState.Recipes)
+private suspend fun addRecipe(title: String, url: String?, target: ScreenState.BaseScreen) {
+    ScreenState.set(target)
 
+    val state = RecipesState.value()
     if (state is RecipesState.Success) {
         RecipesState.set(
             RecipesState.Success(
