@@ -40,7 +40,13 @@ class RecipeContext(
     val database: Database,
     val sheets: Sheets,
     val spreadSheetsId: String,
-    val platformContext: PlatformContext
+    val platformContext: PlatformContext,
+    val repositoryFactory: de.rakhman.cooking.repository.RepositoryFactory = de.rakhman.cooking.repository.RepositoryFactory(
+        database,
+        sheets,
+        spreadSheetsId,
+        platformContext
+    )
 )
 
 fun CoroutineScope.launchRecipesState(
@@ -106,7 +112,7 @@ fun CoroutineScope.launchRecipesState(
 
 context(c: RecipeContext)
 private fun CoroutineScope.launchRecipesStateInternal() = launch {
-    setStateFromDatabase(c.database)
+    setStateFromDatabase(c.database) // The database parameter is not used in the method, but kept for compatibility
     collectEventsAsyncCatchingErrors<ReloadEvent> { syncWithSheets() }
     collectEventsAsyncCatchingErrors<DeleteEvent> { setDeleted(it.id) }
     collectEventsAsyncCatchingErrors<AddEvent> { addRecipe(it.title, it.url, it.target) }
@@ -151,9 +157,11 @@ private suspend fun setDeleted(id: Long) {
     if (state is RecipesState.Success) {
         RecipesState.set(RecipesState.Success(state.recipes.filter { it.id != id }, state.plan, state.shop))
     }
-    withContext(Dispatchers.IO) {
-        updateRawValue("$SHEET_NAME_RECIPES!C${id}", listOf(listOf(DELETED_VALUE)))
-    }
+
+    // Use the recipe repository to delete the recipe
+    c.repositoryFactory.recipeRepository.deleteRecipe(id)
+
+    // Update the UI with the latest data
     syncWithSheets()
 }
 
@@ -203,32 +211,21 @@ private suspend fun updatePlanAndShop(
     }
 
     withContext(Dispatchers.IO) {
-        awaitAll(
-            async {
-                val (oldPlan, oldShop) = readPlanAndShop()
-                val (newPlan, newShop) = newPlanAndShop(oldPlan, oldShop)
+        // Update plan
+        addIdToPlan?.let { c.repositoryFactory.planRepository.addToPlan(it) }
+        removeIdFromPlan?.let { c.repositoryFactory.planRepository.removeFromPlan(it) }
 
-                updateRawValue(
-                    RANGE_PLAN_AND_SHOP,
-                    listOf(
-                        listOf(newPlan.joinToString(",")),
-                        listOf(newShop.joinToString(",")),
-                    )
-                )
-            },
-            async {
-                if (incrementCounter && removeIdFromPlan != null) {
-                    val rangeRef = "$SHEET_NAME_RECIPES!D${removeIdFromPlan}"
-                    val range = readSheetRange(rangeRef)
-                    val oldCounter = range.elementAtOrNull(0)?.elementAtOrNull(0)?.toString()?.toLongOrNull()
-                    val newCounter = ((oldCounter ?: 0) + 1).toString()
-                    updateRawValue(rangeRef, listOf(listOf(newCounter)))
-                }
-            }
-        )
+        // Update shop
+        addIdToShop?.let { c.repositoryFactory.shopRepository.addToShop(it) }
+        removeIdFromShop?.let { c.repositoryFactory.shopRepository.removeFromShop(it) }
 
-
+        // Increment counter if needed
+        if (incrementCounter && removeIdFromPlan != null) {
+            c.repositoryFactory.recipeRepository.incrementCounter(removeIdFromPlan)
+        }
     }
+
+    // Update the UI with the latest data
     syncWithSheets()
 }
 
@@ -248,20 +245,10 @@ private suspend fun updateRecipe(id: Long, title: String, url: String?) {
         )
     }
 
-    withContext(Dispatchers.IO) {
-        c.sheets.spreadsheets().values().update(
-            c.spreadSheetsId,
-            "$SHEET_NAME_RECIPES!A$id:B$id",
-            ValueRange().apply {
-                setValues(listOf(listOf(title, url ?: "")))
-            }
-        ).run {
-            valueInputOption = "RAW"
-            execute()
-        }
-    }
+    // Use the recipe repository to update the recipe
+    c.repositoryFactory.recipeRepository.updateRecipe(id, title, url)
 
-    syncWithSheets()
+    // No need to call syncWithSheets() as the repository handles synchronization
 }
 
 context(c: RecipeContext)
@@ -279,125 +266,53 @@ private suspend fun addRecipe(title: String, url: String?, target: ScreenState.B
         )
     }
 
-    withContext(Dispatchers.IO) {
-        val recipes = readSheetRange(SHEET_NAME_RECIPES)
+    // Use the recipe repository to add the recipe
+    val id = c.repositoryFactory.recipeRepository.addRecipe(title, url)
 
-        val id = recipes.size + 1L
-        c.sheets.spreadsheets().values().update(
-            c.spreadSheetsId,
-            "$SHEET_NAME_RECIPES!A$id:B$id",
-            ValueRange().apply {
-                setValues(listOf(listOf(title, url ?: "")))
-            }
-        ).run {
-            valueInputOption = "RAW"
-            execute()
-        }
-
-        if (target == ScreenState.Shop) {
-            updatePlanAndShop(
-                addIdToShop = id,
-                updateStateOptimistically = false
-            )
-        } else if (target == ScreenState.Plan) {
-            updatePlanAndShop(
-                addIdToPlan = id,
-                removeIdFromShop = null,
-                updateStateOptimistically = false
-            )
-        }
+    // Add to plan or shop if needed
+    if (target == ScreenState.Shop) {
+        c.repositoryFactory.shopRepository.addToShop(id)
+    } else if (target == ScreenState.Plan) {
+        c.repositoryFactory.planRepository.addToPlan(id)
     }
 
+    // Update the UI with the latest data
     syncWithSheets()
 }
 
 context(c: RecipeContext)
 suspend fun syncWithSheets() = withContext(Dispatchers.IO) {
-    val recipesDeferred = async { readRecipes() }
-    val planDeferred = async { readPlanAndShop() }
+    // Use the repository factory to sync all data
+    c.repositoryFactory.syncAll()
 
-    val recipes = recipesDeferred.await()
-    val (plan, shop) = planDeferred.await()
+    // Get the data from repositories
+    val recipes = c.repositoryFactory.recipeRepository.getAllRecipes()
+    val plan = c.repositoryFactory.planRepository.getPlanRecipeIds()
+    val shop = c.repositoryFactory.shopRepository.getShopRecipeIds()
 
-    c.database.updateWith(recipes, plan, shop)
     withContext(Dispatchers.Default) { updateWidget(c.platformContext) }
 
     coroutineContext.statesOrNull?.setState(RecipesState, RecipesState.Success(recipes, plan, shop))
 }
 
 context(c: RecipeContext)
-private fun readRecipes(): List<Recipe> {
-    return readSheetRange(SHEET_NAME_RECIPES)
-        .mapIndexedNotNull { i, row ->
-            if (row.isNotEmpty() && row.elementAtOrNull(COLUMN_DELETED)?.toString() != DELETED_VALUE) {
-                Recipe(
-                    id = i + 1L,
-                    title = row[COLUMN_NAME].toString().trim(),
-                    url = row.elementAtOrNull(COLUMN_URL)?.toString()?.ifBlank { null },
-                    counter = row.elementAtOrNull(COLUMN_COUNTER).toString().toLongOrNull() ?: 0,
-                )
-            } else {
-                null
-            }
-        }
-}
-
-context(c: RecipeContext)
-private fun readPlanAndShop(): Pair<List<Long>, List<Long>> {
-    val range = readSheetRange(RANGE_PLAN_AND_SHOP)
-    return Pair(
-        parsePlanCell(range.elementAtOrNull(0)?.elementAtOrNull(0)),
-        parsePlanCell(range.elementAtOrNull(1)?.elementAtOrNull(0))
-    )
-}
-
-private fun parsePlanCell(elementAtOrNull: Any?): List<Long> {
-    return elementAtOrNull
-        ?.toString()
-        ?.split(",")
-        ?.map { it.toLong() }
-        .orEmpty()
-}
-
-context(c: RecipeContext)
-private fun readSheetRange(range: String): List<List<Any?>> {
-    return c.sheets.spreadsheets().values()
-        .get(c.spreadSheetsId, range)
-        .execute()
-        .getValues()
-        ?: emptyList()
-}
-
-private fun Database.updateWith(recipes: List<Recipe>, plan: List<Long>, shop: List<Long>) {
-    transaction {
-        recipesQueries.deleteAll()
-        recipes.forEach {
-            recipesQueries.insert(it.id, it.title, it.url, it.counter)
-        }
-
-        planQueries.deleteAll()
-        plan.forEach {
-            planQueries.insert(it)
-        }
-
-        shopQueries.deleteAll()
-        shop.forEach {
-            shopQueries.insert(it)
-        }
-    }
-}
-
 private suspend fun setStateFromDatabase(database: Database) {
-    val recipes = database.recipesQueries.selectAll().executeAsList()
+    // Use the repositories to get the data
+    val recipes = c.repositoryFactory.recipeRepository.getAllRecipes()
+    val plan = c.repositoryFactory.planRepository.getPlanRecipeIds()
+    val shop = c.repositoryFactory.shopRepository.getShopRecipeIds()
+
     RecipesState.set(
         if (recipes.isNotEmpty()) {
             RecipesState.Success(
                 recipes = recipes,
-                plan = database.planQueries.selectAll().executeAsList(),
-                shop = database.shopQueries.selectAll().executeAsList(),
+                plan = plan,
+                shop = shop,
             )
         } else {
             RecipesState.Loading
         }
     )
 }
+
+// The following methods have been replaced by the repository pattern implementation
