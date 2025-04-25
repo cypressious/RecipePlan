@@ -8,7 +8,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
-    id("org.jetbrains.compose.hot-reload") version "1.0.0-alpha04"
+    id("org.jetbrains.compose.hot-reload") version "1.0.0-alpha08"
     alias(libs.plugins.sqldelight)
 }
 

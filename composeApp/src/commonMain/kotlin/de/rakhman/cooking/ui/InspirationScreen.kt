@@ -18,6 +18,8 @@ fun InspirationScreen(modifier: Modifier) {
     var windowed by remember { mutableStateOf(state.recipes.shuffled().windowed(3, 3)) }
 
     Column(modifier.fillMaxSize().padding(12.dp)) {
+        Text("Hello ${windowed.size}") // comment here
+
         if (windowed.isEmpty()) {
             // TODO
         } else {
