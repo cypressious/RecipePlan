@@ -7,7 +7,11 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.*
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.*
 import de.rakhman.cooking.*
 import de.rakhman.cooking.events.*
@@ -47,14 +51,33 @@ fun RecipeItem(
                 .padding(start = if (slotLeft == null) 16.dp else 0.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
                 .weight(1f)
         ) {
-            Text(text = recipe.title, fontSize = 18.sp, modifier = if (recipe.url != null) Modifier.padding(bottom = 8.dp) else Modifier)
-            recipe.url?.let {
-                Text(
-                    text = it,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    color = MaterialTheme.colorScheme.secondary
-                )
+            Text(
+                text = recipe.title,
+                fontSize = 18.sp,
+            )
+            Row {
+                if (recipe.counter > 0) {
+                    Text(
+                        text = stringResource(Res.string.cooked_times, recipe.counter),
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.tertiary,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+                recipe.url?.let {
+                    if (recipe.counter > 0) {
+                        VerticalDivider(Modifier.padding(top = 4.dp, start = 8.dp, end = 8.dp))
+                    }
+
+                    Text(
+                        text = it,
+                        maxLines = 1,
+                        fontSize = 14.sp,
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
             }
         }
 

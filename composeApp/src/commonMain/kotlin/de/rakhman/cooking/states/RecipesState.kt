@@ -32,6 +32,11 @@ private const val SHEET_NAME_PLAN = "Plan"
 private const val RANGE_PLAN_AND_SHOP = "$SHEET_NAME_PLAN!A1:A2"
 private const val DELETED_VALUE = "deleted"
 
+private const val COLUMN_NAME = 0
+private const val COLUMN_URL = 1
+private const val COLUMN_DELETED = 2
+private const val COLUMN_COUNTER = 3
+
 const val ID_TEMPORARY = -1L
 
 class RecipeContext(
@@ -113,7 +118,7 @@ private fun CoroutineScope.launchRecipesStateInternal() = launch {
         updatePlanAndShop(addIdToPlan = it.id, removeIdFromShop = it.id)
     }
     collectEventsAsyncCatchingErrors<RemoveFromPlanEvent> {
-        updatePlanAndShop(removeIdFromPlan = it.id)
+        updatePlanAndShop(removeIdFromPlan = it.id, incrementCounter = true)
     }
     collectEventsAsyncCatchingErrors<AddToShopEvent> {
         updatePlanAndShop(addIdToShop = it.id)
@@ -174,6 +179,7 @@ private suspend fun updatePlanAndShop(
     removeIdFromPlan: Long? = null,
     removeIdFromShop: Long? = null,
     updateStateOptimistically: Boolean = true,
+    incrementCounter: Boolean = false,
 ) {
     fun newPlanAndShop(
         plan: List<Long>,
@@ -200,16 +206,31 @@ private suspend fun updatePlanAndShop(
     }
 
     withContext(Dispatchers.IO) {
-        val (oldPlan, oldShop) = readPlanAndShop()
-        val (newPlan, newShop) = newPlanAndShop(oldPlan, oldShop)
+        awaitAll(
+            async {
+                val (oldPlan, oldShop) = readPlanAndShop()
+                val (newPlan, newShop) = newPlanAndShop(oldPlan, oldShop)
 
-        updateRawValue(
-            RANGE_PLAN_AND_SHOP,
-            listOf(
-                listOf(newPlan.joinToString(",")),
-                listOf(newShop.joinToString(",")),
-            )
+                updateRawValue(
+                    RANGE_PLAN_AND_SHOP,
+                    listOf(
+                        listOf(newPlan.joinToString(",")),
+                        listOf(newShop.joinToString(",")),
+                    )
+                )
+            },
+            async {
+                if (incrementCounter && removeIdFromPlan != null) {
+                    val rangeRef = "$SHEET_NAME_RECIPES!D${removeIdFromPlan}"
+                    val range = readSheetRange(rangeRef)
+                    val oldCounter = range.elementAtOrNull(0)?.elementAtOrNull(0)?.toString()?.toLongOrNull()
+                    val newCounter = ((oldCounter ?: 0) + 1).toString()
+                    updateRawValue(rangeRef, listOf(listOf(newCounter)))
+                }
+            }
         )
+
+
     }
     syncWithSheets()
 }
@@ -223,7 +244,7 @@ private suspend fun updateRecipe(id: Long, title: String, url: String?) {
     if (state is RecipesState.Success) {
         RecipesState.set(
             RecipesState.Success(
-                state.recipes.map { if (it.id == id) Recipe(id, title, url) else it },
+                state.recipes.map { if (it.id == id) Recipe(id, title, url, it.counter) else it },
                 state.plan,
                 state.shop,
             )
@@ -255,7 +276,7 @@ private suspend fun addRecipe(title: String, url: String?) {
     if (state is RecipesState.Success) {
         RecipesState.set(
             RecipesState.Success(
-                state.recipes + Recipe(ID_TEMPORARY, title, url),
+                state.recipes + Recipe(ID_TEMPORARY, title, url, 0),
                 state.plan.let { if (target == ScreenState.Plan) it + ID_TEMPORARY else it },
                 state.shop.let { if (target == ScreenState.Shop) it + ID_TEMPORARY else it },
             )
@@ -312,11 +333,13 @@ context(c: RecipeContext)
 private fun readRecipes(): List<Recipe> {
     return readSheetRange(SHEET_NAME_RECIPES)
         .mapIndexedNotNull { i, row ->
-            if (row.isNotEmpty() && row.elementAtOrNull(2)?.toString() != DELETED_VALUE) {
+            if (row.isNotEmpty() && row.elementAtOrNull(COLUMN_DELETED)?.toString() != DELETED_VALUE) {
                 Recipe(
                     id = i + 1L,
-                    title = row[0].toString().trim(),
-                    url = row.elementAtOrNull(1)?.toString()?.ifBlank { null })
+                    title = row[COLUMN_NAME].toString().trim(),
+                    url = row.elementAtOrNull(COLUMN_URL)?.toString()?.ifBlank { null },
+                    counter = row.elementAtOrNull(COLUMN_COUNTER).toString().toLongOrNull() ?: 0,
+                )
             } else {
                 null
             }
@@ -353,7 +376,7 @@ private fun Database.updateWith(recipes: List<Recipe>, plan: List<Long>, shop: L
     transaction {
         recipesQueries.deleteAll()
         recipes.forEach {
-            recipesQueries.insert(it.id, it.title, it.url)
+            recipesQueries.insert(it.id, it.title, it.url, it.counter)
         }
 
         planQueries.deleteAll()
