@@ -35,9 +35,13 @@ fun RecipeItem(recipe: Recipe, screenState: ScreenState, slotLeft: (@Composable 
         slotLeft?.invoke(this)
 
         Column(
-            modifier = Modifier.fillMaxWidth().padding(start = if (slotLeft == null) 16.dp else 0.dp, end = 16.dp, top = 8.dp, bottom = 8.dp).weight(1f),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = if (slotLeft == null) 16.dp else 0.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
+                .weight(1f)
+                .align(Alignment.CenterVertically),
         ) {
-            Text(text = recipe.title, fontSize = 18.sp, modifier = Modifier.padding(bottom = 8.dp))
+            Text(text = recipe.title, fontSize = 18.sp, modifier = if (recipe.url != null) Modifier.padding(bottom = 8.dp) else Modifier)
             recipe.url?.let {
                 Text(
                     text = it,

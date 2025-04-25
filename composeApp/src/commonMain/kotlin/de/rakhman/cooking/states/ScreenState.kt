@@ -12,6 +12,7 @@ sealed class ScreenState(val title: StringResource) : State {
     data object Shop : BaseScreen(Res.string.shop)
     class Add(val target: BaseScreen, val editingRecipe: Recipe? = null, val initialData: String? = null) : ScreenState(Res.string.add_recipe)
     data object Settings : ScreenState(Res.string.settings)
+    data object Inspiration : ScreenState(Res.string.inspiration)
 
     companion object Key : State.Key<ScreenState> {
         override val default: ScreenState
