@@ -36,4 +36,7 @@
     <string name="clear_search">Suche leeren</string>
     <string name="sign_out">Abmelden</string>
     <string name="back">Zurück</string>
+    <string name="inspiration">Inspiration</string>
+    <string name="next">Weiter</string>
+    <string name="added">Hinzugefügt</string>
 </resources>

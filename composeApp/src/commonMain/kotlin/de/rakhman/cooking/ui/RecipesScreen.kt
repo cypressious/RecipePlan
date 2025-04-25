@@ -86,7 +86,8 @@ private fun Recipes(recipes: List<Recipe>) {
             count = filteredList.size,
             key = { i -> filteredList[i].id },
             itemContent = { i ->
-                RecipeItem(recipe = filteredList[i], ScreenState.Recipes)
+                val recipe = filteredList[i]
+                RecipeItem(recipe = recipe, slotRight = { RecipeDropdown(recipe, ScreenState.Recipes) })
                 if (i != filteredList.lastIndex) HorizontalDivider()
             },
         )
