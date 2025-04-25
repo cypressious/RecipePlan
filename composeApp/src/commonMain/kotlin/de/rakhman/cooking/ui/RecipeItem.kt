@@ -8,10 +8,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.*
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.*
 import de.rakhman.cooking.*
 import de.rakhman.cooking.events.*
@@ -88,7 +85,7 @@ fun RecipeItem(
 @Composable
 fun RecipeDropdown(
     recipe: Recipe,
-    screenState: ScreenState.BaseScreen
+    screen: ScreenState.BaseScreen
 ) {
     var expanded by remember { mutableStateOf(false) }
     val context = getContext()
@@ -105,7 +102,7 @@ fun RecipeDropdown(
                 expanded = expanded,
                 onDismissRequest = { expanded = false }
             ) {
-                if (screenState == ScreenState.Recipes) {
+                if (screen == ScreenState.Recipes) {
                     DropdownMenuItem(
                         text = { Text(stringResource(Res.string.add_to_shop)) },
                         onClick = EvasLaunching {
@@ -123,7 +120,7 @@ fun RecipeDropdown(
                         }
                     )
                 }
-                if (screenState == ScreenState.Shop) {
+                if (screen == ScreenState.Shop) {
                     DropdownMenuItem(
                         text = { Text(stringResource(Res.string.remove_from_shop)) },
                         onClick = EvasLaunching {
@@ -138,7 +135,7 @@ fun RecipeDropdown(
                     onClick = EvasLaunching {
                         ScreenState.set(
                             ScreenState.Add(
-                                target = screenState,
+                                target = screen,
                                 editingRecipe = recipe
                             )
                         )

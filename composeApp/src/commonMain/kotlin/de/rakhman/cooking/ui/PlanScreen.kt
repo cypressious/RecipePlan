@@ -57,7 +57,7 @@ fun PlanScreen(modifier: Modifier, isShop: Boolean) {
                                 RecipeItem(
                                     recipe = recipe,
                                     slotLeft = { PlanCheckbox(recipe, isShop) },
-                                    slotRight = { RecipeDropdown(recipe, ScreenState.Plan) }
+                                    slotRight = { RecipeDropdown(recipe, if (isShop) ScreenState.Shop else ScreenState.Plan) }
                                 )
                             }
                             if (i != planRecipes.lastIndex) HorizontalDivider()
