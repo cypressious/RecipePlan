@@ -50,35 +50,38 @@ fun RecipeItem(
                 text = recipe.title,
                 fontSize = 18.sp,
             )
-            Row(
-                modifier = Modifier.height(IntrinsicSize.Min)
-            ) {
-                if (recipe.counter > 0) {
-                    Text(
-                        text = stringResource(Res.string.cooked_times, recipe.counter),
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.tertiary,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                }
-                recipe.url?.ifBlank { null }?.let {
+            if (recipe.counter > 0 || !recipe.url.isNullOrBlank()) {
+                Row(
+                    modifier = Modifier.height(IntrinsicSize.Min).padding(top = 2.dp)
+                ) {
                     if (recipe.counter > 0) {
-                        VerticalDivider(Modifier.padding(top = 8.dp, start = 8.dp, end = 8.dp, bottom = 2.dp))
+                        Text(
+                            text = stringResource(Res.string.cooked_times, recipe.counter),
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.tertiary,
+                        )
                     }
+                    recipe.url?.ifBlank { null }?.let {
+                        if (recipe.counter > 0) {
+                            VerticalDivider(Modifier.padding(top = 4.dp, start = 8.dp, end = 8.dp, bottom = 2.dp))
+                        }
 
-                    Text(
-                        text = it,
-                        maxLines = 1,
-                        fontSize = 14.sp,
-                        overflow = TextOverflow.Ellipsis,
-                        color = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
+                        Text(
+                            text = it,
+                            maxLines = 1,
+                            fontSize = 14.sp,
+                            overflow = TextOverflow.Ellipsis,
+                            color = MaterialTheme.colorScheme.secondary,
+                        )
+                    }
                 }
             }
-            FlowRow {
-                recipe.tagsSet.forEach {
-                    RecipeTag(it)
+
+            if (recipe.tagsSet.isNotEmpty()) {
+                FlowRow(modifier = Modifier.padding(bottom = 4.dp)) {
+                    recipe.tagsSet.forEach {
+                        RecipeTag(it)
+                    }
                 }
             }
         }
