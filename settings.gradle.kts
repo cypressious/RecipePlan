@@ -27,11 +27,11 @@ plugins {
 
 dependencyResolutionManagement {
     repositories {
-        maven("https://repo.sellmair.io") {
-            mavenContent {
-                includeGroupAndSubgroups("org.jetbrains.kotlin")
-            }
-        }
+//        maven("https://repo.sellmair.io") {
+//            mavenContent {
+//                includeGroupAndSubgroups("org.jetbrains.kotlin")
+//            }
+//        }
         google {
             mavenContent {
                 includeGroupAndSubgroups("androidx")
