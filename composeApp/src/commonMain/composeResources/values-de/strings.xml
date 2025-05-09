@@ -41,4 +41,5 @@
     <string name="added">Hinzugefügt</string>
     <string name="cooked_times">%1$d mal gekocht</string>
     <string name="sort">Sortierung</string>
+    <string name="new_tag">Neuer Tag...</string>
 </resources>

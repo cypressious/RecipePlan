@@ -13,16 +13,22 @@ import io.sellmair.evas.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collectLatest
 
+const val SEPARATOR_TAGS = ";"
+
 sealed class RecipesState : State {
     data object Loading : RecipesState()
     data class Success(val recipes: List<Recipe>, val plan: List<Long>, val shop: List<Long>) : RecipesState() {
-        val byId = recipes.associateBy { it.id }
+        val byId: Map<Long, Recipe> = recipes.associateBy { it.id }
+        val allTags: Set<String> = recipes.flatMapTo(mutableSetOf()) { it.tagsSet }
     }
 
     companion object Key : State.Key<RecipesState> {
         override val default: RecipesState get() = Loading
     }
 }
+
+val Recipe.tagsSet: Set<String>
+    get() = tags?.split(SEPARATOR_TAGS)?.mapTo(mutableSetOf()) { it.trim() }.orEmpty()
 
 private const val SHEET_NAME_RECIPES = "Rezepte"
 private const val SHEET_NAME_PLAN = "Plan"
@@ -33,6 +39,7 @@ private const val COLUMN_NAME = 0
 private const val COLUMN_URL = 1
 private const val COLUMN_DELETED = 2
 private const val COLUMN_COUNTER = 3
+private const val COLUMN_TAGS = 4
 
 const val ID_TEMPORARY = -1L
 
@@ -109,8 +116,8 @@ private fun CoroutineScope.launchRecipesStateInternal() = launch {
     setStateFromDatabase(c.database)
     collectEventsAsyncCatchingErrors<ReloadEvent> { syncWithSheets() }
     collectEventsAsyncCatchingErrors<DeleteEvent> { setDeleted(it.id) }
-    collectEventsAsyncCatchingErrors<AddEvent> { addRecipe(it.title, it.url, it.target) }
-    collectEventsAsyncCatchingErrors<UpdateEvent> { updateRecipe(it.id, it.title, it.url) }
+    collectEventsAsyncCatchingErrors<AddEvent> { addRecipe(it.title, it.url, it.target, it.tags) }
+    collectEventsAsyncCatchingErrors<UpdateEvent> { updateRecipe(it.id, it.title, it.url, it.tags) }
     collectEventsAsyncCatchingErrors<AddToPlanEvent> {
         updatePlanAndShop(addIdToPlan = it.id, removeIdFromShop = it.id)
     }
@@ -233,15 +240,16 @@ private suspend fun updatePlanAndShop(
 }
 
 context(c: RecipeContext)
-private suspend fun updateRecipe(id: Long, title: String, url: String?) {
+private suspend fun updateRecipe(id: Long, title: String, url: String?, tags: Set<String>) {
     val state = RecipesState.value()
     val target = (ScreenState.value() as? ScreenState.Add)?.target
     ScreenState.set(target ?: ScreenState.Recipes)
+    val tagString = tags.joinToString(SEPARATOR_TAGS)
 
     if (state is RecipesState.Success) {
         RecipesState.set(
             RecipesState.Success(
-                state.recipes.map { if (it.id == id) Recipe(id, title, url, it.counter) else it },
+                state.recipes.map { if (it.id == id) Recipe(id, title, url, it.counter, tagString.ifBlank { null }) else it },
                 state.plan,
                 state.shop,
             )
@@ -249,30 +257,23 @@ private suspend fun updateRecipe(id: Long, title: String, url: String?) {
     }
 
     withContext(Dispatchers.IO) {
-        c.sheets.spreadsheets().values().update(
-            c.spreadSheetsId,
-            "$SHEET_NAME_RECIPES!A$id:B$id",
-            ValueRange().apply {
-                setValues(listOf(listOf(title, url ?: "")))
-            }
-        ).run {
-            valueInputOption = "RAW"
-            execute()
-        }
+        writeRecipe(id, title, url, tagString)
     }
 
     syncWithSheets()
 }
 
 context(c: RecipeContext)
-private suspend fun addRecipe(title: String, url: String?, target: ScreenState.BaseScreen) {
+private suspend fun addRecipe(title: String, url: String?, target: ScreenState.BaseScreen, tags: Set<String>) {
     ScreenState.set(target)
+
+    val tagsString = tags.joinToString(SEPARATOR_TAGS)
 
     val state = RecipesState.value()
     if (state is RecipesState.Success) {
         RecipesState.set(
             RecipesState.Success(
-                state.recipes + Recipe(ID_TEMPORARY, title, url, 0),
+                state.recipes + Recipe(ID_TEMPORARY, title, url, 0, tagsString),
                 state.plan.let { if (target == ScreenState.Plan) it + ID_TEMPORARY else it },
                 state.shop.let { if (target == ScreenState.Shop) it + ID_TEMPORARY else it },
             )
@@ -283,16 +284,7 @@ private suspend fun addRecipe(title: String, url: String?, target: ScreenState.B
         val recipes = readSheetRange(SHEET_NAME_RECIPES)
 
         val id = recipes.size + 1L
-        c.sheets.spreadsheets().values().update(
-            c.spreadSheetsId,
-            "$SHEET_NAME_RECIPES!A$id:B$id",
-            ValueRange().apply {
-                setValues(listOf(listOf(title, url ?: "")))
-            }
-        ).run {
-            valueInputOption = "RAW"
-            execute()
-        }
+        writeRecipe(id, title, url, tagsString)
 
         if (target == ScreenState.Shop) {
             updatePlanAndShop(
@@ -334,12 +326,34 @@ private fun readRecipes(): List<Recipe> {
                     id = i + 1L,
                     title = row[COLUMN_NAME].toString().trim(),
                     url = row.elementAtOrNull(COLUMN_URL)?.toString()?.ifBlank { null },
-                    counter = row.elementAtOrNull(COLUMN_COUNTER).toString().toLongOrNull() ?: 0,
+                    counter = row.elementAtOrNull(COLUMN_COUNTER)?.toString()?.toLongOrNull() ?: 0,
+                    tags = row.elementAtOrNull(COLUMN_TAGS)?.toString(),
                 )
             } else {
                 null
             }
         }
+}
+
+context(c: RecipeContext)
+private fun writeRecipe(id: Long, title: String, url: String?, tagsString: String) {
+    c.sheets.spreadsheets().values().batchUpdate(
+        c.spreadSheetsId,
+        BatchUpdateValuesRequest().apply {
+            data = listOf(
+                ValueRange().apply {
+                    range = "$SHEET_NAME_RECIPES!A$id:B$id"
+                    setValues(listOf(listOf(title, url ?: "")))
+                    valueInputOption = "RAW"
+                },
+                ValueRange().apply {
+                    range = "$SHEET_NAME_RECIPES!E$id"
+                    setValues(listOf(listOf(tagsString)))
+                    valueInputOption = "RAW"
+                },
+            )
+        }
+    ).execute()
 }
 
 context(c: RecipeContext)
@@ -372,7 +386,7 @@ private fun Database.updateWith(recipes: List<Recipe>, plan: List<Long>, shop: L
     transaction {
         recipesQueries.deleteAll()
         recipes.forEach {
-            recipesQueries.insert(it.id, it.title, it.url, it.counter)
+            recipesQueries.insert(it.id, it.title, it.url, it.counter, it.tags)
         }
 
         planQueries.deleteAll()

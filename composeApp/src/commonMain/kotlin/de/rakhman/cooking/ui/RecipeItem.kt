@@ -1,18 +1,24 @@
 package de.rakhman.cooking.ui
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.*
 import androidx.compose.ui.unit.*
 import de.rakhman.cooking.*
 import de.rakhman.cooking.events.*
 import de.rakhman.cooking.states.ID_TEMPORARY
 import de.rakhman.cooking.states.ScreenState
+import de.rakhman.cooking.states.tagsSet
 import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.emitAsync
 import io.sellmair.evas.set
@@ -29,7 +35,6 @@ fun RecipeItem(
     val context = getContext()
     Row(
         modifier = Modifier
-            .height(IntrinsicSize.Min)
             .clickable(onClick = { recipe.url?.let { openUrl(it, context) } }),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -45,7 +50,9 @@ fun RecipeItem(
                 text = recipe.title,
                 fontSize = 18.sp,
             )
-            Row {
+            Row(
+                modifier = Modifier.height(IntrinsicSize.Min)
+            ) {
                 if (recipe.counter > 0) {
                     Text(
                         text = stringResource(Res.string.cooked_times, recipe.counter),
@@ -54,9 +61,9 @@ fun RecipeItem(
                         modifier = Modifier.padding(top = 4.dp)
                     )
                 }
-                recipe.url?.let {
+                recipe.url?.ifBlank { null }?.let {
                     if (recipe.counter > 0) {
-                        VerticalDivider(Modifier.padding(top = 4.dp, start = 8.dp, end = 8.dp))
+                        VerticalDivider(Modifier.padding(top = 8.dp, start = 8.dp, end = 8.dp, bottom = 2.dp))
                     }
 
                     Text(
@@ -69,10 +76,37 @@ fun RecipeItem(
                     )
                 }
             }
+            FlowRow {
+                recipe.tagsSet.forEach {
+                    RecipeTag(it)
+                }
+            }
         }
 
         slotRight?.invoke(this)
     }
+}
+
+@Composable
+fun RecipeTag(string: String, selected: Boolean = true, clickable: Boolean = false, onClick: () -> Unit = { }) {
+    val shape = RoundedCornerShape(8.dp)
+    val modifier = Modifier
+        .padding(top = 4.dp, end = 4.dp)
+        .border(1.dp, MaterialTheme.colorScheme.outline, shape)
+        .background(
+            if (selected) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.surfaceContainer,
+            shape
+        )
+        .clip(shape)
+        .clickable(clickable, onClick = onClick)
+        .padding(vertical = 2.dp, horizontal = 8.dp)
+
+
+    Text(
+        text = string,
+        fontSize = 14.sp,
+        modifier = modifier
+    )
 }
 
 @Composable

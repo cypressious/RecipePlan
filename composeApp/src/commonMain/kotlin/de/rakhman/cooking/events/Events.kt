@@ -16,9 +16,9 @@ class RemoveFromPlanEvent(val id: Long) : Event
 
 class RemoveFromShopEvent(val id: Long) : Event
 
-class AddEvent(val title: String, val url: String?, val target: ScreenState.BaseScreen) : Event
+class AddEvent(val title: String, val url: String?, val tags: Set<String>, val target: ScreenState.BaseScreen) : Event
 
-class UpdateEvent(val id: Long, val title: String, val url: String?) : Event
+class UpdateEvent(val id: Long, val title: String, val url: String?, val tags: Set<String>) : Event
 
 class ErrorEvent(val e: Exception) : Event
 
