@@ -27,7 +27,14 @@ private const val INSPIRATION_COUNT = 3
 @Composable
 fun InspirationScreen(modifier: Modifier) {
     val state = RecipesState.composeValue() as? RecipesState.Success ?: return
-    var windowed by remember { mutableStateOf(state.recipes.shuffled().windowed(INSPIRATION_COUNT, INSPIRATION_COUNT)) }
+    var windowed by remember {
+        mutableStateOf(
+            state.recipes
+                .filter { it.id !in state.shop && it.id !in state.plan }
+                .shuffled()
+                .windowed(INSPIRATION_COUNT, INSPIRATION_COUNT)
+        )
+    }
     var checked by remember { mutableStateOf(List(INSPIRATION_COUNT) { false }) }
 
     Box(modifier.fillMaxSize()) {
