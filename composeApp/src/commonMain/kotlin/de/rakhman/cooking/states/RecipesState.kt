@@ -19,7 +19,7 @@ sealed class RecipesState : State {
     data object Loading : RecipesState()
     data class Success(val recipes: List<Recipe>, val plan: List<Long>, val shop: List<Long>) : RecipesState() {
         val byId: Map<Long, Recipe> = recipes.associateBy { it.id }
-        val allTags: Set<String> = recipes.flatMapTo(mutableSetOf()) { it.tagsSet }
+        val allTags: Set<String> = recipes.flatMap { it.tagsSet }.sorted().toSet()
     }
 
     companion object Key : State.Key<RecipesState> {

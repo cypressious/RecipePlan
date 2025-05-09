@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package de.rakhman.cooking.ui
 
 import androidx.compose.foundation.layout.*
@@ -8,10 +10,12 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.*
 import de.rakhman.cooking.Recipe
 import de.rakhman.cooking.states.RecipesState
 import de.rakhman.cooking.states.ScreenState
+import de.rakhman.cooking.states.tagsSet
 import io.sellmair.evas.compose.composeValue
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -23,7 +27,7 @@ fun RecipesScreen(modifier: Modifier) {
     Column(modifier = modifier) {
         when (recipeState) {
             is RecipesState.Success -> {
-                Recipes(recipeState.recipes)
+                Recipes(recipeState)
             }
 
             RecipesState.Loading -> {
@@ -43,9 +47,11 @@ enum class SortOrder(
 }
 
 @Composable
-private fun Recipes(recipes: List<Recipe>) {
+private fun Recipes(state: RecipesState.Success) {
+    val recipes = state.recipes
     var filter by remember { mutableStateOf("") }
     var sort by remember { mutableStateOf(SortOrder.Name) }
+    var tagsToShow by remember { mutableStateOf(emptySet<String>()) }
 
     Row(
         modifier = Modifier.fillMaxWidth().padding(12.dp, 4.dp, 12.dp, 4.dp),
@@ -81,6 +87,36 @@ private fun Recipes(recipes: List<Recipe>) {
                 modifier = Modifier.size(24.dp)
             )
         }
+
+        var showTagsFilter by remember { mutableStateOf(false) }
+
+        IconButton(onClick = {
+            showTagsFilter = true
+        }) {
+            Icon(
+                imageVector = vectorResource(if (tagsToShow.isNotEmpty()) Res.drawable.tags_fill else Res.drawable.tags),
+                contentDescription = stringResource(Res.string.sort),
+                modifier = Modifier.size(24.dp)
+            )
+        }
+
+        if (showTagsFilter) {
+            ModalBottomSheet(onDismissRequest = { showTagsFilter = false}) {
+                FlowRow(modifier = Modifier.padding(16.dp)) {
+                    for (tag in state.allTags) {
+                        val shown = tag in tagsToShow
+                        RecipeTag(
+                            string = tag,
+                            selected = shown,
+                            clickable = true,
+                            onClick = {
+                                if (shown) tagsToShow -= tag else tagsToShow += tag
+                            }
+                        )
+                    }
+                }
+            }
+        }
     }
 
     HorizontalDivider()
@@ -96,17 +132,21 @@ private fun Recipes(recipes: List<Recipe>) {
     LaunchedEffect(filter, sort) { listState.scrollToItem(0) }
 
     LazyColumn(state = listState, contentPadding = PaddingValues(bottom = 70.dp)) {
-        val filteredList = if (filter.isEmpty()) {
-            recipes.sortedWith(sort.comparator)
-        } else {
-            recipes
-                .filter { it.matchesFilter(filter.trim()) }
-                .sortedWith(compareByDescending<Recipe> {
-                    it.title.startsWith(filter.trim(), ignoreCase = true)
-                }.thenByDescending {
-                    it.title.contains(filter.trim(), ignoreCase = true)
-                })
-        }
+        val filteredList = recipes
+            .filter { tagsToShow.isEmpty() || it.tagsSet.any { tag -> tag in tagsToShow } }
+            .let {
+                if (filter.isEmpty()) {
+                    it.sortedWith(sort.comparator)
+                } else {
+                    it
+                        .filter { it.matchesFilter(filter.trim()) }
+                        .sortedWith(compareByDescending<Recipe> {
+                            it.title.startsWith(filter.trim(), ignoreCase = true)
+                        }.thenByDescending {
+                            it.title.contains(filter.trim(), ignoreCase = true)
+                        })
+                }
+            }
 
         items(
             count = filteredList.size,
