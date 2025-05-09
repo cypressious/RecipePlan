@@ -10,7 +10,6 @@ import io.sellmair.evas.Events
 import io.sellmair.evas.States
 import io.sellmair.evas.compose.installEvas
 import kotlinx.coroutines.*
-import org.jetbrains.compose.reload.DevelopmentEntryPoint
 import java.util.*
 
 fun main() {
@@ -43,9 +42,7 @@ fun main() {
         alwaysOnTop = true,
     ) {
         installEvas(events, states) {
-            DevelopmentEntryPoint {
-                App()
-            }
+            App()
         }
     }
 }

@@ -19,13 +19,13 @@ googleApiClientAndroid = "2.7.2"
 googleApiServicesSheets = "v4-rev20250415-2.0.0"
 googleOauthClientJetty = "1.39.0"
 junit = "4.13.2"
-kotlin = "2.2.0-lenient-3"
+kotlin = "2.2.0-Beta2"
 kotlinx-coroutines = "1.10.2"
 ksoup = "0.2.3"
 materialIconsCore = "1.7.3"
 playServicesAuth = "21.3.0"
 sqldelight = "2.0.2"
-hotReload = "1.0.0-alpha04"
+hotReload = "1.0.0-alpha09"
 
 [libraries]
 evas = { module = "io.sellmair:evas", version.ref = "evas" }
