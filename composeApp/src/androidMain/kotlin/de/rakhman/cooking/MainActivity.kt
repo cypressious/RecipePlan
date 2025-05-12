@@ -81,6 +81,7 @@ class MainActivity : ComponentActivity() {
 
                 collectEventsAsync<ErrorEvent> {
                     Toast.makeText(this@MainActivity, it.e.toString(), Toast.LENGTH_LONG).show()
+                    it.e.printStackTrace()
                 }
 
                 lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
