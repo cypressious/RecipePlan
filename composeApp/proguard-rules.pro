@@ -5,3 +5,4 @@
 
 -keep class com.google.api.services.sheets.v4.model.UpdateValuesResponse { *; }
 -keep class com.google.api.services.sheets.v4.model.ValueRange { *; }
+-keep class com.google.api.services.sheets.v4.model.BatchUpdateValuesResponse { *; }
