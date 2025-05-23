@@ -84,6 +84,17 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1,INDEX.LIST,DEPENDENCIES}"
         }
     }
+    val keystoreFile = rootDir.resolve("recipe-keystore")
+    signingConfigs {
+        if (keystoreFile.exists()) {
+            create("release") {
+                storeFile = keystoreFile
+                storePassword = System.getenv("SIGNING_STORE_PASSWORD")
+                keyAlias = System.getenv("SIGNING_KEY_ALIAS")
+                keyPassword = System.getenv("SIGNING_KEY_PASSWORD")
+            }
+        }
+    }
     buildTypes {
         getByName("release") {
             isMinifyEnabled = true
@@ -93,22 +104,15 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+
+            if (keystoreFile.exists()) {
+                signingConfig = signingConfigs["release"]
+            }
         }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
-    }
-    signingConfigs {
-        val keystoreFile = rootDir.resolve("recipe-keystore")
-        if (keystoreFile.exists()) {
-            create("release") {
-                storeFile = keystoreFile
-                storePassword = System.getenv("SIGNING_STORE_PASSWORD")
-                keyAlias = System.getenv("SIGNING_KEY_ALIAS")
-                keyPassword = System.getenv("SIGNING_KEY_PASSWORD")
-            }
-        }
     }
 }
 
