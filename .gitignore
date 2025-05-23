@@ -16,7 +16,7 @@ captures
 !*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
 /composeApp/tokens/StoredCredential
-/recipe-keystore
+/recipe-keystore.jks
 composeApp/release
 /composeApp/src/jvmMain/resources/credentials.json
 /.idea/uiDesigner.xml

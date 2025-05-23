@@ -2,6 +2,9 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.security.MessageDigest
+
+
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -84,9 +87,13 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1,INDEX.LIST,DEPENDENCIES}"
         }
     }
-    val keystoreFile = rootDir.resolve("recipe-keystore")
+    val keystoreFile = rootDir.resolve("recipe-keystore.jks")
     signingConfigs {
         if (keystoreFile.exists()) {
+            val data = keystoreFile.readBytes()
+            val hash = MessageDigest.getInstance("MD5").digest(data)
+            val checksum = BigInteger(1, hash).toString(16)
+            println("Keystore file exists. Checksum: $checksum")
             create("release") {
                 storeFile = keystoreFile
                 storePassword = System.getenv("SIGNING_STORE_PASSWORD")
