@@ -90,10 +90,6 @@ android {
     val keystoreFile = rootDir.resolve("recipe-keystore.jks")
     signingConfigs {
         if (keystoreFile.exists()) {
-            val data = keystoreFile.readBytes()
-            val hash = MessageDigest.getInstance("MD5").digest(data)
-            val checksum = BigInteger(1, hash).toString(16)
-            println("Keystore file exists. Checksum: $checksum")
             create("release") {
                 storeFile = keystoreFile
                 storePassword = System.getenv("SIGNING_STORE_PASSWORD")
