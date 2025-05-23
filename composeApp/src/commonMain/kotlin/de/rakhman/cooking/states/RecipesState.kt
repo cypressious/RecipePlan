@@ -143,7 +143,6 @@ private inline fun <reified T : Event> CoroutineScope.collectEventsAsyncCatching
             SyncState.setSyncing()
             f(event)
         } catch (e: Exception) {
-            e.printStackTrace()
             ErrorEvent(e).emit()
             setStateFromDatabase(c.database)
         } finally {

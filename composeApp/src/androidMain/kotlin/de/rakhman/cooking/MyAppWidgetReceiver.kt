@@ -20,6 +20,7 @@ import androidx.glance.state.GlanceStateDefinition
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import app.cash.sqldelight.coroutines.asFlow
+import de.rakhman.cooking.backend.buildSheetsService
 import de.rakhman.cooking.database.DriverFactory
 import de.rakhman.cooking.states.RecipeContext
 import de.rakhman.cooking.states.syncWithSheets

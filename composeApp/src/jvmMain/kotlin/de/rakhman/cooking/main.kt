@@ -4,10 +4,12 @@ import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.*
 import de.rakhman.cooking.backend.SheetsQuickstart
 import de.rakhman.cooking.database.DriverFactory
+import de.rakhman.cooking.events.ErrorEvent
 import de.rakhman.cooking.states.launchRecipesState
 import de.rakhman.cooking.ui.App
 import io.sellmair.evas.Events
 import io.sellmair.evas.States
+import io.sellmair.evas.collectEventsAsync
 import io.sellmair.evas.compose.installEvas
 import kotlinx.coroutines.*
 import java.util.*
@@ -25,6 +27,10 @@ fun main() {
 
         System.getenv("SHEET")?.let {
             database.settingsQueries.insert(it)
+        }
+
+        collectEventsAsync<ErrorEvent> {
+            it.e.printStackTrace()
         }
 
         launchRecipesState(

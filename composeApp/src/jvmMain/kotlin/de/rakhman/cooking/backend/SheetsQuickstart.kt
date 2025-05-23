@@ -18,27 +18,22 @@ import java.io.IOException
 import java.io.InputStreamReader
 
 object SheetsQuickstart {
-    const val APPLICATION_NAME = "Recipe Plan Desktop"
-    val JSON_FACTORY: JsonFactory = GsonFactory.getDefaultInstance()
-    const val TOKENS_DIRECTORY_PATH = "tokens"
+    private val JSON_FACTORY: JsonFactory = GsonFactory.getDefaultInstance()
+    private const val TOKENS_DIRECTORY_PATH = "tokens"
 
-    val SCOPES = mutableListOf<String?>(SheetsScopes.SPREADSHEETS)
-    const val CREDENTIALS_FILE_PATH = "/credentials.json"
+    private val SCOPES: List<String> = listOf(SheetsScopes.SPREADSHEETS)
+    private const val CREDENTIALS_FILE_PATH = "/credentials.json"
 
     @Throws(IOException::class)
-    fun getCredentials(transport: NetHttpTransport): Credential? {
-        // Load client secrets.
+    fun getCredentials(transport: NetHttpTransport): Credential {
         val inputStream = SheetsQuickstart::class.java.getResourceAsStream(CREDENTIALS_FILE_PATH)
-        if (inputStream == null) {
-            throw FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH)
-        }
+            ?: throw FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH)
         val clientSecrets =
             GoogleClientSecrets.load(JSON_FACTORY, InputStreamReader(inputStream))
 
         // Build flow and trigger user authorization request.
-        val flow = GoogleAuthorizationCodeFlow.Builder(
-            transport, JSON_FACTORY, clientSecrets, SCOPES
-        )
+        val flow = GoogleAuthorizationCodeFlow
+            .Builder(transport, JSON_FACTORY, clientSecrets, SCOPES)
             .setDataStoreFactory(FileDataStoreFactory(File(TOKENS_DIRECTORY_PATH)))
             .setAccessType("offline")
             .build()
@@ -48,8 +43,6 @@ object SheetsQuickstart {
 
     fun getSheetsService(): Sheets {
         val transport = GoogleNetHttpTransport.newTrustedTransport()
-        return Sheets.Builder(transport, JSON_FACTORY, getCredentials(transport))
-            .setApplicationName(APPLICATION_NAME)
-            .build()
+        return buildSheetsService(getCredentials(transport))
     }
 }
