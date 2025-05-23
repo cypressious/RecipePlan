@@ -15,7 +15,6 @@ compose-multiplatform = "1.8.1"
 evas = "1.3.0"
 glanceAppwidget = "1.1.1"
 googleApiClient = "2.8.0"
-googleApiClientAndroid = "2.8.0"
 googleApiServicesSheets = "v4-rev20250513-2.0.0"
 googleOauthClientJetty = "1.39.0"
 junit = "4.13.2"
@@ -31,7 +30,7 @@ hotReload = "1.0.0-alpha09"
 evas = { module = "io.sellmair:evas", version.ref = "evas" }
 evas-compose = { module = "io.sellmair:evas-compose", version.ref = "evas" }
 google-api-client = { module = "com.google.api-client:google-api-client", version.ref = "googleApiClient" }
-google-api-client-android = { module = "com.google.api-client:google-api-client-android", version.ref = "googleApiClientAndroid" }
+google-api-client-android = { module = "com.google.api-client:google-api-client-android", version.ref = "googleApiClient" }
 google-api-services-sheets = { module = "com.google.apis:google-api-services-sheets", version.ref = "googleApiServicesSheets" }
 google-oauth-client-jetty = { module = "com.google.oauth-client:google-oauth-client-jetty", version.ref = "googleOauthClientJetty" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
