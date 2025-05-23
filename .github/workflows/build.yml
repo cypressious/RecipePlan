@@ -44,7 +44,7 @@ jobs:
         id: decode_keystore
         uses: timheuer/base64-to-file@v1.2
         with:
-          fileName: '${{ GITHUB_WORKSPACE }}/recipe-keystore'
+          fileName: 'recipe-keystore'
           encodedString: ${{ secrets.KEYSTORE }}
 
       - name: Bump version
@@ -66,5 +66,5 @@ jobs:
         with:
           serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           packageName: de.rakhman.cooking
-          releaseFiles: '${{ GITHUB_WORKSPACE }}/composeApp/build/outputs/bundle/release/composeApp-release.aab'
+          releaseFiles: 'composeApp/build/outputs/bundle/release/composeApp-release.aab'
           track: qa
