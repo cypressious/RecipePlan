@@ -209,31 +209,39 @@ private suspend fun updatePlanAndShop(
     }
 
     withContext(Dispatchers.IO) {
-        awaitAll(
-            async {
-                val (oldPlan, oldShop) = readPlanAndShop()
-                val (newPlan, newShop) = newPlanAndShop(oldPlan, oldShop)
+        val (oldPlan, oldShop) = readPlanAndShop()
+        val (newPlan, newShop) = newPlanAndShop(oldPlan, oldShop)
 
-                updateRawValue(
-                    RANGE_PLAN_AND_SHOP,
-                    listOf(
-                        listOf(newPlan.joinToString(",")),
-                        listOf(newShop.joinToString(",")),
-                    )
-                )
-            },
-            async {
-                if (incrementCounter && removeIdFromPlan != null) {
-                    val rangeRef = "$SHEET_NAME_RECIPES!D${removeIdFromPlan}"
-                    val range = readSheetRange(rangeRef)
-                    val oldCounter = range.elementAtOrNull(0)?.elementAtOrNull(0)?.toString()?.toLongOrNull()
-                    val newCounter = ((oldCounter ?: 0) + 1).toString()
-                    updateRawValue(rangeRef, listOf(listOf(newCounter)))
+        c.sheets.spreadsheets().values().batchUpdate(
+            c.spreadSheetsId,
+            BatchUpdateValuesRequest().apply {
+                data = buildList {
+                    add(ValueRange().apply {
+                        range = RANGE_PLAN_AND_SHOP
+                        setValues(
+                            listOf(
+                                listOf(newPlan.joinToString(",")),
+                                listOf(newShop.joinToString(",")),
+                            )
+                        )
+                        valueInputOption = "RAW"
+                    })
+
+                    if (incrementCounter && removeIdFromPlan != null) {
+                        val rangeRef = "$SHEET_NAME_RECIPES!D${removeIdFromPlan}"
+                        val oldCounter = readSheetRange(rangeRef)
+                            .elementAtOrNull(0)?.elementAtOrNull(0)?.toString()?.toLongOrNull()
+                        val newCounter = ((oldCounter ?: 0) + 1).toString()
+
+                        add(ValueRange().apply {
+                            range = rangeRef
+                            setValues(listOf(listOf(newCounter)))
+                            valueInputOption = "RAW"
+                        })
+                    }
                 }
             }
-        )
-
-
+        ).execute()
     }
     syncWithSheets()
 }
