@@ -28,12 +28,11 @@ jobs:
           fileDir: ${{ github.workspace }}
           encodedString: ${{ secrets.KEYSTORE }}
 
-      - name: Bump version
-        uses: chkfung/android-version-actions@v1.2.3
-        with:
-          gradlePath: composeApp/build.gradle.kts
-          versionCode: ${{github.run_number}}
-          versionName: "1.0"
+      - name: Set versionCode
+        run: |
+          VERSION_CODE=$((GITHUB_RUN_NUMBER + 10))
+          echo "Setting versionCode to $VERSION_CODE"
+          sed -i -E "s/versionCode = [0-9]+/versionCode = $VERSION_CODE/" composeApp/build.gradle.kts
 
       - name: Build Android Release
         run: ./gradlew :composeApp:bundleRelease
