@@ -106,7 +106,7 @@ android {
             )
 
             if (keystoreFile.exists()) {
-                signingConfig = signingConfigs["release"]
+                signingConfig = signingConfigs.getByName("release")
             }
         }
     }
