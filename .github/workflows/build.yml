@@ -64,7 +64,7 @@ jobs:
       - name: Publish to Google Play
         uses: r0adkll/upload-google-play@v1
         with:
-          serviceAccountJsonPlainText: ${{ SERVICE_ACCOUNT_JSON }}
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           packageName: de.rakhman.cooking
-          releaseFiles: ${{ GITHUB_WORKSPACE }}/composeApp/build/outputs/bundle/release/composeApp-release.aab
+          releaseFiles: '${{ GITHUB_WORKSPACE }}/composeApp/build/outputs/bundle/release/composeApp-release.aab'
           track: qa
