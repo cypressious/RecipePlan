@@ -12,7 +12,7 @@ class AddToPlanEvent(val id: Long) : Event
 
 class AddToShopEvent(val id: Long) : Event
 
-class RemoveFromPlanEvent(val id: Long) : Event
+class RemoveFromPlanEvent(val id: Long, val incrementCounter: Boolean) : Event
 
 class RemoveFromShopEvent(val id: Long) : Event
 

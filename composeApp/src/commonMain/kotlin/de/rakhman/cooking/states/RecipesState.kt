@@ -122,7 +122,7 @@ private fun CoroutineScope.launchRecipesStateInternal() = launch {
         updatePlanAndShop(addIdToPlan = it.id, removeIdFromShop = it.id)
     }
     collectEventsAsyncCatchingErrors<RemoveFromPlanEvent> {
-        updatePlanAndShop(removeIdFromPlan = it.id, incrementCounter = true)
+        updatePlanAndShop(removeIdFromPlan = it.id, incrementCounter = it.incrementCounter)
     }
     collectEventsAsyncCatchingErrors<AddToShopEvent> {
         updatePlanAndShop(addIdToShop = it.id)

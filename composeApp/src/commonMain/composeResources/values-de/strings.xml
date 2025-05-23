@@ -29,6 +29,7 @@
     <string name="add_to_shop">Auf die Einkaufsliste</string>
     <string name="add_to_plan">Auf den Plan</string>
     <string name="remove_from_shop">Von Einkaufsliste entfernen</string>
+    <string name="remove_from_plan">Von Plan entfernen</string>
     <string name="edit">Bearbeiten</string>
     <string name="share">Teilen</string>
     <string name="add_to_bring">Zu Bring hinzufügen</string>

@@ -72,6 +72,16 @@ fun RecipeDropdown(
                         }
                     )
                 }
+                if (screen == ScreenState.Plan) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(Res.string.remove_from_plan)) },
+                        onClick = EvasLaunching {
+                            NotificationEvent(getString(Res.string.recipe_removed_from_plan, recipe.title)).emitAsync()
+                            RemoveFromPlanEvent(recipe.id, incrementCounter = false).emitAsync()
+                            expanded = false
+                        }
+                    )
+                }
                 DropdownMenuItem(
                     text = { Text(stringResource(Res.string.edit)) },
                     onClick = EvasLaunching {

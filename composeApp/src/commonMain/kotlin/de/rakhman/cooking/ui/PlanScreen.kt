@@ -96,7 +96,7 @@ private fun RowScope.PlanCheckbox(recipe: Recipe, isShop: Boolean) {
                             )
                         ).emitAsync()
                     } else {
-                        RemoveFromPlanEvent(recipe.id).emitAsync()
+                        RemoveFromPlanEvent(recipe.id, incrementCounter = true).emitAsync()
                         NotificationEvent(
                             getString(
                                 Res.string.recipe_removed_from_plan,
