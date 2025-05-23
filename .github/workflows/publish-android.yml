@@ -25,7 +25,7 @@ jobs:
         uses: timheuer/base64-to-file@v1.2
         with:
           fileName: 'recipe-keystore.jks'
-          fileDir: '$GITHUB_WORKSPACE'
+          fileDir: ${{ github.workspace }}
           encodedString: ${{ secrets.KEYSTORE }}
 
       - name: Bump version
