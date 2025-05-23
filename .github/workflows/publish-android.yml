@@ -49,3 +49,4 @@ jobs:
           releaseFiles: 'composeApp/build/outputs/bundle/release/composeApp-release.aab'
           mappingFile: 'composeApp/build/outputs/mapping/release/mapping.txt'
           track: internal
+          status: draft
