@@ -25,7 +25,7 @@ jobs:
       - name: Build JVM
         run: ./gradlew :composeApp:jvmJar
 
-  build-and-publish-android:
+  build-android-debug:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
