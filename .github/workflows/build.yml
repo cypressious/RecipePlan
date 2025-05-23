@@ -48,7 +48,7 @@ jobs:
           encodedString: ${{ secrets.KEYSTORE }}
 
       - name: Bump version
-        uses: chkfung/android-version-actions@v1.2.2
+        uses: chkfung/android-version-actions@v1.2.3
         with:
           gradlePath: composeApp/build.gradle.kts
           versionCode: ${{github.run_number}}
