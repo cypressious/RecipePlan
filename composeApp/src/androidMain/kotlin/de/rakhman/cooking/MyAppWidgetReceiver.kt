@@ -22,6 +22,8 @@ import androidx.glance.text.TextStyle
 import app.cash.sqldelight.coroutines.asFlow
 import de.rakhman.cooking.backend.buildSheetsService
 import de.rakhman.cooking.database.DriverFactory
+import de.rakhman.cooking.repositories.DatabaseRepository
+import de.rakhman.cooking.repositories.SheetsRepository
 import de.rakhman.cooking.states.RecipeContext
 import de.rakhman.cooking.states.syncWithSheets
 import kotlinx.coroutines.Dispatchers
@@ -36,7 +38,7 @@ class MyAppWidgetReceiver : GlanceAppWidgetReceiver() {
 }
 
 class MyAppWidget : GlanceAppWidget() {
-    override val stateDefinition: GlanceStateDefinition<*>?
+    override val stateDefinition: GlanceStateDefinition<*>
         get() = object : GlanceStateDefinition<List<Recipe>> {
             override suspend fun getDataStore(context: Context, fileKey: String): DataStore<List<Recipe>> {
                 val driver = DriverFactory(context).createDriver()
@@ -153,9 +155,8 @@ class RefreshAction : ActionCallback {
 
                 withContext(Dispatchers.IO) {
                     val recipeContext = RecipeContext(
-                        database = database,
-                        sheets = buildSheetsService(authz.toCredentials()),
-                        spreadSheetsId = spreadSheetsId,
+                        database = DatabaseRepository(database),
+                        sheets = SheetsRepository(buildSheetsService(authz.toCredentials()), spreadSheetsId),
                         platformContext = context
                     )
                     with(recipeContext) {

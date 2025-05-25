@@ -8,6 +8,7 @@ import de.rakhman.cooking.Database
 import de.rakhman.cooking.PlatformContext
 import de.rakhman.cooking.Recipe
 import de.rakhman.cooking.events.*
+import de.rakhman.cooking.repositories.DatabaseRepository
 import de.rakhman.cooking.repositories.SHEET_NAME_PLAN
 import de.rakhman.cooking.repositories.SHEET_NAME_RECIPES
 import de.rakhman.cooking.repositories.SheetsRepository
@@ -36,7 +37,7 @@ val Recipe.tagsSet: Set<String>
 const val ID_TEMPORARY = -1L
 
 class RecipeContext(
-    val database: Database,
+    val database: DatabaseRepository,
     val sheets: SheetsRepository,
     val platformContext: PlatformContext
 )
@@ -46,8 +47,9 @@ fun CoroutineScope.launchRecipesState(
     sheets: Deferred<Sheets>,
     platformContext: PlatformContext
 ) {
+    val databaseRepository = DatabaseRepository(database)
     launchState(SettingsState) {
-        val spreadSheetsId = database.settingsQueries.selectFirst().executeAsOneOrNull()
+        val spreadSheetsId = databaseRepository.getSpreadSheetIdOrNull()
         if (spreadSheetsId != null) {
             emit(SettingsState(spreadSheetsId))
         } else {
@@ -57,13 +59,7 @@ fun CoroutineScope.launchRecipesState(
         collectEventsAsync<SpreadsheetIdChangedEvent> {
             val id = it.id
 
-            database.transaction {
-                database.settingsQueries.deleteAll()
-                id?.let { database.settingsQueries.insert(it) }
-                database.recipesQueries.deleteAll()
-                database.planQueries.deleteAll()
-                database.shopQueries.deleteAll()
-            }
+            databaseRepository.updateSpreadsheetId(id)
 
             emit(id?.let(::SettingsState))
         }
@@ -94,7 +90,7 @@ fun CoroutineScope.launchRecipesState(
             if (!spreadSheetsId.isNullOrBlank()) {
                 coroutineScope {
                     with(RecipeContext(
-                        database = database,
+                        database = databaseRepository,
                         sheets = SheetsRepository(sheets.await(), spreadSheetsId),
                         platformContext = platformContext
                     )) {
@@ -279,33 +275,14 @@ suspend fun syncWithSheets() = withContext(Dispatchers.IO) {
     coroutineContext.statesOrNull?.setState(RecipesState, RecipesState.Success(recipes, plan, shop))
 }
 
-private fun Database.updateWith(recipes: List<Recipe>, plan: List<Long>, shop: List<Long>) {
-    transaction {
-        recipesQueries.deleteAll()
-        recipes.forEach {
-            recipesQueries.insert(it.id, it.title, it.url, it.counter, it.tags)
-        }
-
-        planQueries.deleteAll()
-        plan.forEach {
-            planQueries.insert(it)
-        }
-
-        shopQueries.deleteAll()
-        shop.forEach {
-            shopQueries.insert(it)
-        }
-    }
-}
-
-private suspend fun setStateFromDatabase(database: Database) {
-    val recipes = database.recipesQueries.selectAll().executeAsList()
+private suspend fun setStateFromDatabase(database: DatabaseRepository) {
+    val recipes = database.getRecipes()
     RecipesState.set(
         if (recipes.isNotEmpty()) {
             RecipesState.Success(
                 recipes = recipes,
-                plan = database.planQueries.selectAll().executeAsList(),
-                shop = database.shopQueries.selectAll().executeAsList(),
+                plan = database.getPlan(),
+                shop = database.getShop(),
             )
         } else {
             RecipesState.Loading
