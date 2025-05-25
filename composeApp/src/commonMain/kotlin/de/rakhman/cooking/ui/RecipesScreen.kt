@@ -153,8 +153,11 @@ private fun Recipes(state: RecipesState.Success) {
             key = { i -> filteredList[i].id },
             itemContent = { i ->
                 val recipe = filteredList[i]
-                RecipeItem(recipe = recipe, slotRight = { RecipeDropdown(recipe, ScreenState.Recipes) })
-                if (i != filteredList.lastIndex) HorizontalDivider()
+                RecipeItem(
+                    recipe = recipe,
+                    modifier = Modifier.animateItem(),
+                    slotRight = { RecipeDropdown(recipe, ScreenState.Recipes) })
+                if (i != filteredList.lastIndex) HorizontalDivider(modifier = Modifier.animateItem())
             },
         )
     }

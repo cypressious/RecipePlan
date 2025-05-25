@@ -20,12 +20,13 @@ import recipeplan.composeapp.generated.resources.*
 @Composable
 fun RecipeItem(
     recipe: Recipe,
+    modifier: Modifier = Modifier,
     slotLeft: (@Composable RowScope.() -> Unit)? = null,
     slotRight: (@Composable RowScope.() -> Unit)? = null,
 ) {
     val context = getContext()
     Row(
-        modifier = Modifier
+        modifier = modifier
             .clickable(onClick = { recipe.url?.let { openUrl(it, context) } }),
         verticalAlignment = Alignment.CenterVertically
     ) {

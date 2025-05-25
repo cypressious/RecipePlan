@@ -2,6 +2,10 @@
 
 package de.rakhman.cooking.ui
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -74,9 +78,13 @@ fun App() {
             topBar = { MyTopBar() },
             bottomBar = { if (screenState != ScreenState.Settings) MyBottomBar() },
             floatingActionButton = {
-                if (screenState is ScreenState.BaseScreen) {
+                AnimatedVisibility(
+                    visible = screenState is ScreenState.BaseScreen,
+                    enter = scaleIn(),
+                    exit = scaleOut(),
+                ) {
                     FloatingActionButton(onClick = EvasLaunching {
-                        ScreenState.set(ScreenState.Add(screenState))
+                        ScreenState.set(ScreenState.Add(screenState as ScreenState.BaseScreen))
                     }) {
                         Icon(Icons.Default.Add, contentDescription = stringResource(Res.string.add_recipe))
                     }
@@ -84,14 +92,16 @@ fun App() {
             },
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         ) { innerPadding ->
-            val modifier = Modifier.padding(innerPadding)
-            when (screenState) {
-                ScreenState.Plan -> PlanScreen(modifier, false)
-                ScreenState.Shop -> PlanScreen(modifier, true)
-                ScreenState.Recipes -> RecipesScreen(modifier)
-                is ScreenState.Add -> AddScreen(modifier, screenState.editingRecipe, screenState.initialData)
-                ScreenState.Settings -> SettingsScreen(modifier)
-                ScreenState.Inspiration -> InspirationScreen(modifier)
+            AnimatedContent(screenState) {
+                val modifier = Modifier.padding(innerPadding)
+                when (it) {
+                    ScreenState.Plan -> PlanScreen(modifier, false)
+                    ScreenState.Shop -> PlanScreen(modifier, true)
+                    ScreenState.Recipes -> RecipesScreen(modifier)
+                    is ScreenState.Add -> AddScreen(modifier, it.editingRecipe, it.initialData)
+                    ScreenState.Settings -> SettingsScreen(modifier)
+                    ScreenState.Inspiration -> InspirationScreen(modifier)
+                }
             }
         }
 

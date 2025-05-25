@@ -1,5 +1,6 @@
 package de.rakhman.cooking.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -78,7 +79,7 @@ private fun InspirationCard(
             .copy(if (isChecked) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceContainer)
     ) {
         RecipeItem(recipe, slotRight = {
-            if (isChecked) {
+            AnimatedVisibility(visible = isChecked) {
                 Icon(
                     imageVector = Icons.Default.Check,
                     contentDescription = stringResource(Res.string.added),
