@@ -45,12 +45,10 @@ fun PlanScreen(modifier: Modifier, isShop: Boolean) {
             )
         }
 
-        val timestamp = System.currentTimeMillis().toString()
-        val keys = planRecipes.mapIndexed { i, it -> "$i$timestamp" }
         LazyColumn(contentPadding = PaddingValues(bottom = 70.dp)) {
             items(
                 count = planRecipes.size,
-                key = { i -> keys[i] },
+                key = { i -> planRecipes[i].id },
                 itemContent = { i ->
                     val recipe = planRecipes[i]
                     RecipeItem(
