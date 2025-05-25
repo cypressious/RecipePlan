@@ -8,6 +8,9 @@ import de.rakhman.cooking.Database
 import de.rakhman.cooking.PlatformContext
 import de.rakhman.cooking.Recipe
 import de.rakhman.cooking.events.*
+import de.rakhman.cooking.repositories.SHEET_NAME_PLAN
+import de.rakhman.cooking.repositories.SHEET_NAME_RECIPES
+import de.rakhman.cooking.repositories.SheetsRepository
 import de.rakhman.cooking.updateWidget
 import io.sellmair.evas.*
 import kotlinx.coroutines.*
@@ -30,23 +33,11 @@ sealed class RecipesState : State {
 val Recipe.tagsSet: Set<String>
     get() = tags?.split(SEPARATOR_TAGS)?.mapTo(mutableSetOf()) { it.trim() }.orEmpty()
 
-private const val SHEET_NAME_RECIPES = "Rezepte"
-private const val SHEET_NAME_PLAN = "Plan"
-private const val RANGE_PLAN_AND_SHOP = "$SHEET_NAME_PLAN!A1:A2"
-private const val DELETED_VALUE = "deleted"
-
-private const val COLUMN_NAME = 0
-private const val COLUMN_URL = 1
-private const val COLUMN_DELETED = 2
-private const val COLUMN_COUNTER = 3
-private const val COLUMN_TAGS = 4
-
 const val ID_TEMPORARY = -1L
 
 class RecipeContext(
     val database: Database,
-    val sheets: Sheets,
-    val spreadSheetsId: String,
+    val sheets: SheetsRepository,
     val platformContext: PlatformContext
 )
 
@@ -102,7 +93,11 @@ fun CoroutineScope.launchRecipesState(
             val spreadSheetsId = it?.spreadSheetsId
             if (!spreadSheetsId.isNullOrBlank()) {
                 coroutineScope {
-                    with(RecipeContext(database, sheets.await(), spreadSheetsId, platformContext)) {
+                    with(RecipeContext(
+                        database = database,
+                        sheets = SheetsRepository(sheets.await(), spreadSheetsId),
+                        platformContext = platformContext
+                    )) {
                         launchRecipesStateInternal()
                     }
                 }
@@ -158,21 +153,9 @@ private suspend fun setDeleted(id: Long) {
         RecipesState.set(RecipesState.Success(state.recipes.filter { it.id != id }, state.plan, state.shop))
     }
     withContext(Dispatchers.IO) {
-        updateRawValue("$SHEET_NAME_RECIPES!C${id}", listOf(listOf(DELETED_VALUE)))
+        c.sheets.delete(id)
     }
     syncWithSheets()
-}
-
-context(c: RecipeContext)
-private fun updateRawValue(range: String, rawValues: List<List<String>>) {
-    c.sheets.spreadsheets().values().update(
-        c.spreadSheetsId,
-        range,
-        ValueRange().apply { setValues(rawValues) }
-    ).run {
-        valueInputOption = "RAW"
-        execute()
-    }
 }
 
 context(c: RecipeContext)
@@ -209,39 +192,13 @@ private suspend fun updatePlanAndShop(
     }
 
     withContext(Dispatchers.IO) {
-        val (oldPlan, oldShop) = readPlanAndShop()
+        val (oldPlan, oldShop) = c.sheets.getPlanAndShop()
         val (newPlan, newShop) = newPlanAndShop(oldPlan, oldShop)
 
-        c.sheets.spreadsheets().values().batchUpdate(
-            c.spreadSheetsId,
-            BatchUpdateValuesRequest().apply {
-                data = buildList {
-                    add(ValueRange().apply {
-                        range = RANGE_PLAN_AND_SHOP
-                        setValues(
-                            listOf(
-                                listOf(newPlan.joinToString(",")),
-                                listOf(newShop.joinToString(",")),
-                            )
-                        )
-                        valueInputOption = "RAW"
-                    })
-
-                    if (incrementCounter && removeIdFromPlan != null) {
-                        val rangeRef = "$SHEET_NAME_RECIPES!D${removeIdFromPlan}"
-                        val oldCounter = readSheetRange(rangeRef)
-                            .elementAtOrNull(0)?.elementAtOrNull(0)?.toString()?.toLongOrNull()
-                        val newCounter = ((oldCounter ?: 0) + 1).toString()
-
-                        add(ValueRange().apply {
-                            range = rangeRef
-                            setValues(listOf(listOf(newCounter)))
-                            valueInputOption = "RAW"
-                        })
-                    }
-                }
-            }
-        ).execute()
+        c.sheets.updatePlanAndShop(
+            newPlan = newPlan,
+            newShop = newShop,
+            idToIncrementCounter = removeIdFromPlan.takeIf { incrementCounter })
     }
     syncWithSheets()
 }
@@ -264,7 +221,7 @@ private suspend fun updateRecipe(id: Long, title: String, url: String?, tags: Se
     }
 
     withContext(Dispatchers.IO) {
-        writeRecipe(id, title, url, tagString)
+        c.sheets.updateRecipe(id, title, url, tagString)
     }
 
     syncWithSheets()
@@ -288,10 +245,8 @@ private suspend fun addRecipe(title: String, url: String?, target: ScreenState.B
     }
 
     withContext(Dispatchers.IO) {
-        val recipes = readSheetRange(SHEET_NAME_RECIPES)
-
-        val id = recipes.size + 1L
-        writeRecipe(id, title, url, tagsString)
+        val id = c.sheets.getNewId()
+        c.sheets.updateRecipe(id, title, url, tagsString)
 
         if (target == ScreenState.Shop) {
             updatePlanAndShop(
@@ -312,8 +267,8 @@ private suspend fun addRecipe(title: String, url: String?, target: ScreenState.B
 
 context(c: RecipeContext)
 suspend fun syncWithSheets() = withContext(Dispatchers.IO) {
-    val recipesDeferred = async { readRecipes() }
-    val planDeferred = async { readPlanAndShop() }
+    val recipesDeferred = async { c.sheets.getRecipes() }
+    val planDeferred = async { c.sheets.getPlanAndShop() }
 
     val recipes = recipesDeferred.await()
     val (plan, shop) = planDeferred.await()
@@ -322,71 +277,6 @@ suspend fun syncWithSheets() = withContext(Dispatchers.IO) {
     withContext(Dispatchers.Default) { updateWidget(c.platformContext) }
 
     coroutineContext.statesOrNull?.setState(RecipesState, RecipesState.Success(recipes, plan, shop))
-}
-
-context(c: RecipeContext)
-private fun readRecipes(): List<Recipe> {
-    return readSheetRange(SHEET_NAME_RECIPES)
-        .mapIndexedNotNull { i, row ->
-            if (row.isNotEmpty() && row.elementAtOrNull(COLUMN_DELETED)?.toString() != DELETED_VALUE) {
-                Recipe(
-                    id = i + 1L,
-                    title = row[COLUMN_NAME].toString().trim(),
-                    url = row.elementAtOrNull(COLUMN_URL)?.toString()?.ifBlank { null },
-                    counter = row.elementAtOrNull(COLUMN_COUNTER)?.toString()?.toLongOrNull() ?: 0,
-                    tags = row.elementAtOrNull(COLUMN_TAGS)?.toString(),
-                )
-            } else {
-                null
-            }
-        }
-}
-
-context(c: RecipeContext)
-private fun writeRecipe(id: Long, title: String, url: String?, tagsString: String) {
-    c.sheets.spreadsheets().values().batchUpdate(
-        c.spreadSheetsId,
-        BatchUpdateValuesRequest().apply {
-            data = listOf(
-                ValueRange().apply {
-                    range = "$SHEET_NAME_RECIPES!A$id:B$id"
-                    setValues(listOf(listOf(title, url ?: "")))
-                    valueInputOption = "RAW"
-                },
-                ValueRange().apply {
-                    range = "$SHEET_NAME_RECIPES!E$id"
-                    setValues(listOf(listOf(tagsString)))
-                    valueInputOption = "RAW"
-                },
-            )
-        }
-    ).execute()
-}
-
-context(c: RecipeContext)
-private fun readPlanAndShop(): Pair<List<Long>, List<Long>> {
-    val range = readSheetRange(RANGE_PLAN_AND_SHOP)
-    return Pair(
-        parsePlanCell(range.elementAtOrNull(0)?.elementAtOrNull(0)),
-        parsePlanCell(range.elementAtOrNull(1)?.elementAtOrNull(0))
-    )
-}
-
-private fun parsePlanCell(elementAtOrNull: Any?): List<Long> {
-    return elementAtOrNull
-        ?.toString()
-        ?.split(",")
-        ?.map { it.toLong() }
-        .orEmpty()
-}
-
-context(c: RecipeContext)
-private fun readSheetRange(range: String): List<List<Any?>> {
-    return c.sheets.spreadsheets().values()
-        .get(c.spreadSheetsId, range)
-        .execute()
-        .getValues()
-        ?: emptyList()
 }
 
 private fun Database.updateWith(recipes: List<Recipe>, plan: List<Long>, shop: List<Long>) {
