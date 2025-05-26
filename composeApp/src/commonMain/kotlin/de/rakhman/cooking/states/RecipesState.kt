@@ -1,5 +1,3 @@
-@file:Suppress("UsePropertyAccessSyntax")
-
 package de.rakhman.cooking.states
 
 import com.google.api.services.sheets.v4.Sheets

@@ -40,7 +40,7 @@ actual fun getContext(): PlatformContext {
 
 actual fun shareRecipe(title: String, url: String?, c: PlatformContext) {
     val i = Intent(Intent.ACTION_SEND)
-    i.setType("text/plain")
+    i.type = "text/plain"
     i.putExtra(Intent.EXTRA_SUBJECT, title)
     url?.let { i.putExtra(Intent.EXTRA_TEXT, it) }
     c.startActivity(Intent.createChooser(i, c.getString(R.string.share_recipe)))
@@ -48,7 +48,7 @@ actual fun shareRecipe(title: String, url: String?, c: PlatformContext) {
 
 actual fun shareToBring(title: String, url: String, c: PlatformContext) {
     val i = Intent(Intent.ACTION_SEND)
-    i.setType("text/plain")
+    i.type = "text/plain"
     i.setPackage("ch.publisheria.bring")
     i.putExtra(Intent.EXTRA_SUBJECT, title)
     i.putExtra(Intent.EXTRA_TEXT, url)

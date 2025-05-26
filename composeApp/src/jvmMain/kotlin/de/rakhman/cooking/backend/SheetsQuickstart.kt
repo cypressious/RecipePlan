@@ -27,7 +27,7 @@ object SheetsQuickstart {
     @Throws(IOException::class)
     fun getCredentials(transport: NetHttpTransport): Credential {
         val inputStream = SheetsQuickstart::class.java.getResourceAsStream(CREDENTIALS_FILE_PATH)
-            ?: throw FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH)
+            ?: throw FileNotFoundException("Resource not found: $CREDENTIALS_FILE_PATH")
         val clientSecrets =
             GoogleClientSecrets.load(JSON_FACTORY, InputStreamReader(inputStream))
 

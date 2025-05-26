@@ -134,11 +134,11 @@ private fun Recipes(state: RecipesState.Success) {
     LazyColumn(state = listState, contentPadding = PaddingValues(bottom = 70.dp)) {
         val filteredList = recipes
             .filter { tagsToShow.isEmpty() || it.tagsSet.any { tag -> tag in tagsToShow } }
-            .let {
+            .let { list ->
                 if (filter.isEmpty()) {
-                    it.sortedWith(sort.comparator)
+                    list.sortedWith(sort.comparator)
                 } else {
-                    it
+                    list
                         .filter { it.matchesFilter(filter.trim()) }
                         .sortedWith(compareByDescending<Recipe> {
                             it.title.startsWith(filter.trim(), ignoreCase = true)
