@@ -33,8 +33,8 @@ fun RecipeDropdown(
     val context = getContext()
 
     Box(
-        modifier = Modifier.Companion.padding(end = 12.dp),
-        contentAlignment = Alignment.Companion.Center
+        modifier = Modifier.padding(end = 12.dp),
+        contentAlignment = Alignment.Center
     ) {
         if (recipe.id != ID_TEMPORARY) {
             IconButton(onClick = { expanded = true }) {
@@ -85,7 +85,7 @@ fun RecipeDropdown(
                 DropdownMenuItem(
                     text = { Text(stringResource(Res.string.edit)) },
                     onClick = EvasLaunching {
-                        ScreenState.Key.set(
+                        ScreenState.set(
                             ScreenState.Add(
                                 target = screen,
                                 editingRecipe = recipe
@@ -113,7 +113,7 @@ fun RecipeDropdown(
                 }
             }
         } else {
-            CircularProgressIndicator(modifier = Modifier.Companion.padding(12.dp).width(24.dp).height(24.dp))
+            CircularProgressIndicator(modifier = Modifier.padding(12.dp).width(24.dp).height(24.dp))
         }
     }
 }
