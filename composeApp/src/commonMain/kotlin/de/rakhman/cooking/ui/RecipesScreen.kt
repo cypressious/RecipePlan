@@ -26,12 +26,12 @@ fun RecipesScreen(modifier: Modifier) {
     val recipeState = RecipesState.composeValue()
     Column(modifier = modifier) {
         when (recipeState) {
-            is RecipesState.Success -> {
-                Recipes(recipeState)
+            is Success -> {
+                RecipesList(recipeState)
             }
 
-            RecipesState.Loading -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Loading -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Center) {
                     CircularProgressIndicator()
                 }
             }
@@ -47,7 +47,7 @@ enum class SortOrder(
 }
 
 @Composable
-private fun Recipes(state: RecipesState.Success) {
+private fun RecipesList(state: RecipesState.Success) {
     val recipes = state.recipes
     var filter by remember { mutableStateOf("") }
     var sort by remember { mutableStateOf(SortOrder.Name) }
@@ -122,7 +122,7 @@ private fun Recipes(state: RecipesState.Success) {
     HorizontalDivider()
 
     if (recipes.isEmpty()) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Center) {
             Text(stringResource(Res.string.no_entries), fontSize = 20.sp)
         }
         return

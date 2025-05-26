@@ -38,7 +38,7 @@ fun PlanScreen(modifier: Modifier, isShop: Boolean) {
                 .mapNotNull { recipeState.byId[it] }
 
         AnimatedVisibility(planRecipes.isEmpty(),
-            modifier = Modifier.align(Alignment.Center)) {
+            modifier = Modifier.align(Center)) {
             Text(
                 stringResource(resource = Res.string.no_entries),
                 fontSize = 20.sp,
@@ -107,7 +107,7 @@ private fun RowScope.PlanCheckbox(recipe: Recipe, isShop: Boolean) {
             checked = checked,
             enabled = enabled,
             onCheckedChange = null,
-            modifier = Modifier.align(Alignment.Center)
+            modifier = Modifier.align(Center)
         )
     }
 }

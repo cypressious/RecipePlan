@@ -34,7 +34,7 @@ fun RecipeDropdown(
 
     Box(
         modifier = Modifier.Companion.padding(end = 12.dp),
-        contentAlignment = Alignment.Companion.Center
+        contentAlignment = Center
     ) {
         if (recipe.id != ID_TEMPORARY) {
             IconButton(onClick = { expanded = true }) {

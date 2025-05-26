@@ -53,7 +53,7 @@ fun CoroutineScope.launchRecipesState(
         if (spreadSheetsId != null) {
             emit(SettingsState(spreadSheetsId))
         } else {
-            ScreenState.set(ScreenState.Settings)
+            ScreenState.set(Settings)
         }
 
         collectEventsAsync<SpreadsheetIdChangedEvent> {
@@ -66,7 +66,7 @@ fun CoroutineScope.launchRecipesState(
 
         collectEventsAsync<CreateSpreadsheetEvent>(Dispatchers.IO) {
             try {
-                SavingSettingsState.set(SavingSettingsState.Saving)
+                SavingSettingsState.set(Saving)
                 val sheets = sheets.await()
                 val result = sheets.spreadsheets().create(Spreadsheet().apply {
                     properties = SpreadsheetProperties().apply { title = "Recipes" }
@@ -79,7 +79,7 @@ fun CoroutineScope.launchRecipesState(
             } catch (e: Exception) {
                 ErrorEvent(e).emit()
             } finally {
-                SavingSettingsState.set(SavingSettingsState.NotSaving)
+                SavingSettingsState.set(NotSaving)
             }
         }
     }
@@ -202,7 +202,7 @@ private suspend fun updatePlanAndShop(
 context(c: RecipeContext)
 private suspend fun updateRecipe(id: Long, title: String, url: String?, tags: Set<String>) {
     val state = RecipesState.value()
-    val target = (ScreenState.value() as? ScreenState.Add)?.target
+    val target = (ScreenState.value() as? Add)?.target
     ScreenState.set(target ?: ScreenState.Recipes)
     val tagString = tags.joinToString(SEPARATOR_TAGS)
 

@@ -27,7 +27,7 @@ fun MyBottomBar() {
         NavigationBar(
             modifier = Modifier
                 .windowInsetsPadding(
-                    WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
+                    WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + Bottom)
                 )
                 .height(70.dp),
         ) {

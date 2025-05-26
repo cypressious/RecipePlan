@@ -19,6 +19,7 @@ kotlin {
     compilerOptions {
         freeCompilerArgs.add("-Xrender-internal-diagnostic-names")
         freeCompilerArgs.add("-Xcontext-parameters")
+        freeCompilerArgs.add("-Xcontext-sensitive-resolution")
         freeCompilerArgs.add("-Xexpect-actual-classes")
     }
     androidTarget {

@@ -97,7 +97,7 @@ class MyAppWidget : GlanceAppWidget() {
             }
 
             if (recipes.isEmpty()) {
-                Box(modifier = GlanceModifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Box(modifier = GlanceModifier.fillMaxSize(), contentAlignment = Center) {
                     Text(text = LocalContext.current.getString(R.string.no_items), style = TextStyle(fontSize = 20.sp, color = GlanceTheme.colors.onBackground))
                 }
                 return@Column

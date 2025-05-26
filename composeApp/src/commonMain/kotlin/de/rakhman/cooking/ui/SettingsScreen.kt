@@ -32,8 +32,8 @@ fun SettingsScreen(modifier: Modifier) {
 
         Button(
             modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp).height(56.dp),
-            onClick = EvasLaunching { CreateSpreadsheetEvent.emit(); ScreenState.set(ScreenState.Plan) },
-            enabled = spreadSheetId.isBlank() && savingState == SavingSettingsState.NotSaving
+            onClick = EvasLaunching { CreateSpreadsheetEvent.emit(); ScreenState.set(Plan) },
+            enabled = spreadSheetId.isBlank() && savingState == NotSaving
         ) {
             Text(stringResource(Res.string.create_new_sheet))
         }
@@ -45,13 +45,13 @@ fun SettingsScreen(modifier: Modifier) {
             label = { Text(stringResource(Res.string.or_enter_existing_id)) },
             textStyle = LocalTextStyle.current.copy(fontSize = 18.sp),
             singleLine = true,
-            enabled = savingState == SavingSettingsState.NotSaving
+            enabled = savingState == NotSaving
         )
 
         Button(
             modifier = Modifier.fillMaxWidth(),
-            onClick = EvasLaunching { SpreadsheetIdChangedEvent(spreadSheetId.trim()).emit(); ScreenState.set(ScreenState.Plan) },
-            enabled = spreadSheetId.isNotBlank() && savingState == SavingSettingsState.NotSaving
+            onClick = EvasLaunching { SpreadsheetIdChangedEvent(spreadSheetId.trim()).emit(); ScreenState.set(Plan) },
+            enabled = spreadSheetId.isNotBlank() && savingState == NotSaving
         ) {
             Text(stringResource(Res.string.save))
         }

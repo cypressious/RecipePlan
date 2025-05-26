@@ -1,20 +1,13 @@
 package de.rakhman.cooking.ui
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.*
+import androidx.compose.ui.*
 import androidx.compose.ui.platform.*
-import androidx.compose.ui.text.input.*
 import androidx.compose.ui.unit.*
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.network.parseGetRequest
@@ -42,7 +35,7 @@ val allTargets = listOf(ScreenState.Plan, ScreenState.Shop, ScreenState.Recipes)
 @Composable
 fun AddScreen(modifier: Modifier, editingRecipe: Recipe?, initialData: String?) {
     val composeValue = ScreenState.composeValue()
-    var target by remember { mutableStateOf((composeValue as? ScreenState.Add)?.target ?: ScreenState.Recipes) }
+    var target by remember { mutableStateOf((composeValue as? Add)?.target ?: ScreenState.Recipes) }
     var tags by remember { mutableStateOf(editingRecipe?.tagsSet ?: emptySet()) }
 
     Column(modifier = modifier.padding(16.dp)) {
@@ -83,9 +76,9 @@ fun AddScreen(modifier: Modifier, editingRecipe: Recipe?, initialData: String?) 
             label = { Text(stringResource(Res.string.title)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+            keyboardOptions = KeyboardOptions(imeAction = Next),
             keyboardActions = KeyboardActions(
-                onDone = { focusManager.moveFocus(FocusDirection.Next) }
+                onDone = { focusManager.moveFocus(Next) }
             ),
         )
 
@@ -95,7 +88,7 @@ fun AddScreen(modifier: Modifier, editingRecipe: Recipe?, initialData: String?) 
             label = { Text(stringResource(Res.string.url)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth().padding(bottom = 14.dp),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+            keyboardOptions = KeyboardOptions(imeAction = Done),
             keyboardActions = KeyboardActions(
                 onDone = { if (enabled) submit() }
             ),
@@ -118,13 +111,13 @@ fun AddScreen(modifier: Modifier, editingRecipe: Recipe?, initialData: String?) 
                 })
             }
 
-            Box(modifier = Modifier.padding(6.dp), contentAlignment = Alignment.CenterStart) {
+            Box(modifier = Modifier.padding(6.dp), contentAlignment = CenterStart) {
                 var newTag by remember { mutableStateOf("") }
                 BasicTextField(
                     value = newTag,
                     singleLine = true,
                     onValueChange = { newTag = it.trim().replace(";", "") },
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardOptions = KeyboardOptions(imeAction = Done),
                     keyboardActions = KeyboardActions(
                         onDone = {
                             tags += newTag

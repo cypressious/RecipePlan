@@ -76,15 +76,15 @@ fun App() {
 
         Scaffold(
             topBar = { MyTopBar() },
-            bottomBar = { if (screenState != ScreenState.Settings) MyBottomBar() },
+            bottomBar = { if (screenState != Settings) MyBottomBar() },
             floatingActionButton = {
                 AnimatedVisibility(
-                    visible = screenState is ScreenState.BaseScreen,
+                    visible = screenState is BaseScreen,
                     enter = scaleIn(),
                     exit = scaleOut(),
                 ) {
                     FloatingActionButton(onClick = EvasLaunching {
-                        ScreenState.set(ScreenState.Add(screenState as ScreenState.BaseScreen))
+                        ScreenState.set(ScreenState.Add(screenState as BaseScreen))
                     }) {
                         Icon(Icons.Default.Add, contentDescription = stringResource(Res.string.add_recipe))
                     }
@@ -95,12 +95,12 @@ fun App() {
             AnimatedContent(screenState) {
                 val modifier = Modifier.padding(innerPadding)
                 when (it) {
-                    ScreenState.Plan -> PlanScreen(modifier, false)
-                    ScreenState.Shop -> PlanScreen(modifier, true)
-                    ScreenState.Recipes -> RecipesScreen(modifier)
-                    is ScreenState.Add -> AddScreen(modifier, it.editingRecipe, it.initialData)
-                    ScreenState.Settings -> SettingsScreen(modifier)
-                    ScreenState.Inspiration -> InspirationScreen(modifier)
+                    Plan -> PlanScreen(modifier, false)
+                    Shop -> PlanScreen(modifier, true)
+                    Recipes -> RecipesScreen(modifier)
+                    is Add -> AddScreen(modifier, it.editingRecipe, it.initialData)
+                    Settings -> SettingsScreen(modifier)
+                    Inspiration -> InspirationScreen(modifier)
                 }
             }
         }

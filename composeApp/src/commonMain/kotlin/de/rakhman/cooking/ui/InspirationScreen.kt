@@ -61,7 +61,7 @@ fun InspirationScreen(modifier: Modifier) {
                 },
                 icon = { Icon(Icons.AutoMirrored.Filled.ArrowForward, stringResource(Res.string.next)) },
                 text = { Text(stringResource(Res.string.next)) },
-                modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp)
+                modifier = Modifier.align(BottomCenter).padding(16.dp)
             )
         }
     }
