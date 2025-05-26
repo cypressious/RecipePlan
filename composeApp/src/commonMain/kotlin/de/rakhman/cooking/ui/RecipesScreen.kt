@@ -43,7 +43,7 @@ enum class SortOrder(
     val comparator: Comparator<Recipe>
 ) {
     Name(compareBy { it.title.lowercase() }),
-    Counter(compareByDescending<Recipe> { it.counter }.thenBy { it.title }),
+    Counter(compareByDescending<Recipe> { it.counter }.thenBy { it.title.lowercase() }),
 }
 
 @Composable
