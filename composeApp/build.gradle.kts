@@ -2,9 +2,6 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import java.security.MessageDigest
-
-
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -20,6 +17,7 @@ kotlin {
         freeCompilerArgs.add("-Xrender-internal-diagnostic-names")
         freeCompilerArgs.add("-Xcontext-parameters")
         freeCompilerArgs.add("-Xexpect-actual-classes")
+        progressiveMode = true
     }
     androidTarget {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
