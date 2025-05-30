@@ -45,7 +45,7 @@ fun handleAuthz(): CompletableDeferred<AuthorizationResult?> {
         }
         .addOnFailureListener { e ->
             Log.e(TAG, "Failed to authorize", e)
-            deferred.completeExceptionally(e)
+            deferred.complete(null)
         }
 
     return deferred
