@@ -42,6 +42,9 @@ class MainActivity : ComponentActivity() {
         val database = Database(driver)
         launchStateHandler(database)
 
+        // Initialize the daily background reload worker
+        WorkManagerInitializer.initialize(applicationContext)
+
         setContent {
             installEvas(events, states) {
                 App()

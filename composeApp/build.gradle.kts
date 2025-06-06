@@ -25,12 +25,12 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    
+
     jvm {
         compilerOptions.freeCompilerArgs.add("-XXlenient-mode")
         compilerOptions.freeCompilerArgs.add("-Xindy-allow-annotated-lambdas=true")
     }
-    
+
     sourceSets {
         androidMain.dependencies {
             implementation(libs.kotlinx.coroutines.android)
@@ -41,6 +41,7 @@ kotlin {
             implementation(libs.google.api.client.android)
             implementation(libs.androidx.glance.appwidget)
             implementation(libs.androidx.glance.material3)
+            implementation(libs.androidx.work.runtime.ktx)
         }
         commonMain.dependencies {
             implementation(compose.runtime)

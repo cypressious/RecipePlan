@@ -20,17 +20,10 @@ import androidx.glance.state.GlanceStateDefinition
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import app.cash.sqldelight.coroutines.asFlow
-import de.rakhman.cooking.backend.buildSheetsService
 import de.rakhman.cooking.database.DriverFactory
-import de.rakhman.cooking.repositories.DatabaseRepository
-import de.rakhman.cooking.repositories.SheetsRepository
-import de.rakhman.cooking.states.RecipeContext
-import de.rakhman.cooking.states.syncWithSheets
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.withContext
 import java.io.File
 
 class MyAppWidgetReceiver : GlanceAppWidgetReceiver() {
@@ -138,31 +131,10 @@ class MyAppWidget : GlanceAppWidget() {
 }
 
 class RefreshAction : ActionCallback {
-    override suspend fun onAction(
-        context: Context,
-        glanceId: GlanceId,
-        parameters: ActionParameters
-    ) {
+    override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
         with(context) {
             coroutineScope {
-                val authz = handleAuthz().await() ?: return@coroutineScope
-
-                val driver = DriverFactory(context).createDriver()
-                val database = Database(driver)
-
-                val spreadSheetsId =
-                    database.settingsQueries.selectFirst().executeAsOneOrNull() ?: return@coroutineScope
-
-                withContext(Dispatchers.IO) {
-                    val recipeContext = RecipeContext(
-                        database = DatabaseRepository(database),
-                        sheets = SheetsRepository(buildSheetsService(authz.toCredentials()), spreadSheetsId),
-                        platformContext = context
-                    )
-                    with(recipeContext) {
-                        syncWithSheets()
-                    }
-                }
+                syncInBackground()
             }
         }
     }
