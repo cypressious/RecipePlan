@@ -3,11 +3,11 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
     repositories {
-        maven("https://repo.sellmair.io") {
-            mavenContent {
-                includeGroupAndSubgroups("org.jetbrains.kotlin")
-            }
-        }
+//        maven("https://repo.sellmair.io") {
+//            mavenContent {
+//                includeGroupAndSubgroups("org.jetbrains.kotlin")
+//            }
+//        }
         mavenCentral()
         google {
             mavenContent {
