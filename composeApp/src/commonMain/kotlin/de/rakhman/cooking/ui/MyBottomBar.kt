@@ -9,9 +9,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.*
 import androidx.compose.ui.unit.*
+import de.rakhman.cooking.events.ChangeScreenEvent
 import de.rakhman.cooking.states.ScreenState
 import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.compose.composeValue
+import io.sellmair.evas.emit
 import io.sellmair.evas.set
 import org.jetbrains.compose.resources.stringResource
 
@@ -35,7 +37,7 @@ fun MyBottomBar() {
             for ((state, icon) in tabs) {
                 NavigationBarItem(
                     selected = screenState == state,
-                    onClick = EvasLaunching { ScreenState.set(state) },
+                    onClick = EvasLaunching { ChangeScreenEvent(state).emit(); ScreenState.set(state) },
                     icon = {
                         Icon(
                             imageVector = icon,

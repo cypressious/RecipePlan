@@ -10,13 +10,15 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.*
 import androidx.compose.ui.unit.*
 import de.rakhman.cooking.Recipe
+import de.rakhman.cooking.events.ChangeScreenEvent
 import de.rakhman.cooking.states.RecipesState
 import de.rakhman.cooking.states.ScreenState
 import de.rakhman.cooking.states.tagsSet
 import io.sellmair.evas.compose.composeValue
+import io.sellmair.evas.compose.eventsOrThrow
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import recipeplan.composeapp.generated.resources.*
@@ -57,8 +59,9 @@ private fun Recipes(state: RecipesState.Success) {
         modifier = Modifier.fillMaxWidth().padding(12.dp, 4.dp, 12.dp, 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        val focusRequester = remember { FocusRequester() }
         OutlinedTextField(
-            modifier = Modifier.weight(1f).padding(end = 12.dp, bottom = 8.dp),
+            modifier = Modifier.weight(1f).padding(end = 12.dp, bottom = 8.dp).focusRequester(focusRequester),
             value = filter,
             onValueChange = { filter = it },
             label = { Text(stringResource(Res.string.search)) },
@@ -77,6 +80,15 @@ private fun Recipes(state: RecipesState.Success) {
             },
             textStyle = LocalTextStyle.current.copy(fontSize = 18.sp)
         )
+
+        val events = eventsOrThrow()
+        LaunchedEffect(true) {
+            events.events(ChangeScreenEvent::class).collect {
+                if (it.screen == ScreenState.Recipes) {
+                    focusRequester.requestFocus()
+                }
+            }
+        }
 
         IconButton(onClick = {
             sort = SortOrder.entries[(sort.ordinal + 1) % SortOrder.entries.size]

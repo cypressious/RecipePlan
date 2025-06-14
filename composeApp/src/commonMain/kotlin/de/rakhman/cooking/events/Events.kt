@@ -29,3 +29,5 @@ class DeleteRequestEvent(val recipe: Recipe) : Event
 class SpreadsheetIdChangedEvent(val id: String?) : Event
 
 object CreateSpreadsheetEvent : Event
+
+class ChangeScreenEvent(val screen: ScreenState) : Event
