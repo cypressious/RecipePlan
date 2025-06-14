@@ -47,6 +47,5 @@ fun MyBottomBar() {
                 )
             }
         }
-        Button({}) { Text("Rezepte") }
     }
 }
