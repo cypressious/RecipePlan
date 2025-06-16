@@ -21,10 +21,8 @@ import de.rakhman.cooking.getColorScheme
 import de.rakhman.cooking.states.ScreenState
 import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.compose.composeValue
-import io.sellmair.evas.compose.eventsOrThrow
 import io.sellmair.evas.emitAsync
 import io.sellmair.evas.set
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -36,20 +34,13 @@ fun App() {
     MaterialTheme(getColorScheme()) {
         val screenState = ScreenState.composeValue()
         val snackbarHostState = remember { SnackbarHostState() }
-        val events = eventsOrThrow()
         var recipeToBeDeleted by remember { mutableStateOf<Recipe?>(null) }
 
-        LaunchedEffect(true) {
-            launch {
-                events.events(NotificationEvent::class).collect {
-                    snackbarHostState.showSnackbar(it.message)
-                }
-            }
-            launch {
-                events.events(DeleteRequestEvent::class).collect {
-                    recipeToBeDeleted = it.recipe
-                }
-            }
+        collectEventsComposable<NotificationEvent> {
+            snackbarHostState.showSnackbar(it.message)
+        }
+        collectEventsComposable<DeleteRequestEvent> {
+            recipeToBeDeleted = it.recipe
         }
 
         recipeToBeDeleted?.let {

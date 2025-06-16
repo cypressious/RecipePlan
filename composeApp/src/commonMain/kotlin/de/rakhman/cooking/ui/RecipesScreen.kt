@@ -18,7 +18,6 @@ import de.rakhman.cooking.states.RecipesState
 import de.rakhman.cooking.states.ScreenState
 import de.rakhman.cooking.states.tagsSet
 import io.sellmair.evas.compose.composeValue
-import io.sellmair.evas.compose.eventsOrThrow
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import recipeplan.composeapp.generated.resources.*
@@ -87,12 +86,9 @@ private fun Recipes(state: RecipesState.Success) {
             ),
         )
 
-        val events = eventsOrThrow()
-        LaunchedEffect(true) {
-            events.events(ChangeScreenEvent::class).collect {
-                if (it.screen == ScreenState.Recipes) {
-                    focusRequester.requestFocus()
-                }
+        collectEventsComposable<ChangeScreenEvent> { event ->
+            if (event.screen == ScreenState.Recipes) {
+                focusRequester.requestFocus()
             }
         }
 
