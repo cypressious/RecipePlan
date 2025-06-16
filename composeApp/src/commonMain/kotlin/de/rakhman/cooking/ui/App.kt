@@ -6,6 +6,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -91,6 +92,7 @@ fun App() {
                 }
             },
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+            modifier = Modifier.imePadding()
         ) { innerPadding ->
             AnimatedContent(screenState) {
                 val modifier = Modifier.padding(innerPadding)
