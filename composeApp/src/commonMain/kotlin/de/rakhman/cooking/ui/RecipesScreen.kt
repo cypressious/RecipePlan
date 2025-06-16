@@ -78,7 +78,8 @@ private fun Recipes(state: RecipesState.Success) {
                     }
                 }
             },
-            textStyle = LocalTextStyle.current.copy(fontSize = 18.sp)
+            textStyle = LocalTextStyle.current.copy(fontSize = 18.sp),
+            singleLine = true,
         )
 
         val events = eventsOrThrow()
