@@ -80,6 +80,11 @@ private fun Recipes(state: RecipesState.Success) {
             },
             textStyle = LocalTextStyle.current.copy(fontSize = 18.sp),
             singleLine = true,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+            ),
         )
 
         val events = eventsOrThrow()
