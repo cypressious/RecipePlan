@@ -25,7 +25,7 @@ ksoup = "0.2.4"
 materialIconsCore = "1.7.3"
 playServicesAuth = "21.3.0"
 sqldelight = "2.1.0"
-hotReload = "1.0.0-beta01"
+hotReload = "1.0.0-beta02"
 
 [libraries]
 evas = { module = "io.sellmair:evas", version.ref = "evas" }
