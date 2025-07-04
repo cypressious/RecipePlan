@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.focus.*
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.*
 import de.rakhman.cooking.Recipe
 import de.rakhman.cooking.events.ChangeScreenEvent
@@ -59,6 +60,7 @@ private fun Recipes(state: RecipesState.Success) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         val focusRequester = remember { FocusRequester() }
+        val keyboardController = LocalSoftwareKeyboardController.current
         OutlinedTextField(
             modifier = Modifier.weight(1f).padding(end = 12.dp, bottom = 8.dp).focusRequester(focusRequester),
             value = filter,
@@ -89,6 +91,7 @@ private fun Recipes(state: RecipesState.Success) {
         collectEventsComposable<ChangeScreenEvent> { event ->
             if (event.screen == ScreenState.Recipes) {
                 focusRequester.requestFocus()
+                keyboardController?.show()
             }
         }
 
