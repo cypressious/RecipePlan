@@ -5,9 +5,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -45,7 +47,7 @@ fun AddScreen(modifier: Modifier, editingRecipe: Recipe?, initialData: String?) 
     var target by remember { mutableStateOf((composeValue as? ScreenState.Add)?.target ?: ScreenState.Recipes) }
     var tags by remember { mutableStateOf(editingRecipe?.tagsSet ?: emptySet()) }
 
-    Column(modifier = modifier.padding(16.dp)) {
+    Column(modifier = modifier.verticalScroll(rememberScrollState()).padding(16.dp)) {
         var title by remember { mutableStateOf(editingRecipe?.title ?: "") }
         var url by remember {
             mutableStateOf(
