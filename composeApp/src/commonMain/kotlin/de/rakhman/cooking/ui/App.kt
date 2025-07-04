@@ -13,11 +13,11 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
-import de.rakhman.cooking.Recipe
 import de.rakhman.cooking.events.DeleteEvent
 import de.rakhman.cooking.events.DeleteRequestEvent
 import de.rakhman.cooking.events.NotificationEvent
 import de.rakhman.cooking.getColorScheme
+import de.rakhman.cooking.states.RecipeDto
 import de.rakhman.cooking.states.ScreenState
 import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.compose.composeValue
@@ -34,7 +34,7 @@ fun App() {
     MaterialTheme(getColorScheme()) {
         val screenState = ScreenState.composeValue()
         val snackbarHostState = remember { SnackbarHostState() }
-        var recipeToBeDeleted by remember { mutableStateOf<Recipe?>(null) }
+        var recipeToBeDeleted by remember { mutableStateOf<RecipeDto?>(null) }
 
         collectEventsComposable<NotificationEvent> {
             snackbarHostState.showSnackbar(it.message)

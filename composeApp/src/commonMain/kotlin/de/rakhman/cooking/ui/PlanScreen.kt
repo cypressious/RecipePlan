@@ -13,11 +13,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.unit.*
-import de.rakhman.cooking.Recipe
 import de.rakhman.cooking.events.AddToPlanEvent
 import de.rakhman.cooking.events.NotificationEvent
 import de.rakhman.cooking.events.RemoveFromPlanEvent
 import de.rakhman.cooking.states.ID_TEMPORARY
+import de.rakhman.cooking.states.RecipeDto
 import de.rakhman.cooking.states.RecipesState
 import de.rakhman.cooking.states.ScreenState
 import io.sellmair.evas.compose.EvasLaunching
@@ -66,7 +66,7 @@ fun PlanScreen(modifier: Modifier, isShop: Boolean) {
 }
 
 @Composable
-private fun RowScope.PlanCheckbox(recipe: Recipe, isShop: Boolean) {
+private fun RowScope.PlanCheckbox(recipe: RecipeDto, isShop: Boolean) {
     var checked by remember { mutableStateOf(false) }
     val enabled = !checked && recipe.id != ID_TEMPORARY
 

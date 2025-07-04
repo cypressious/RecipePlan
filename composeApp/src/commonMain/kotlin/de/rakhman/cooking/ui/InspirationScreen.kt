@@ -13,9 +13,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.unit.*
-import de.rakhman.cooking.Recipe
 import de.rakhman.cooking.events.AddToPlanEvent
 import de.rakhman.cooking.events.AddToShopEvent
+import de.rakhman.cooking.states.RecipeDto
 import de.rakhman.cooking.states.RecipesState
 import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.compose.composeValue
@@ -69,7 +69,7 @@ fun InspirationScreen(modifier: Modifier) {
 
 @Composable
 private fun InspirationCard(
-    recipe: Recipe,
+    recipe: RecipeDto,
     isChecked: Boolean,
     onChecked: () -> Unit,
 ) {

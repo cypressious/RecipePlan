@@ -1,6 +1,6 @@
 package de.rakhman.cooking.events
 
-import de.rakhman.cooking.Recipe
+import de.rakhman.cooking.states.RecipeDto
 import de.rakhman.cooking.states.ScreenState
 import io.sellmair.evas.Event
 
@@ -24,7 +24,7 @@ class ErrorEvent(val e: Exception) : Event
 
 class NotificationEvent(val message: String) : Event
 
-class DeleteRequestEvent(val recipe: Recipe) : Event
+class DeleteRequestEvent(val recipe: RecipeDto) : Event
 
 class SpreadsheetIdChangedEvent(val id: String?) : Event
 

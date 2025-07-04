@@ -11,13 +11,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.focus.*
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.*
 import androidx.compose.ui.unit.*
-import de.rakhman.cooking.Recipe
 import de.rakhman.cooking.events.ChangeScreenEvent
+import de.rakhman.cooking.states.RecipeDto
 import de.rakhman.cooking.states.RecipesState
 import de.rakhman.cooking.states.ScreenState
-import de.rakhman.cooking.states.tagsSet
 import io.sellmair.evas.compose.composeValue
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -42,10 +41,10 @@ fun RecipesScreen(modifier: Modifier) {
 }
 
 enum class SortOrder(
-    val comparator: Comparator<Recipe>
+    val comparator: Comparator<RecipeDto>
 ) {
     Name(compareBy { it.title.lowercase() }),
-    Counter(compareByDescending<Recipe> { it.counter }.thenBy { it.title.lowercase() }),
+    Counter(compareByDescending<RecipeDto> { it.counter }.thenBy { it.title.lowercase() }),
 }
 
 @Composable
@@ -150,14 +149,14 @@ private fun Recipes(state: RecipesState.Success) {
 
     LazyColumn(state = listState, contentPadding = PaddingValues(bottom = 70.dp)) {
         val filteredList = recipes
-            .filter { tagsToShow.isEmpty() || it.tagsSet.any { tag -> tag in tagsToShow } }
+            .filter { tagsToShow.isEmpty() || it.tags.any { tag -> tag in tagsToShow } }
             .let { list ->
                 if (filter.isEmpty()) {
                     list.sortedWith(sort.comparator)
                 } else {
                     list
                         .filter { it.matchesFilter(filter.trim()) }
-                        .sortedWith(compareByDescending<Recipe> {
+                        .sortedWith(compareByDescending<RecipeDto> {
                             it.title.startsWith(filter.trim(), ignoreCase = true)
                         }.thenByDescending {
                             it.title.contains(filter.trim(), ignoreCase = true)
@@ -180,7 +179,7 @@ private fun Recipes(state: RecipesState.Success) {
     }
 }
 
-private fun Recipe.matchesFilter(filter: String): Boolean =
+private fun RecipeDto.matchesFilter(filter: String): Boolean =
     title.contains(filter, ignoreCase = true) ||
             url?.contains(filter, ignoreCase = true) == true
 

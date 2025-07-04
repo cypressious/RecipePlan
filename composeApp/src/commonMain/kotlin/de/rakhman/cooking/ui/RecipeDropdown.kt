@@ -10,12 +10,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.unit.*
-import de.rakhman.cooking.Recipe
 import de.rakhman.cooking.events.*
 import de.rakhman.cooking.getContext
 import de.rakhman.cooking.shareRecipe
 import de.rakhman.cooking.shareToBring
 import de.rakhman.cooking.states.ID_TEMPORARY
+import de.rakhman.cooking.states.RecipeDto
 import de.rakhman.cooking.states.ScreenState
 import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.emitAsync
@@ -26,7 +26,7 @@ import recipeplan.composeapp.generated.resources.*
 
 @Composable
 fun RecipeDropdown(
-    recipe: Recipe,
+    recipe: RecipeDto,
     screen: ScreenState.BaseScreen
 ) {
     var expanded by remember { mutableStateOf(false) }

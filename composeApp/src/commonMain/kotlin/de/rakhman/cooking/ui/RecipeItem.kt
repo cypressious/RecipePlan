@@ -5,21 +5,23 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.*
 import androidx.compose.ui.text.style.*
 import androidx.compose.ui.unit.*
-import de.rakhman.cooking.*
-import de.rakhman.cooking.states.tagsSet
+import de.rakhman.cooking.getContext
+import de.rakhman.cooking.openUrl
+import de.rakhman.cooking.states.RecipeDto
 import org.jetbrains.compose.resources.stringResource
 import recipeplan.composeapp.generated.resources.*
 
 @Composable
 fun RecipeItem(
-    recipe: Recipe,
+    recipe: RecipeDto,
     modifier: Modifier = Modifier,
     slotLeft: (@Composable RowScope.() -> Unit)? = null,
     slotRight: (@Composable RowScope.() -> Unit)? = null,
@@ -69,9 +71,9 @@ fun RecipeItem(
                 }
             }
 
-            if (recipe.tagsSet.isNotEmpty()) {
+            if (recipe.tags.isNotEmpty()) {
                 FlowRow(modifier = Modifier.padding(bottom = 4.dp)) {
-                    recipe.tagsSet.forEach {
+                    recipe.tags.forEach {
                         RecipeTag(it)
                     }
                 }

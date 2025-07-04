@@ -1,7 +1,7 @@
 package de.rakhman.cooking.repositories
 
 import de.rakhman.cooking.Database
-import de.rakhman.cooking.Recipe
+import de.rakhman.cooking.states.RecipeDto
 
 class DatabaseRepository(
     private val database: Database
@@ -10,8 +10,9 @@ class DatabaseRepository(
         return database.settingsQueries.selectFirst().executeAsOneOrNull()
     }
 
-    fun getRecipes(): List<Recipe> {
+    fun getRecipes(): List<RecipeDto> {
         return database.recipesQueries.selectAll().executeAsList()
+            .map { RecipeDto.create(it.id, it.title, it.url, it.counter, it.tags) }
     }
 
     fun getPlan(): List<Long> {
@@ -32,11 +33,11 @@ class DatabaseRepository(
         }
     }
 
-    fun updateWith(recipes: List<Recipe>, plan: List<Long>, shop: List<Long>) {
+    fun updateWith(recipes: List<RecipeDto>, plan: List<Long>, shop: List<Long>) {
         database.transaction {
             database.recipesQueries.deleteAll()
             recipes.forEach {
-                database.recipesQueries.insert(it.id, it.title, it.url, it.counter, it.tags)
+                database.recipesQueries.insert(it.id, it.title, it.url, it.counter, it.tags.joinToString(RecipeDto.SEPARATOR_TAGS))
             }
 
             database.planQueries.deleteAll()

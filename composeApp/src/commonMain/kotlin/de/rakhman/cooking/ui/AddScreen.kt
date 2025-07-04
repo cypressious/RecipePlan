@@ -1,10 +1,6 @@
 package de.rakhman.cooking.ui
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -12,21 +8,19 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.*
 import androidx.compose.ui.focus.*
 import androidx.compose.ui.platform.*
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.unit.*
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.network.parseGetRequest
-import de.rakhman.cooking.Recipe
 import de.rakhman.cooking.events.AddEvent
 import de.rakhman.cooking.events.NotificationEvent
 import de.rakhman.cooking.events.UpdateEvent
+import de.rakhman.cooking.states.RecipeDto
 import de.rakhman.cooking.states.RecipesState
 import de.rakhman.cooking.states.ScreenState
-import de.rakhman.cooking.states.tagsSet
 import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.compose.composeValue
 import io.sellmair.evas.emitAsync
@@ -42,10 +36,10 @@ private val urlRegex =
 val allTargets = listOf(ScreenState.Plan, ScreenState.Shop, ScreenState.Recipes)
 
 @Composable
-fun AddScreen(modifier: Modifier, editingRecipe: Recipe?, initialData: String?) {
+fun AddScreen(modifier: Modifier, editingRecipe: RecipeDto?, initialData: String?) {
     val composeValue = ScreenState.composeValue()
     var target by remember { mutableStateOf((composeValue as? ScreenState.Add)?.target ?: ScreenState.Recipes) }
-    var tags by remember { mutableStateOf(editingRecipe?.tagsSet ?: emptySet()) }
+    var tags by remember { mutableStateOf(editingRecipe?.tags ?: emptySet()) }
 
     Column(modifier = modifier.verticalScroll(rememberScrollState()).padding(16.dp)) {
         var title by remember { mutableStateOf(editingRecipe?.title ?: "") }

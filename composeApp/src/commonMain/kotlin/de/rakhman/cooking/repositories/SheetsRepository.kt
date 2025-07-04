@@ -3,7 +3,7 @@ package de.rakhman.cooking.repositories
 import com.google.api.services.sheets.v4.Sheets
 import com.google.api.services.sheets.v4.model.BatchUpdateValuesRequest
 import com.google.api.services.sheets.v4.model.ValueRange
-import de.rakhman.cooking.Recipe
+import de.rakhman.cooking.states.RecipeDto
 
 const val SHEET_NAME_RECIPES = "Rezepte"
 const val SHEET_NAME_PLAN = "Plan"
@@ -20,14 +20,14 @@ class SheetsRepository(
     private val sheets: Sheets,
     private val spreadSheetsId: String,
 ) {
-    fun getRecipes(): List<Recipe> {
-        fun parseRecipe(index: Int, row: List<Any?>): Recipe {
-            return Recipe(
+    fun getRecipes(): List<RecipeDto> {
+        fun parseRecipe(index: Int, row: List<Any?>): RecipeDto {
+            return RecipeDto.create(
                 id = index + 1L,
                 title = row[COLUMN_NAME].toString().trim(),
                 url = row.elementAtOrNull(COLUMN_URL)?.toString()?.ifBlank { null },
                 counter = row.elementAtOrNull(COLUMN_COUNTER)?.toString()?.toLongOrNull() ?: 0,
-                tags = row.elementAtOrNull(COLUMN_TAGS)?.toString(),
+                tagsString = row.elementAtOrNull(COLUMN_TAGS)?.toString(),
             )
         }
 
@@ -62,7 +62,7 @@ class SheetsRepository(
         )
     }
 
-    fun updateRecipe(id: Long, title: String, url: String?, tagsString: String) {
+    fun updateRecipe(id: Long, title: String, url: String?, tags: Set<String>) {
         sheets.spreadsheets().values().batchUpdate(
             spreadSheetsId,
             BatchUpdateValuesRequest().apply {
@@ -74,7 +74,7 @@ class SheetsRepository(
                     },
                     ValueRange().apply {
                         range = "$SHEET_NAME_RECIPES!E$id"
-                        setValues(listOf(listOf(tagsString)))
+                        setValues(listOf(listOf(tags.joinToString(RecipeDto.SEPARATOR_TAGS))))
                         valueInputOption = "RAW"
                     },
                 )
