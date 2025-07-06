@@ -55,7 +55,7 @@ class RecipeDto private constructor(
             title = title,
             url = url,
             counter = counter,
-            tagsSet = tagsString?.trim()?.split(SEPARATOR_TAGS)?.mapTo(mutableSetOf()) { it.trim() }?.filter { it.isNotBlank() }?.toSet().orEmpty()
+            tagsSet = tagsString?.trim()?.split(SEPARATOR_TAGS)?.map { it.trim() }?.filter { it.isNotBlank() }?.toSet().orEmpty()
         )
 
         fun create(
