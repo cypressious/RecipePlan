@@ -5,7 +5,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
@@ -47,6 +54,7 @@ fun RecipeDropdown(
                 if (screen == ScreenState.Recipes) {
                     DropdownMenuItem(
                         text = { Text(stringResource(Res.string.add_to_shop)) },
+                        leadingIcon = { Icon(Icons.Filled.ShoppingCart, contentDescription = null) },
                         onClick = EvasLaunching {
                             NotificationEvent(getString(Res.string.recipe_added_to_shop, recipe.title)).emitAsync()
                             AddToShopEvent(recipe.id).emitAsync()
@@ -55,6 +63,7 @@ fun RecipeDropdown(
                     )
                     DropdownMenuItem(
                         text = { Text(stringResource(Res.string.add_to_plan)) },
+                        leadingIcon = { Icon(Icons.Filled.DateRange, contentDescription = null) },
                         onClick = EvasLaunching {
                             NotificationEvent(getString(Res.string.recipe_added_to_plan, recipe.title)).emitAsync()
                             AddToPlanEvent(recipe.id).emitAsync()
@@ -65,6 +74,12 @@ fun RecipeDropdown(
                 if (screen == ScreenState.Shop) {
                     DropdownMenuItem(
                         text = { Text(stringResource(Res.string.remove_from_shop)) },
+                        leadingIcon = { 
+                            Icon(
+                                imageVector = Icons.Filled.Clear,
+                                contentDescription = null
+                            )
+                        },
                         onClick = EvasLaunching {
                             NotificationEvent(getString(Res.string.recipe_removed_from_shop, recipe.title)).emitAsync()
                             RemoveFromShopEvent(recipe.id).emitAsync()
@@ -75,6 +90,12 @@ fun RecipeDropdown(
                 if (screen == ScreenState.Plan) {
                     DropdownMenuItem(
                         text = { Text(stringResource(Res.string.remove_from_plan)) },
+                        leadingIcon = { 
+                            Icon(
+                                imageVector = Icons.Filled.Clear,
+                                contentDescription = null
+                            )
+                        },
                         onClick = EvasLaunching {
                             NotificationEvent(getString(Res.string.recipe_removed_from_plan, recipe.title)).emitAsync()
                             RemoveFromPlanEvent(recipe.id, incrementCounter = false).emitAsync()
@@ -84,6 +105,7 @@ fun RecipeDropdown(
                 }
                 DropdownMenuItem(
                     text = { Text(stringResource(Res.string.edit)) },
+                    leadingIcon = { Icon(Icons.Filled.Edit, contentDescription = null) },
                     onClick = EvasLaunching {
                         ScreenState.set(
                             ScreenState.Add(
@@ -96,6 +118,7 @@ fun RecipeDropdown(
                 )
                 DropdownMenuItem(
                     text = { Text(stringResource(Res.string.delete)) },
+                    leadingIcon = { Icon(Icons.Filled.Delete, contentDescription = null) },
                     onClick = EvasLaunching {
                         DeleteRequestEvent(recipe).emitAsync()
                         expanded = false
@@ -103,11 +126,13 @@ fun RecipeDropdown(
                 )
                 DropdownMenuItem(
                     text = { Text(stringResource(Res.string.share)) },
+                    leadingIcon = { Icon(Icons.Filled.Share, contentDescription = null) },
                     onClick = { shareRecipe(recipe.title, recipe.url, context); expanded = false }
                 )
                 recipe.url?.let { url ->
                     DropdownMenuItem(
                         text = { Text(stringResource(Res.string.add_to_bring)) },
+                        leadingIcon = { Icon(Icons.Filled.Add, contentDescription = null) },
                         onClick = { shareToBring(recipe.title, url, context); expanded = false }
                     )
                 }
