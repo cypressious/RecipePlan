@@ -15,6 +15,7 @@ private const val COLUMN_URL = 1
 private const val COLUMN_DELETED = 2
 private const val COLUMN_COUNTER = 3
 private const val COLUMN_TAGS = 4
+private const val COLUMN_TEXT = 5
 
 class SheetsRepository(
     private val sheets: Sheets,
@@ -28,6 +29,7 @@ class SheetsRepository(
                 url = row.elementAtOrNull(COLUMN_URL)?.toString()?.ifBlank { null },
                 counter = row.elementAtOrNull(COLUMN_COUNTER)?.toString()?.toLongOrNull() ?: 0,
                 tagsString = row.elementAtOrNull(COLUMN_TAGS)?.toString(),
+                text = row.elementAtOrNull(COLUMN_TEXT)?.toString()?.ifBlank { null },
             )
         }
 
@@ -62,7 +64,7 @@ class SheetsRepository(
         )
     }
 
-    fun updateRecipe(id: Long, title: String, url: String?, tags: Set<String>) {
+    fun updateRecipe(id: Long, title: String, url: String?, tags: Set<String>, text: String? = null) {
         sheets.spreadsheets().values().batchUpdate(
             spreadSheetsId,
             BatchUpdateValuesRequest().apply {
@@ -75,6 +77,11 @@ class SheetsRepository(
                     ValueRange().apply {
                         range = "$SHEET_NAME_RECIPES!E$id"
                         setValues(listOf(listOf(tags.joinToString(RecipeDto.SEPARATOR_TAGS))))
+                        valueInputOption = "RAW"
+                    },
+                    ValueRange().apply {
+                        range = "$SHEET_NAME_RECIPES!F$id"
+                        setValues(listOf(listOf(text ?: "")))
                         valueInputOption = "RAW"
                     },
                 )

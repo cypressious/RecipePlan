@@ -50,25 +50,38 @@ fun AddScreen(modifier: Modifier, editingRecipe: RecipeDto?, initialData: String
                     ?: ""
             )
         }
+        var text by remember { mutableStateOf(editingRecipe?.text ?: "") }
+        
         LaunchedEffect(url) {
-            if (title.isNotEmpty() || url.isEmpty()) return@LaunchedEffect
+            if ((title.isNotEmpty() && text.isNotEmpty()) || url.isEmpty()) return@LaunchedEffect
             withContext(Dispatchers.IO) {
                 try {
                     val doc = Ksoup.parseGetRequest(url)
-                    title = doc.title()
+                    if (title.isEmpty()) {
+                        title = doc.title()
+                    }
+                    if (text.isEmpty()) {
+                        // Try to extract recipe text from the page
+                        val recipeText = doc.select("article, .recipe-content, .recipe-text, .recipe-instructions, .instructions, .recipe-description, .description")
+                            .firstOrNull()?.text()
+                        if (!recipeText.isNullOrBlank()) {
+                            text = recipeText
+                        }
+                    }
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
             }
         }
         val enabled = title.isNotBlank() && (url.isBlank() || url.matches(urlRegex))
+        val textToSave = text.ifBlank { null }
         val submit = EvasLaunching {
             if (editingRecipe != null) {
                 NotificationEvent(getString(Res.string.recipe_saved, title.trim())).emitAsync()
-                UpdateEvent(editingRecipe.id, title.trim(), url, tags).emitAsync()
+                UpdateEvent(editingRecipe.id, title.trim(), url, tags, textToSave).emitAsync()
             } else {
                 NotificationEvent(getString(Res.string.recipe_added, title.trim())).emitAsync()
-                AddEvent(title.trim(), url.ifBlank { null }, tags, target).emitAsync()
+                AddEvent(title.trim(), url.ifBlank { null }, tags, target, textToSave).emitAsync()
             }
         }
         val focusManager = LocalFocusManager.current
@@ -90,6 +103,20 @@ fun AddScreen(modifier: Modifier, editingRecipe: RecipeDto?, initialData: String
             onValueChange = { url = it },
             label = { Text(stringResource(Res.string.url)) },
             singleLine = true,
+            modifier = Modifier.fillMaxWidth().padding(bottom = 14.dp),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+            keyboardActions = KeyboardActions(
+                onDone = { focusManager.moveFocus(FocusDirection.Next) }
+            ),
+        )
+        
+        OutlinedTextField(
+            value = text,
+            onValueChange = { text = it },
+            label = { Text(stringResource(Res.string.recipe_text)) },
+            singleLine = false,
+            minLines = 3,
+            maxLines = 10,
             modifier = Modifier.fillMaxWidth().padding(bottom = 14.dp),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(

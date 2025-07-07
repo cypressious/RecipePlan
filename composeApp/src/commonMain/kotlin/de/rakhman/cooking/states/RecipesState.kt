@@ -35,10 +35,12 @@ class RecipeDto private constructor(
     val url: String?,
     val counter: Long,
     val tags: Set<String>,
+    val text: String?,
 ) {
     init {
         require(url == null || !url.isEmpty()) { "URL must be null or non-empty" }
         require(tags.none { it.isBlank() }) { "Tags must not contain blank items" }
+        require(text == null || !text.isBlank()) { "Recipe text must be null or not blank" }
     }
 
     companion object {
@@ -50,12 +52,14 @@ class RecipeDto private constructor(
             url: String?,
             counter: Long,
             tagsString: String?,
+            text: String? = null,
         ) = create(
             id = id,
             title = title,
             url = url,
             counter = counter,
-            tagsSet = tagsString?.trim()?.split(SEPARATOR_TAGS)?.map { it.trim() }?.filter { it.isNotBlank() }?.toSet().orEmpty()
+            tagsSet = tagsString?.trim()?.split(SEPARATOR_TAGS)?.map { it.trim() }?.filter { it.isNotBlank() }?.toSet().orEmpty(),
+            text = text
         )
 
         fun create(
@@ -64,7 +68,8 @@ class RecipeDto private constructor(
             url: String?,
             counter: Long,
             tagsSet: Set<String>,
-        ) = RecipeDto(id, title, url?.ifBlank { null }, counter, tagsSet)
+            text: String? = null,
+        ) = RecipeDto(id, title, url?.ifBlank { null }, counter, tagsSet, text?.ifBlank { null })
     }
 }
 
@@ -141,8 +146,8 @@ private fun CoroutineScope.launchRecipesStateInternal() = launch {
     setStateFromDatabase(c.database)
     collectEventsAsyncCatchingErrors<ReloadEvent> { syncWithSheets() }
     collectEventsAsyncCatchingErrors<DeleteEvent> { setDeleted(it.id) }
-    collectEventsAsyncCatchingErrors<AddEvent> { addRecipe(it.title, it.url, it.target, it.tags) }
-    collectEventsAsyncCatchingErrors<UpdateEvent> { updateRecipe(it.id, it.title, it.url, it.tags) }
+    collectEventsAsyncCatchingErrors<AddEvent> { addRecipe(it.title, it.url, it.target, it.tags, it.text) }
+    collectEventsAsyncCatchingErrors<UpdateEvent> { updateRecipe(it.id, it.title, it.url, it.tags, it.text) }
     collectEventsAsyncCatchingErrors<AddToPlanEvent> {
         updatePlanAndShop(addIdToPlan = it.id, removeIdFromShop = it.id)
     }
@@ -234,7 +239,7 @@ private suspend fun updatePlanAndShop(
 }
 
 context(c: RecipeContext)
-private suspend fun updateRecipe(id: Long, title: String, url: String?, tags: Set<String>) {
+private suspend fun updateRecipe(id: Long, title: String, url: String?, tags: Set<String>, text: String? = null) {
     val state = RecipesState.value()
     val target = (ScreenState.value() as? ScreenState.Add)?.target
     ScreenState.set(target ?: ScreenState.Recipes)
@@ -242,7 +247,7 @@ private suspend fun updateRecipe(id: Long, title: String, url: String?, tags: Se
     if (state is RecipesState.Success) {
         RecipesState.set(
             RecipesState.Success(
-                state.recipes.map { if (it.id == id) RecipeDto.create(id, title, url, it.counter, tags) else it },
+                state.recipes.map { if (it.id == id) RecipeDto.create(id, title, url, it.counter, tags, text) else it },
                 state.plan,
                 state.shop,
             )
@@ -250,21 +255,21 @@ private suspend fun updateRecipe(id: Long, title: String, url: String?, tags: Se
     }
 
     withContext(Dispatchers.IO) {
-        c.sheets.updateRecipe(id, title, url, tags)
+        c.sheets.updateRecipe(id, title, url, tags, text)
     }
 
     syncWithSheets()
 }
 
 context(c: RecipeContext)
-private suspend fun addRecipe(title: String, url: String?, target: ScreenState.BaseScreen, tags: Set<String>) {
+private suspend fun addRecipe(title: String, url: String?, target: ScreenState.BaseScreen, tags: Set<String>, text: String? = null) {
     ScreenState.set(target)
 
     val state = RecipesState.value()
     if (state is RecipesState.Success) {
         RecipesState.set(
             RecipesState.Success(
-                state.recipes + RecipeDto.create(ID_TEMPORARY, title, url, 0, tags),
+                state.recipes + RecipeDto.create(ID_TEMPORARY, title, url, 0, tags, text),
                 state.plan.let { if (target == ScreenState.Plan) it + ID_TEMPORARY else it },
                 state.shop.let { if (target == ScreenState.Shop) it + ID_TEMPORARY else it },
             )
@@ -273,7 +278,7 @@ private suspend fun addRecipe(title: String, url: String?, target: ScreenState.B
 
     withContext(Dispatchers.IO) {
         val id = c.sheets.getNewId()
-        c.sheets.updateRecipe(id, title, url, tags)
+        c.sheets.updateRecipe(id, title, url, tags, text)
 
         if (target == ScreenState.Shop) {
             updatePlanAndShop(
