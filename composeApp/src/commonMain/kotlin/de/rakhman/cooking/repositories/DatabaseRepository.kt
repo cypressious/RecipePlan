@@ -12,7 +12,7 @@ class DatabaseRepository(
 
     fun getRecipes(): List<RecipeDto> {
         return database.recipesQueries.selectAll().executeAsList()
-            .map { RecipeDto.create(it.id, it.title, it.url, it.counter, it.tags) }
+            .map { RecipeDto.create(it.id, it.title, it.url, it.counter, it.tags, it.text) }
     }
 
     fun getPlan(): List<Long> {
@@ -37,7 +37,7 @@ class DatabaseRepository(
         database.transaction {
             database.recipesQueries.deleteAll()
             recipes.forEach {
-                database.recipesQueries.insert(it.id, it.title, it.url, it.counter, it.tags.joinToString(RecipeDto.SEPARATOR_TAGS))
+                database.recipesQueries.insert(it.id, it.title, it.url, it.counter, it.tags.joinToString(RecipeDto.SEPARATOR_TAGS), it.text)
             }
 
             database.planQueries.deleteAll()

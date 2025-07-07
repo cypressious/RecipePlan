@@ -45,4 +45,7 @@
     <string name="sort">Sort</string>
     <string name="new_tag">New tag...</string>
     <string name="tags">Tags</string>
+    <string name="recipe_text">Recipe Text</string>
+    <string name="view_recipe">View Recipe</string>
+    <string name="open_url">Open URL</string>
 </resources>

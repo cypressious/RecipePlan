@@ -94,6 +94,7 @@ fun App() {
                     is ScreenState.Add -> AddScreen(modifier, it.editingRecipe, it.initialData)
                     ScreenState.Settings -> SettingsScreen(modifier)
                     ScreenState.Inspiration -> InspirationScreen(modifier)
+                    is ScreenState.RecipeText -> RecipeTextScreen(modifier, it)
                 }
             }
         }

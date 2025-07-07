@@ -10,6 +10,7 @@ sealed class ScreenState(val title: StringResource) : State {
     data object Plan : BaseScreen(Res.string.plan)
     data object Shop : BaseScreen(Res.string.shop)
     class Add(val target: BaseScreen, val editingRecipe: RecipeDto? = null, val initialData: String? = null) : ScreenState(Res.string.add_recipe)
+    class RecipeText(val recipe: RecipeDto) : ScreenState(Res.string.view_recipe)
     data object Settings : ScreenState(Res.string.settings)
     data object Inspiration : ScreenState(Res.string.inspiration)
 

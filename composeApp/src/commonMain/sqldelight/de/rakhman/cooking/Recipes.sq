@@ -4,7 +4,8 @@ CREATE TABLE recipe
     title   TEXT                NOT NULL,
     url     TEXT,
     counter INTEGER             NOT NULL,
-    tags TEXT
+    tags    TEXT,
+    text    TEXT
 );
 
 selectAll
@@ -19,5 +20,5 @@ FROM recipe;
 
 insert
 :
-INSERT INTO recipe(id, title, url, counter, tags)
-VALUES (?, ?, ?, ?, ?);
+INSERT INTO recipe(id, title, url, counter, tags, text)
+VALUES (?, ?, ?, ?, ?, ?);
