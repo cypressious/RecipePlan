@@ -37,8 +37,7 @@ fun MyTopBar() {
                 IconButton(onClick = EvasLaunching {
                     ScreenState.set(when(screenState) {
                         is ScreenState.Add -> screenState.target
-                        ScreenState.Settings, ScreenState.Inspiration -> ScreenState.Plan
-                        else -> screenState
+                        else -> ScreenState.Plan
                     })
                 }
                 ) {
