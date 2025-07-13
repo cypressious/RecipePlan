@@ -10,6 +10,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.hotReload)
     alias(libs.plugins.sqldelight)
+    alias(libs.plugins.paparazzi)
 }
 
 kotlin {
@@ -66,6 +67,12 @@ kotlin {
             implementation(libs.kotlinx.coroutines.swing)
             implementation(libs.sqldelight.sqlite.driver)
             implementation(libs.google.oauth.client.jetty)
+        }
+        jvmTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation(libs.kotlin.test.junit)
+            implementation(libs.junit)
+            implementation(libs.paparazzi)
         }
     }
 }
