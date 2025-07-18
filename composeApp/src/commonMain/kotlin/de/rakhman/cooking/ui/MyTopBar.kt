@@ -13,13 +13,25 @@ import androidx.compose.ui.unit.*
 import de.rakhman.cooking.events.ReloadEvent
 import de.rakhman.cooking.states.ScreenState
 import de.rakhman.cooking.states.SyncState
+import io.sellmair.evas.Events
+import io.sellmair.evas.States
 import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.compose.composeValue
+import io.sellmair.evas.compose.installEvas
 import io.sellmair.evas.emit
 import io.sellmair.evas.set
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
 import recipeplan.composeapp.generated.resources.*
+
+@Composable
+@Preview
+fun MyTopBarPreview() {
+    installEvas(Events(), States()) {
+        MyTopBar()
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -19,8 +19,11 @@ import de.rakhman.cooking.events.NotificationEvent
 import de.rakhman.cooking.getColorScheme
 import de.rakhman.cooking.states.RecipeDto
 import de.rakhman.cooking.states.ScreenState
+import io.sellmair.evas.Events
+import io.sellmair.evas.States
 import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.compose.composeValue
+import io.sellmair.evas.compose.installEvas
 import io.sellmair.evas.emitAsync
 import io.sellmair.evas.set
 import org.jetbrains.compose.resources.getString
@@ -30,6 +33,13 @@ import recipeplan.composeapp.generated.resources.*
 
 @Composable
 @Preview
+fun AppPreview() {
+    installEvas(Events(), States()) {
+        App()
+    }
+}
+
+@Composable
 fun App() {
     MaterialTheme(getColorScheme()) {
         val screenState = ScreenState.composeValue()
