@@ -45,4 +45,6 @@
     <string name="sort">Sort</string>
     <string name="new_tag">New tag...</string>
     <string name="tags">Tags</string>
+    <string name="all_items_transferred_to_plan">All items transferred to plan.</string>
+    <string name="transfer_all_to_plan">Transfer All to Plan</string>
 </resources>

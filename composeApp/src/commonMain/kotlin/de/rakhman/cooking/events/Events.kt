@@ -16,6 +16,8 @@ class RemoveFromPlanEvent(val id: Long, val incrementCounter: Boolean) : Event
 
 class RemoveFromShopEvent(val id: Long) : Event
 
+object TransferAllToPlanEvent : Event
+
 class AddEvent(val title: String, val url: String?, val tags: Set<String>, val target: ScreenState.BaseScreen) : Event
 
 class UpdateEvent(val id: Long, val title: String, val url: String?, val tags: Set<String>) : Event

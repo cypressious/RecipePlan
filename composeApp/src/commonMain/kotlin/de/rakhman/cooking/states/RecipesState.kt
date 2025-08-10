@@ -16,6 +16,8 @@ import de.rakhman.cooking.updateWidget
 import io.sellmair.evas.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collectLatest
+import org.jetbrains.compose.resources.getString
+import recipeplan.composeapp.generated.resources.*
 
 sealed class RecipesState : State {
     data object Loading : RecipesState()
@@ -155,6 +157,9 @@ private fun CoroutineScope.launchRecipesStateInternal() = launch {
     collectEventsAsyncCatchingErrors<RemoveFromShopEvent> {
         updatePlanAndShop(removeIdFromShop = it.id)
     }
+    collectEventsAsyncCatchingErrors<TransferAllToPlanEvent> {
+        transferAllToPlan()
+    }
 
     ReloadEvent.emit()
 }
@@ -186,6 +191,35 @@ private suspend fun setDeleted(id: Long) {
         c.sheets.delete(id)
     }
     syncWithSheets()
+}
+
+context(c: RecipeContext)
+private suspend fun transferAllToPlan() {
+    val state = RecipesState.value()
+    if (state is RecipesState.Success && state.shop.isNotEmpty()) {
+        // Create new plan with all shop items added
+        val newPlan = (state.plan + state.shop).distinct()
+        // Empty the shop
+        val newShop = emptyList<Long>()
+        
+        // Update state optimistically
+        RecipesState.set(RecipesState.Success(state.recipes, newPlan, newShop))
+        
+        // Update remote state
+        withContext(Dispatchers.IO) {
+            c.sheets.updatePlanAndShop(
+                newPlan = newPlan,
+                newShop = newShop,
+                idToIncrementCounter = null
+            )
+        }
+        
+        // Show notification
+        NotificationEvent(getString(Res.string.all_items_transferred_to_plan)).emitAsync()
+        
+        // Sync with sheets
+        syncWithSheets()
+    }
 }
 
 context(c: RecipeContext)
