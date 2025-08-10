@@ -42,3 +42,11 @@ jobs:
 
       - name: Build Android Debug
         run: ./gradlew :composeApp:assembleDebug
+
+      - name: Upload Debug APK
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-apk-${{ github.event.pull_request.number }}
+          path: composeApp/build/outputs/apk/debug/composeApp-debug.apk
+          retention-days: 30
