@@ -5,6 +5,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
@@ -16,6 +17,7 @@ import androidx.compose.ui.unit.*
 import de.rakhman.cooking.events.AddToPlanEvent
 import de.rakhman.cooking.events.NotificationEvent
 import de.rakhman.cooking.events.RemoveFromPlanEvent
+import de.rakhman.cooking.events.TransferAllToPlanEvent
 import de.rakhman.cooking.states.ID_TEMPORARY
 import de.rakhman.cooking.states.RecipeDto
 import de.rakhman.cooking.states.RecipesState
@@ -45,24 +47,46 @@ fun PlanScreen(modifier: Modifier, isShop: Boolean) {
             )
         }
 
-        LazyColumn(contentPadding = PaddingValues(bottom = 70.dp)) {
-            items(
-                count = planRecipes.size,
-                key = { i -> planRecipes[i].id },
-                itemContent = { i ->
-                    val recipe = planRecipes[i]
-                    RecipeItem(
-                        recipe = recipe,
-                        modifier = Modifier.animateItem(),
-                        slotLeft = { PlanCheckbox(recipe, isShop) },
-                        slotRight = { RecipeDropdown(recipe, if (isShop) ScreenState.Shop else ScreenState.Plan) }
-                    )
-                    if (i != planRecipes.lastIndex) HorizontalDivider(modifier = Modifier.animateItem())
-                },
-            )
+        Column(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                contentPadding = PaddingValues(bottom = 16.dp)
+            ) {
+                items(
+                    count = planRecipes.size,
+                    key = { i -> planRecipes[i].id },
+                    itemContent = { i ->
+                        val recipe = planRecipes[i]
+                        RecipeItem(
+                            recipe = recipe,
+                            modifier = Modifier.animateItem(),
+                            slotLeft = { PlanCheckbox(recipe, isShop) },
+                            slotRight = { RecipeDropdown(recipe, if (isShop) ScreenState.Shop else ScreenState.Plan) }
+                        )
+                        if (i != planRecipes.lastIndex) HorizontalDivider(modifier = Modifier.animateItem())
+                    },
+                )
+            }
+            
+            // Add the "Transfer All to Plan" button only for the shop screen and when there are items
+            if (isShop && planRecipes.isNotEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Button(
+                        onClick = EvasLaunching {
+                            TransferAllToPlanEvent.emitAsync()
+                        }
+                    ) {
+                        Text(stringResource(Res.string.transfer_all_to_plan))
+                    }
+                }
+            }
         }
     }
-
 }
 
 @Composable

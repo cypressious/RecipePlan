@@ -44,4 +44,6 @@
     <string name="sort">Sortierung</string>
     <string name="new_tag">Neuer Tag...</string>
     <string name="tags">Tags</string>
+    <string name="all_items_transferred_to_plan">Alle Einträge zum Plan hinzugefügt.</string>
+    <string name="transfer_all_to_plan">Alle zum Plan hinzufügen</string>
 </resources>
