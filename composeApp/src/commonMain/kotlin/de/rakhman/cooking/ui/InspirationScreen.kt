@@ -15,6 +15,7 @@ import androidx.compose.ui.*
 import androidx.compose.ui.unit.*
 import de.rakhman.cooking.events.AddToPlanEvent
 import de.rakhman.cooking.events.AddToShopEvent
+import de.rakhman.cooking.events.TransferAllToPlanEvent
 import de.rakhman.cooking.states.RecipeDto
 import de.rakhman.cooking.states.RecipesState
 import io.sellmair.evas.compose.EvasLaunching
@@ -42,7 +43,7 @@ fun InspirationScreen(modifier: Modifier) {
         if (windowed.isEmpty()) {
             Text(stringResource(Res.string.no_entries))
         } else {
-            Column(modifier = Modifier.verticalScroll(rememberScrollState()).padding(12.dp).padding(bottom = 64.dp)) {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState()).padding(12.dp).padding(bottom = 100.dp)) {
                 windowed.first().forEachIndexed { index, recipe ->
                     InspirationCard(
                         recipe = recipe,
@@ -54,15 +55,32 @@ fun InspirationScreen(modifier: Modifier) {
                 }
             }
 
-            ExtendedFloatingActionButton(
-                onClick = {
-                    windowed = windowed.drop(1)
-                    checked = List(INSPIRATION_COUNT) { false }
-                },
-                icon = { Icon(Icons.AutoMirrored.Filled.ArrowForward, stringResource(Res.string.next)) },
-                text = { Text(stringResource(Res.string.next)) },
-                modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp)
-            )
+            Row(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Button(
+                    onClick = EvasLaunching {
+                        TransferAllToPlanEvent.emitAsync()
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(stringResource(Res.string.transfer_all_to_plan))
+                }
+                
+                ExtendedFloatingActionButton(
+                    onClick = {
+                        windowed = windowed.drop(1)
+                        checked = List(INSPIRATION_COUNT) { false }
+                    },
+                    icon = { Icon(Icons.AutoMirrored.Filled.ArrowForward, stringResource(Res.string.next)) },
+                    text = { Text(stringResource(Res.string.next)) },
+                    modifier = Modifier.weight(1f)
+                )
+            }
         }
     }
 }
