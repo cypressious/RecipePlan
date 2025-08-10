@@ -5,7 +5,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidApplication)
+    // alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.hotReload)
@@ -16,15 +16,15 @@ kotlin {
     compilerOptions {
         freeCompilerArgs.add("-Xrender-internal-diagnostic-names")
         freeCompilerArgs.add("-Xcontext-parameters")
-        freeCompilerArgs.add("-Xexpect-actual-classes")
+        freeCompilerArgs.add("-Xexpected-actual-classes")
         progressiveMode = true
     }
-    androidTarget {
+    /* androidTarget {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
-    }
+    } */
 
     jvm {
         compilerOptions.freeCompilerArgs.add("-XXlenient-mode")
@@ -32,7 +32,7 @@ kotlin {
     }
 
     sourceSets {
-        androidMain.dependencies {
+        /* androidMain.dependencies {
             implementation(libs.kotlinx.coroutines.android)
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
@@ -42,7 +42,7 @@ kotlin {
             implementation(libs.androidx.glance.appwidget)
             implementation(libs.androidx.glance.material3)
             implementation(libs.androidx.work.runtime.ktx)
-        }
+        } */
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
@@ -70,7 +70,7 @@ kotlin {
     }
 }
 
-android {
+/* android {
     namespace = "de.rakhman.cooking"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
@@ -116,11 +116,11 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-}
+} */
 
-dependencies {
+/* dependencies {
     debugImplementation(compose.uiTooling)
-}
+} */
 
 compose.desktop {
     application {
