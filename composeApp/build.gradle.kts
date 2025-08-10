@@ -5,7 +5,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidApplication)
+    // Temporarily disabling Android to focus on JVM tests
+    // alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.hotReload)
@@ -19,12 +20,13 @@ kotlin {
         freeCompilerArgs.add("-Xexpect-actual-classes")
         progressiveMode = true
     }
-    androidTarget {
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
-        }
-    }
+    // Temporarily disabled Android target
+    // androidTarget {
+    //     @OptIn(ExperimentalKotlinGradlePluginApi::class)
+    //     compilerOptions {
+    //         jvmTarget.set(JvmTarget.JVM_11)
+    //     }
+    // }
 
     jvm {
         compilerOptions.freeCompilerArgs.add("-XXlenient-mode")
@@ -32,17 +34,18 @@ kotlin {
     }
 
     sourceSets {
-        androidMain.dependencies {
-            implementation(libs.kotlinx.coroutines.android)
-            implementation(compose.preview)
-            implementation(libs.androidx.activity.compose)
-            implementation(libs.sqldelight.android.driver)
-            implementation(libs.play.services.auth)
-            implementation(libs.google.api.client.android)
-            implementation(libs.androidx.glance.appwidget)
-            implementation(libs.androidx.glance.material3)
-            implementation(libs.androidx.work.runtime.ktx)
-        }
+        // Temporarily disabled Android dependencies
+        // androidMain.dependencies {
+        //     implementation(libs.kotlinx.coroutines.android)
+        //     implementation(compose.preview)
+        //     implementation(libs.androidx.activity.compose)
+        //     implementation(libs.sqldelight.android.driver)
+        //     implementation(libs.play.services.auth)
+        //     implementation(libs.google.api.client.android)
+        //     implementation(libs.androidx.glance.appwidget)
+        //     implementation(libs.androidx.glance.material3)
+        //     implementation(libs.androidx.work.runtime.ktx)
+        // }
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
@@ -67,9 +70,22 @@ kotlin {
             implementation(libs.sqldelight.sqlite.driver)
             implementation(libs.google.oauth.client.jetty)
         }
+        
+        // Add test dependencies
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+            @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
+            implementation(compose.uiTest)
+        }
+        
+        jvmTest.dependencies {
+            implementation(libs.kotlin.test.junit)
+        }
     }
 }
 
+// Temporarily disabled Android configuration
+/*
 android {
     namespace = "de.rakhman.cooking"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -117,10 +133,11 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 }
+*/
 
-dependencies {
-    debugImplementation(compose.uiTooling)
-}
+//dependencies {
+//    debugImplementation(compose.uiTooling)
+//}
 
 compose.desktop {
     application {
