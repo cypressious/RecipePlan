@@ -155,6 +155,9 @@ private fun CoroutineScope.launchRecipesStateInternal() = launch {
     collectEventsAsyncCatchingErrors<RemoveFromShopEvent> {
         updatePlanAndShop(removeIdFromShop = it.id)
     }
+    collectEventsAsyncCatchingErrors<TransferAllShopToPlanEvent> {
+        transferAllShopToPlan()
+    }
 
     ReloadEvent.emit()
 }
@@ -231,6 +234,25 @@ private suspend fun updatePlanAndShop(
             idToIncrementCounter = removeIdFromPlan.takeIf { incrementCounter })
     }
     syncWithSheets()
+}
+
+context(c: RecipeContext)
+private suspend fun transferAllShopToPlan() {
+    val state = RecipesState.value()
+    if (state is RecipesState.Success && state.shop.isNotEmpty()) {
+        val shopIds = state.shop
+        val newPlan = (state.plan + shopIds).distinct()
+        val newShop = emptyList<Long>()
+        
+        // Update state optimistically first
+        RecipesState.set(RecipesState.Success(state.recipes, newPlan, newShop))
+        
+        // Then sync with sheets
+        withContext(Dispatchers.IO) {
+            c.sheets.updatePlanAndShop(newPlan = newPlan, newShop = newShop)
+        }
+        syncWithSheets()
+    }
 }
 
 context(c: RecipeContext)

@@ -5,6 +5,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
@@ -16,6 +17,7 @@ import androidx.compose.ui.unit.*
 import de.rakhman.cooking.events.AddToPlanEvent
 import de.rakhman.cooking.events.NotificationEvent
 import de.rakhman.cooking.events.RemoveFromPlanEvent
+import de.rakhman.cooking.events.TransferAllShopToPlanEvent
 import de.rakhman.cooking.states.ID_TEMPORARY
 import de.rakhman.cooking.states.RecipeDto
 import de.rakhman.cooking.states.RecipesState
@@ -60,6 +62,13 @@ fun PlanScreen(modifier: Modifier, isShop: Boolean) {
                     if (i != planRecipes.lastIndex) HorizontalDivider(modifier = Modifier.animateItem())
                 },
             )
+            
+            // Add transfer all button for shop view
+            if (isShop && planRecipes.isNotEmpty()) {
+                item {
+                    TransferAllButton(modifier = Modifier.animateItem().padding(16.dp))
+                }
+            }
         }
     }
 
@@ -109,5 +118,20 @@ private fun RowScope.PlanCheckbox(recipe: RecipeDto, isShop: Boolean) {
             onCheckedChange = null,
             modifier = Modifier.align(Alignment.Center)
         )
+    }
+}
+
+@Composable
+private fun TransferAllButton(modifier: Modifier = Modifier) {
+    Button(
+        onClick = EvasLaunching {
+            TransferAllShopToPlanEvent.emitAsync()
+            NotificationEvent(
+                getString(Res.string.transfer_all_to_plan)
+            ).emitAsync()
+        },
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Text(stringResource(Res.string.transfer_all_to_plan))
     }
 }
