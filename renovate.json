@@ -10,8 +10,9 @@
       "automerge": true
     },
     {
-      "matchPackageNames": ["com.android.application", "com.android.library"],
-      "automerge": false
+      "matchPackagePatterns": ["^com\\.android\\.tools\\."],
+      "automerge": false,
+      "labels": ["dependency", "android-gradle-plugin"]
     }
   ]
 }
