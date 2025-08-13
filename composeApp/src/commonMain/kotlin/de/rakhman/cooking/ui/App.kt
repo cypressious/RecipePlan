@@ -92,7 +92,7 @@ fun App() {
                     }
                 }
             },
-            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+            snackbarHost = { SwipeableSnackbarHost(hostState = snackbarHostState) },
             modifier = Modifier.imePadding()
         ) { innerPadding ->
             AnimatedContent(screenState) {
@@ -108,6 +108,23 @@ fun App() {
             }
         }
 
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SwipeableSnackbarHost(hostState: SnackbarHostState) {
+    SnackbarHost(hostState = hostState) { data ->
+        SwipeToDismissBox(
+            state = rememberSwipeToDismissBoxState(
+                confirmValueChange = { value ->
+                    if (value != SwipeToDismissBoxValue.Settled) data.dismiss()
+                    true
+                }
+            ),
+            backgroundContent = {},
+            content = { Snackbar(snackbarData = data) }
+        )
     }
 }
 
