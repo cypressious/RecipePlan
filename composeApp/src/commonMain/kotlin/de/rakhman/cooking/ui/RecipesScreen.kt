@@ -2,22 +2,35 @@
 
 package de.rakhman.cooking.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
+import androidx.compose.material3.SwipeToDismissBoxValue.Settled
+import androidx.compose.material3.SwipeToDismissBoxValue.StartToEnd
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.focus.*
 import androidx.compose.ui.platform.*
 import androidx.compose.ui.unit.*
+import de.rakhman.cooking.events.AddToPlanEvent
+import de.rakhman.cooking.events.AddToShopEvent
 import de.rakhman.cooking.events.ChangeScreenEvent
+import de.rakhman.cooking.events.NotificationEvent
 import de.rakhman.cooking.states.RecipeDto
 import de.rakhman.cooking.states.RecipesState
 import de.rakhman.cooking.states.ScreenState
 import io.sellmair.evas.compose.composeValue
+import io.sellmair.evas.compose.rememberEvasCoroutineScope
+import io.sellmair.evas.emitAsync
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import recipeplan.composeapp.generated.resources.*
@@ -169,12 +182,60 @@ private fun Recipes(state: RecipesState.Success) {
             key = { i -> filteredList[i].id },
             itemContent = { i ->
                 val recipe = filteredList[i]
-                RecipeItem(
-                    recipe = recipe,
-                    modifier = Modifier.animateItem(),
-                    slotRight = { RecipeDropdown(recipe, ScreenState.Recipes) })
+
+                SwipeableRecipeItem(recipe)
+
                 if (i != filteredList.lastIndex) HorizontalDivider(modifier = Modifier.animateItem())
             },
+        )
+    }
+}
+
+@Composable
+private fun LazyItemScope.SwipeableRecipeItem(recipe: RecipeDto) {
+    val dismissState = rememberSwipeToDismissBoxState()
+    val scope = rememberEvasCoroutineScope()
+
+    LaunchedEffect(dismissState.currentValue) {
+        if (dismissState.currentValue != Settled) {
+            scope.launch {
+                if (dismissState.dismissDirection == StartToEnd) {
+                    AddToPlanEvent(recipe.id).emitAsync()
+                    NotificationEvent(getString(Res.string.recipe_added_to_plan, recipe.title)).emitAsync()
+                } else {
+                    AddToShopEvent(recipe.id).emitAsync()
+                    NotificationEvent(getString(Res.string.recipe_added_to_shop, recipe.title)).emitAsync()
+                }
+                dismissState.reset()
+            }
+        }
+    }
+
+    SwipeToDismissBox(
+        state = dismissState,
+        enableDismissFromStartToEnd = true,
+        enableDismissFromEndToStart = true,
+        backgroundContent = {
+            Icon(
+                imageVector = if (dismissState.dismissDirection == StartToEnd) Icons.Filled.DateRange else Icons.Filled.ShoppingCart,
+                contentDescription = if (dismissState.dismissDirection == StartToEnd) {
+                    stringResource(Res.string.add_to_plan)
+                } else {
+                    stringResource(Res.string.add_to_shop)
+                },
+                tint = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.primary)
+                    .wrapContentSize(if (dismissState.dismissDirection == StartToEnd) Alignment.CenterStart else Alignment.CenterEnd)
+                    .padding(horizontal = 24.dp),
+            )
+        }
+    ) {
+        RecipeItem(
+            recipe = recipe,
+            modifier = Modifier.animateItem(),
+            slotRight = { RecipeDropdown(recipe, ScreenState.Recipes) }
         )
     }
 }

@@ -29,6 +29,7 @@ fun RecipeItem(
     val context = getContext()
     Row(
         modifier = modifier
+            .background(MaterialTheme.colorScheme.background)
             .clickable(onClick = { recipe.url?.let { openUrl(it, context) } }),
         verticalAlignment = Alignment.CenterVertically
     ) {
