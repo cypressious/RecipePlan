@@ -5,14 +5,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
@@ -117,14 +110,6 @@ fun RecipeDropdown(
                     }
                 )
                 DropdownMenuItem(
-                    text = { Text(stringResource(Res.string.delete)) },
-                    leadingIcon = { Icon(Icons.Filled.Delete, contentDescription = null) },
-                    onClick = EvasLaunching {
-                        DeleteRequestEvent(recipe).emitAsync()
-                        expanded = false
-                    }
-                )
-                DropdownMenuItem(
                     text = { Text(stringResource(Res.string.share)) },
                     leadingIcon = { Icon(Icons.Filled.Share, contentDescription = null) },
                     onClick = { shareRecipe(recipe.title, recipe.url, context); expanded = false }
@@ -136,6 +121,15 @@ fun RecipeDropdown(
                         onClick = { shareToBring(recipe.title, url, context); expanded = false }
                     )
                 }
+                HorizontalDivider()
+                DropdownMenuItem(
+                    text = { Text(stringResource(Res.string.delete), color = MaterialTheme.colorScheme.error) },
+                    leadingIcon = { Icon(Icons.Filled.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
+                    onClick = EvasLaunching {
+                        DeleteRequestEvent(recipe).emitAsync()
+                        expanded = false
+                    }
+                )
             }
         } else {
             CircularProgressIndicator(modifier = Modifier.padding(12.dp).width(24.dp).height(24.dp))
