@@ -234,7 +234,7 @@ private fun LazyItemScope.SwipeableRecipeItem(recipe: RecipeDto) {
     ) {
         RecipeItem(
             recipe = recipe,
-            modifier = Modifier.animateItem(),
+            modifier = Modifier.animateItem().background(MaterialTheme.colorScheme.background),
             slotRight = { RecipeDropdown(recipe, ScreenState.Recipes) }
         )
     }
