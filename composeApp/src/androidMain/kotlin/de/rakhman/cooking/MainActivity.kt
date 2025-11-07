@@ -102,15 +102,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
-    @Suppress("OVERRIDE_DEPRECATION", "DEPRECATION")
-    override fun onBackPressed() {
-        when (val state = states.getState(ScreenState).value) {
-            is ScreenState.Add -> states.setState(ScreenState, state.target)
-            is ScreenState.BaseScreen -> super.onBackPressed()
-            else -> states.setState(ScreenState, ScreenState.Plan)
-        }
-    }
 }
 
 @Preview

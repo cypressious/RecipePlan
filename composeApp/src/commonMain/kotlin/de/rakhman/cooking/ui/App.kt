@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.backhandler.*
 import de.rakhman.cooking.events.DeleteEvent
 import de.rakhman.cooking.events.DeleteRequestEvent
 import de.rakhman.cooking.events.NotificationEvent
@@ -39,10 +40,19 @@ fun AppPreview() {
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun App() {
     MaterialTheme(getColorScheme()) {
         val screenState = ScreenState.composeValue()
+
+        BackHandler(true, EvasLaunching {
+            when (screenState) {
+                is ScreenState.Add -> ScreenState.set(screenState.target)
+                else -> ScreenState.set(ScreenState.Plan)
+            }
+        })
+
         val snackbarHostState = remember { SnackbarHostState() }
         var recipeToBeDeleted by remember { mutableStateOf<RecipeDto?>(null) }
 

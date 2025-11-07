@@ -60,6 +60,7 @@ kotlin {
             implementation(libs.ksoup)
             implementation(libs.ksoup.network)
             implementation(libs.sqldelight.coroutines.extensions)
+            implementation(libs.ui.backhandler)
         }
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
