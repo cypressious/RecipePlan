@@ -114,27 +114,9 @@ fun AddScreen(modifier: Modifier, editingRecipe: RecipeDto?, initialData: String
                 })
             }
 
-            Box(modifier = Modifier.padding(6.dp), contentAlignment = Alignment.CenterStart) {
-                var newTag by remember { mutableStateOf("") }
-                BasicTextField(
-                    value = newTag,
-                    singleLine = true,
-                    onValueChange = { newTag = it.trim().replace(";", "") },
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            tags += newTag
-                            allTags += newTag
-                            newTag = ""
-                        }
-                    ),
-                )
-
-                Text(
-                    text = if (newTag.isBlank()) stringResource(Res.string.new_tag) else "",
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            NewTagField { newTag ->
+                tags += newTag
+                allTags += newTag
             }
         }
 
@@ -158,5 +140,30 @@ fun AddScreen(modifier: Modifier, editingRecipe: RecipeDto?, initialData: String
         ) {
             Text(stringResource(if (editingRecipe != null) Res.string.update else Res.string.add))
         }
+    }
+}
+
+@Composable
+private fun NewTagField(cb: (String) -> Unit) {
+    Box(modifier = Modifier.padding(6.dp), contentAlignment = Alignment.CenterStart) {
+        var newTag by remember { mutableStateOf("") }
+        BasicTextField(
+            value = newTag,
+            singleLine = true,
+            onValueChange = { newTag = it.trim().replace(";", "") },
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    cb(newTag)
+                    newTag = ""
+                }
+            ),
+        )
+
+        Text(
+            text = if (newTag.isBlank()) stringResource(Res.string.new_tag) else "",
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
