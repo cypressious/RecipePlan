@@ -126,14 +126,10 @@ fun App() {
 fun SwipeableSnackbarHost(hostState: SnackbarHostState) {
     SnackbarHost(hostState = hostState) { data ->
         SwipeToDismissBox(
-            state = rememberSwipeToDismissBoxState(
-                confirmValueChange = { value ->
-                    if (value != SwipeToDismissBoxValue.Settled) data.dismiss()
-                    true
-                }
-            ),
+            state = rememberSwipeToDismissBoxState(),
             backgroundContent = {},
-            content = { Snackbar(snackbarData = data) }
+            content = { Snackbar(snackbarData = data) },
+            onDismiss = { data.dismiss() }
         )
     }
 }

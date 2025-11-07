@@ -12,7 +12,6 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
-import androidx.compose.material3.SwipeToDismissBoxValue.Settled
 import androidx.compose.material3.SwipeToDismissBoxValue.StartToEnd
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
@@ -196,21 +195,6 @@ private fun LazyItemScope.SwipeableRecipeItem(recipe: RecipeDto) {
     val dismissState = rememberSwipeToDismissBoxState()
     val scope = rememberEvasCoroutineScope()
 
-    LaunchedEffect(dismissState.currentValue) {
-        if (dismissState.currentValue != Settled) {
-            scope.launch {
-                if (dismissState.dismissDirection == StartToEnd) {
-                    AddToPlanEvent(recipe.id).emitAsync()
-                    NotificationEvent(getString(Res.string.recipe_added_to_plan, recipe.title)).emitAsync()
-                } else {
-                    AddToShopEvent(recipe.id).emitAsync()
-                    NotificationEvent(getString(Res.string.recipe_added_to_shop, recipe.title)).emitAsync()
-                }
-                dismissState.reset()
-            }
-        }
-    }
-
     SwipeToDismissBox(
         state = dismissState,
         enableDismissFromStartToEnd = true,
@@ -230,6 +214,18 @@ private fun LazyItemScope.SwipeableRecipeItem(recipe: RecipeDto) {
                     .wrapContentSize(if (dismissState.dismissDirection == StartToEnd) Alignment.CenterStart else Alignment.CenterEnd)
                     .padding(horizontal = 24.dp),
             )
+        },
+        onDismiss = {
+            scope.launch {
+                if (dismissState.dismissDirection == StartToEnd) {
+                    AddToPlanEvent(recipe.id).emitAsync()
+                    NotificationEvent(getString(Res.string.recipe_added_to_plan, recipe.title)).emitAsync()
+                } else {
+                    AddToShopEvent(recipe.id).emitAsync()
+                    NotificationEvent(getString(Res.string.recipe_added_to_shop, recipe.title)).emitAsync()
+                }
+                dismissState.reset()
+            }
         }
     ) {
         RecipeItem(
