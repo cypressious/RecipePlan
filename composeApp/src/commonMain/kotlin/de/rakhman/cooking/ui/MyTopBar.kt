@@ -1,14 +1,16 @@
 package de.rakhman.cooking.ui
 
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.*
+import androidx.compose.ui.graphics.*
 import androidx.compose.ui.unit.*
 import de.rakhman.cooking.events.ReloadEvent
 import de.rakhman.cooking.states.ScreenState
@@ -63,15 +65,24 @@ fun MyTopBar() {
         actions = {
             if (screenState is ScreenState.BaseScreen) {
                 val syncState = SyncState.composeValue()
-                if (!syncState.isSyncing) {
-                    IconButton(onClick = EvasLaunching { ReloadEvent.emit() }) {
-                        Icon(
-                            imageVector = Icons.Filled.Refresh,
-                            contentDescription = stringResource(Res.string.reload),
+                IconButton(onClick = EvasLaunching { if (!syncState.isSyncing) ReloadEvent.emit() }) {
+                    val infiniteTransition = rememberInfiniteTransition()
+                    val rotation by infiniteTransition.animateFloat(
+                        initialValue = 0f,
+                        targetValue = 360f,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(durationMillis = 1000, easing = LinearEasing),
+                            repeatMode = RepeatMode.Restart
                         )
-                    }
-                } else {
-                    CircularProgressIndicator(modifier = Modifier.padding(top = 16.dp, end = 16.dp).width(24.dp))
+                    )
+
+                    Icon(
+                        imageVector = Icons.Filled.Refresh,
+                        contentDescription = stringResource(Res.string.reload),
+                        modifier = Modifier.graphicsLayer {
+                            rotationZ = if (syncState.isSyncing) rotation else 0f
+                        }
+                    )
                 }
 
                 IconButton(onClick = EvasLaunching { ScreenState.set(ScreenState.Inspiration) }) {
