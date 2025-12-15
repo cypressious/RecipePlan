@@ -102,6 +102,7 @@ fun RecipeTag(string: String, selected: Boolean = true, clickable: Boolean = fal
     Text(
         text = string,
         fontSize = 14.sp,
+        color = if (selected) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = modifier
     )
 }
