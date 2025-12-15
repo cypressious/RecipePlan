@@ -104,6 +104,11 @@ fun AddScreen(modifier: Modifier, editingRecipe: RecipeDto?, initialData: String
         ) {
             val recipeState = RecipesState.composeValue()
             var allTags by remember { mutableStateOf((recipeState as? RecipesState.Success)?.allTags.orEmpty()) }
+            // React to recipe state changes (e.g., when loading finishes), and keep any user-added tags
+            LaunchedEffect(recipeState) {
+                val newTags = (recipeState as? RecipesState.Success)?.allTags.orEmpty()
+                allTags = (allTags + newTags)
+            }
 
             for (tag in allTags) {
                 val selected = tag in tags
