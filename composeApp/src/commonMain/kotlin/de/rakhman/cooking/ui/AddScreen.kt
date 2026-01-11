@@ -43,13 +43,11 @@ fun AddScreen(modifier: Modifier, editingRecipe: RecipeDto?, initialData: String
     var target by remember { mutableStateOf((composeValue as? ScreenState.Add)?.target ?: ScreenState.Recipes) }
     var tags by remember { mutableStateOf(editingRecipe?.tags ?: emptySet()) }
 
-    Column(modifier = modifier.verticalScroll(rememberScrollState()).padding(16.dp)) {
+    Column(modifier.fillMaxSize()) {
         var title by remember { mutableStateOf(editingRecipe?.title ?: "") }
         var url by remember {
             mutableStateOf(
-                editingRecipe?.url
-                    ?: initialData?.let { urlRegex.find(it) }?.value
-                    ?: ""
+                editingRecipe?.url ?: initialData?.let { urlRegex.find(it) }?.value ?: ""
             )
         }
         LaunchedEffect(url) {
@@ -73,76 +71,84 @@ fun AddScreen(modifier: Modifier, editingRecipe: RecipeDto?, initialData: String
                 AddEvent(title.trim(), url.ifBlank { null }, tags, target).emitAsync()
             }
         }
-        val focusManager = LocalFocusManager.current
 
-        OutlinedTextField(
-            value = title,
-            onValueChange = { title = it },
-            label = { Text(stringResource(Res.string.title)) },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-            keyboardActions = KeyboardActions(
-                onDone = { focusManager.moveFocus(FocusDirection.Next) }
-            ),
-        )
-
-        OutlinedTextField(
-            value = url,
-            onValueChange = { url = it },
-            label = { Text(stringResource(Res.string.url)) },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth().padding(bottom = 14.dp),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(
-                onDone = { if (enabled) submit() }
-            ),
-        )
-
-        FlowRow(
-            modifier = Modifier.padding(bottom = 14.dp),
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp)
         ) {
-            val recipeState = RecipesState.composeValue()
-            var allTags by remember { mutableStateOf((recipeState as? RecipesState.Success)?.allTags.orEmpty()) }
-            // React to recipe state changes (e.g., when loading finishes), and keep any user-added tags
-            LaunchedEffect(recipeState) {
-                val newTags = (recipeState as? RecipesState.Success)?.allTags.orEmpty()
-                allTags = (allTags + newTags)
+            val focusManager = LocalFocusManager.current
+
+            OutlinedTextField(
+                value = title,
+                onValueChange = { title = it },
+                label = { Text(stringResource(Res.string.title)) },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                keyboardActions = KeyboardActions(
+                    onDone = { focusManager.moveFocus(FocusDirection.Next) }),
+            )
+
+            OutlinedTextField(
+                value = url,
+                onValueChange = { url = it },
+                label = { Text(stringResource(Res.string.url)) },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth().padding(bottom = 14.dp),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(
+                    onDone = { if (enabled) submit() }),
+            )
+
+            FlowRow(
+                modifier = Modifier.padding(bottom = 14.dp),
+            ) {
+                val recipeState = RecipesState.composeValue()
+                var allTags by remember { mutableStateOf((recipeState as? RecipesState.Success)?.allTags.orEmpty()) }
+                // React to recipe state changes (e.g., when loading finishes), and keep any user-added tags
+                LaunchedEffect(recipeState) {
+                    val newTags = (recipeState as? RecipesState.Success)?.allTags.orEmpty()
+                    allTags = (allTags + newTags)
+                }
+
+                for (tag in allTags) {
+                    val selected = tag in tags
+                    RecipeTag(tag, selected, clickable = true, onClick = {
+                        if (!selected) {
+                            tags += tag
+                        } else {
+                            tags -= tag
+                        }
+                    })
+                }
+
+                NewTagField { newTag ->
+                    tags += newTag
+                    allTags += newTag
+                }
             }
 
-            for (tag in allTags) {
-                val selected = tag in tags
-                RecipeTag(tag, selected, clickable = true, onClick = {
-                    if (!selected) {
-                        tags += tag
-                    } else {
-                        tags -= tag
+            if (editingRecipe == null) {
+                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                    allTargets.forEachIndexed { index, option ->
+                        SegmentedButton(
+                            shape = SegmentedButtonDefaults.itemShape(index = index, count = allTargets.size),
+                            onClick = { target = option },
+                            selected = target == option,
+                            label = { Text(stringResource(option.title)) }
+                        )
                     }
-                })
-            }
-
-            NewTagField { newTag ->
-                tags += newTag
-                allTags += newTag
-            }
-        }
-
-        if (editingRecipe == null) {
-            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
-                allTargets.forEachIndexed { index, option ->
-                    SegmentedButton(
-                        shape = SegmentedButtonDefaults.itemShape(index = index, count = allTargets.size),
-                        onClick = { target = option },
-                        selected = target == option,
-                        label = { Text(stringResource(option.title)) }
-                    )
                 }
             }
         }
 
+        HorizontalDivider()
+
         Button(
             onClick = submit,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.padding(16.dp).fillMaxWidth(),
             enabled = enabled
         ) {
             Text(stringResource(if (editingRecipe != null) Res.string.update else Res.string.add))
@@ -165,8 +171,7 @@ private fun NewTagField(cb: (String) -> Unit) {
                 onDone = {
                     cb(newTag)
                     newTag = ""
-                }
-            ),
+                }),
         )
 
         Text(
