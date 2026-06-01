@@ -3,6 +3,7 @@ package de.rakhman.cooking.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -11,6 +12,7 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.*
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.*
 import androidx.compose.ui.unit.*
 import de.rakhman.cooking.getContext
@@ -18,6 +20,53 @@ import de.rakhman.cooking.openUrl
 import de.rakhman.cooking.states.RecipeDto
 import org.jetbrains.compose.resources.stringResource
 import recipeplan.composeapp.generated.resources.*
+
+private fun hueToRgb(p: Float, q: Float, t: Float): Float {
+    val t2 = when {
+        t < 0f -> t + 1f
+        t > 1f -> t - 1f
+        else -> t
+    }
+    return when {
+        t2 < 1f / 6f -> p + (q - p) * 6f * t2
+        t2 < 1f / 2f -> q
+        t2 < 2f / 3f -> p + (q - p) * (2f / 3f - t2) * 6f
+        else -> p
+    }
+}
+
+private fun hslToColor(hue: Float, saturation: Float, lightness: Float): Color {
+    val h = hue / 360f
+    val q = if (lightness < 0.5f) lightness * (1f + saturation) else lightness + saturation - lightness * saturation
+    val p = 2f * lightness - q
+    return Color(
+        red = hueToRgb(p, q, h + 1f / 3f),
+        green = hueToRgb(p, q, h),
+        blue = hueToRgb(p, q, h - 1f / 3f),
+    )
+}
+
+private const val TAG_DARK_CONTAINER_SATURATION = 0.5f
+private const val TAG_DARK_CONTAINER_LIGHTNESS = 0.25f
+private const val TAG_LIGHT_CONTAINER_SATURATION = 0.7f
+private const val TAG_LIGHT_CONTAINER_LIGHTNESS = 0.88f
+
+private const val TAG_DARK_ON_CONTAINER_SATURATION = 0.6f
+private const val TAG_DARK_ON_CONTAINER_LIGHTNESS = 0.88f
+private const val TAG_LIGHT_ON_CONTAINER_SATURATION = 0.8f
+private const val TAG_LIGHT_ON_CONTAINER_LIGHTNESS = 0.15f
+
+/** Returns (containerColor, onContainerColor) for the given tag based on its hash code. */
+private fun tagColors(tagName: String, darkTheme: Boolean): Pair<Color, Color> {
+    val hue = ((tagName.hashCode().toLong() and 0xFFFFFFFFL) % 360).toFloat()
+    return if (darkTheme) {
+        hslToColor(hue, TAG_DARK_CONTAINER_SATURATION, TAG_DARK_CONTAINER_LIGHTNESS) to
+                hslToColor(hue, TAG_DARK_ON_CONTAINER_SATURATION, TAG_DARK_ON_CONTAINER_LIGHTNESS)
+    } else {
+        hslToColor(hue, TAG_LIGHT_CONTAINER_SATURATION, TAG_LIGHT_CONTAINER_LIGHTNESS) to
+                hslToColor(hue, TAG_LIGHT_ON_CONTAINER_SATURATION, TAG_LIGHT_ON_CONTAINER_LIGHTNESS)
+    }
+}
 
 @Composable
 fun RecipeItem(
@@ -86,12 +135,14 @@ fun RecipeItem(
 
 @Composable
 fun RecipeTag(string: String, selected: Boolean = true, clickable: Boolean = false, onClick: () -> Unit = { }) {
+    val darkTheme = isSystemInDarkTheme()
+    val (containerColor, onContainerColor) = tagColors(string, darkTheme)
     val shape = RoundedCornerShape(8.dp)
     val modifier = Modifier
         .padding(top = 4.dp, end = 4.dp)
         .border(1.dp, MaterialTheme.colorScheme.outline, shape)
         .background(
-            if (selected) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.surfaceContainer,
+            if (selected) containerColor else MaterialTheme.colorScheme.surfaceContainer,
             shape
         )
         .clip(shape)
@@ -102,7 +153,7 @@ fun RecipeTag(string: String, selected: Boolean = true, clickable: Boolean = fal
     Text(
         text = string,
         fontSize = 14.sp,
-        color = if (selected) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+        color = if (selected) onContainerColor else MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = modifier
     )
 }
