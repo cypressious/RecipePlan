@@ -160,21 +160,11 @@ private fun Recipes(state: RecipesState.Success) {
     LaunchedEffect(filter, sort) { listState.scrollToItem(0) }
 
     LazyColumn(state = listState, contentPadding = PaddingValues(bottom = 70.dp)) {
+        val trimmedFilter = filter.trim()
         val filteredList = recipes
             .filter { tagsToShow.isEmpty() || it.tags.any { tag -> tag in tagsToShow } }
-            .let { list ->
-                if (filter.isEmpty()) {
-                    list.sortedWith(sort.comparator)
-                } else {
-                    list
-                        .filter { it.matchesFilter(filter.trim()) }
-                        .sortedWith(compareByDescending<RecipeDto> {
-                            it.title.startsWith(filter.trim(), ignoreCase = true)
-                        }.thenByDescending {
-                            it.title.contains(filter.trim(), ignoreCase = true)
-                        })
-                }
-            }
+            .filter { trimmedFilter.isEmpty() || it.matchesFilter(trimmedFilter) }
+            .sortedWith(sort.comparator)
 
         items(
             count = filteredList.size,
@@ -239,4 +229,3 @@ private fun LazyItemScope.SwipeableRecipeItem(recipe: RecipeDto) {
 private fun RecipeDto.matchesFilter(filter: String): Boolean =
     title.contains(filter, ignoreCase = true) ||
             url?.contains(filter, ignoreCase = true) == true
-
