@@ -16,7 +16,7 @@ kotlin = "2.4.20"
 kotlinx-coroutines = "1.11.0"
 ksoup = "0.2.5"
 materialIconsCore = "1.7.3"
-playServicesAuth = "21.6.0"
+playServicesAuth = "22.0.0"
 sqldelight = "2.3.2"
 hotReload = "1.2.0"
 
